@@ -1,25 +1,54 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useEffect, useState } from 'react';
 import './App.css';
+import './styles/styles';
+import { Routes, Route } from 'react-router-dom';
+import {SampleList} from './components/SampleList';
+import BasicGroupChannelSample from './samples/basic-samples/group-channel/BasicGroupChannelSample';
+import BasicOpenChannelSample from './samples/basic-samples/open-channel/BasicOpenChannelSample';
+import {connectSendbird, createSendbird } from './sendbird-actions/SendbirdActions';
+import {SendBirdError, User} from 'sendbird';
+import { homeStyle } from './styles/styles';
 
-function App() {
+const Home = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={homeStyle}>
+      <h1>
+        Home
+      </h1>
+      <p>
+        Welcome to SendBird Chat SDK samples for React.
+      </p>
     </div>
+  );
+}
+
+const App = () => {
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User>();
+
+  console.log('## user: ', user);
+
+  useEffect(() => {
+    createSendbird();
+    connectSendbird()
+      .then((user: User) => setUser(user))
+      .catch((error: SendBirdError) => alert('getUserList error: ' + error))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    loading
+      ? null
+      : <div className='App'>
+        <SampleList/>
+        <div className='sample-page'>
+          <Routes>
+            <Route path='/' element={<Home/>} />
+            <Route path='/basic-samples/group-channel' element={<BasicGroupChannelSample/>} />
+            <Route path='/basic-samples/open-channel' element={<BasicOpenChannelSample/>} />
+          </Routes>
+        </div>
+      </div>
   );
 }
 
