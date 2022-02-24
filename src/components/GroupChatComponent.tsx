@@ -1,16 +1,18 @@
 import { GroupChannel } from "sendbird";
 import {chatStyle} from '../styles/styles';
-import ChatBodyComponent from './ChatBodyComponent';
 import ChatInputComponent from './ChatInputComponent';
+import GroupChatBodyComponent from './GroupChatBodyComponent';
 
 const GroupChatComponent = (props: GroupChatProps) => {
   const {
     groupChannel,
   } = props;
 
+  console.log('## current groupChannel: ', groupChannel);
+
   return (
     <div className={chatStyle}>
-      <ChatBodyComponent channel={groupChannel}/>
+      <GroupChatBodyComponent channel={groupChannel}/>
       <ChatInputComponent channel={groupChannel}/>
     </div>
   );

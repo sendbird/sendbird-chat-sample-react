@@ -5,7 +5,7 @@ import SendBird, {
 import {useState} from 'react';
 import CreateOpenChannelDialogComponent from '../../../components/CreateOpenChannelDialogComponent';
 import OpenChatComponent from '../../../components/OpenChatComponent';
-import ChannelListComponent from '../../../components/ChannelListComponent';
+import GroupChannelListComponent from '../../../components/GroupChannelListComponent';
 import {CHANNEL_TYPE} from '../../../constants/enums';
 
 const BasicOpenChannelSample = (props: BasicOpenChannelSampleProps) => {
@@ -30,12 +30,12 @@ const BasicOpenChannelSample = (props: BasicOpenChannelSampleProps) => {
         />
         : null
       }
-      <ChannelListComponent
-        channelType={CHANNEL_TYPE.OPEN}
-        channels={openChannels}
-        openCreateChannelDialog={openCreateChannelDialog}
-        setCurrentChannel={(channel: OpenChannel) => setCurrentChannel(channel)}
-      />
+      {/*<GroupChannelListComponent*/}
+      {/*  channelType={CHANNEL_TYPE.OPEN}*/}
+      {/*  channels={openChannels}*/}
+      {/*  openCreateChannelDialog={openCreateChannelDialog}*/}
+      {/*  setCurrentChannel={(channel: OpenChannel) => setCurrentChannel(channel)}*/}
+      {/*/>*/}
       {
         currentChannel
           ? <OpenChatComponent openChannel={currentChannel}/>

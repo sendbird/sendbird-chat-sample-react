@@ -8,6 +8,7 @@ import {
 import { getMessagesByTimestamp } from '../sendbird-actions/message-actions/MessagesActions';
 import FileMessageComponent from './FileMessageComponent';
 import UserMessageComponent from './UserMessageComponent';
+import {messageListStyle} from '../styles/styles';
 
 const ChatBodyComponent = (props: ChatBodyProps) => {
   const {
@@ -57,7 +58,7 @@ const ChatBodyComponent = (props: ChatBodyProps) => {
   return (
     <div>
       <div
-        className='message-list'
+        className={messageListStyle}
         onScroll={onScroll}
         ref={messageListRef}
       >

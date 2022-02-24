@@ -12,10 +12,13 @@ export const createSendbird = (localCacheEnabled: boolean = false) => {
 export const connectSendbird = async (): Promise<User> => {
   const sb: SendBirdInstance = SendBird.getInstance();
 
-  const sendbirdUser: User = await sb.connect(
+  await sb.connect(
     SENDBIRD_USER_INFO.userId,
     SENDBIRD_OPTIONS.apiHost,
     SENDBIRD_OPTIONS.wsHost,
+  );
+  const sendbirdUser: User = await sb.updateCurrentUserInfo(
+    decodeURIComponent(SENDBIRD_USER_INFO.nickname), ''
   );
   return sendbirdUser;
 }

@@ -1,6 +1,5 @@
 import moment from "moment";
-import { useEffect } from "react";
-import {BaseChannel, BaseMessageInstance, FileMessage, UserMessage } from "sendbird";
+import {BaseChannel, FileMessage } from "sendbird";
 import { fileMessageStyle } from "../styles/styles";
 
 const FileMessageComponent = (props: FileMessageProps) => {
@@ -26,7 +25,7 @@ const FileMessageComponent = (props: FileMessageProps) => {
 type FileMessageProps = {
   channel: BaseChannel,
   message: FileMessage,
-  deleteMessage: (message: BaseMessageInstance) => void,
+  deleteMessage: (message: FileMessage) => void,
 };
 
 export default FileMessageComponent;

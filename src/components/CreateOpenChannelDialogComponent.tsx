@@ -1,6 +1,5 @@
-import {CHANNEL_TYPE, CREATE_CHANNEL_DIALOG_STATE} from './MainComponent';
 import React, {useState} from 'react';
-import {BaseChannel, OpenChannel} from 'sendbird';
+import {  OpenChannel} from 'sendbird';
 import {createOpenChannel} from '../sendbird-actions/channel-actions/OpenChannelActions';
 import { createChannelDialogStyle } from '../styles/styles';
 

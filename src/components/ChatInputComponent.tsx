@@ -1,4 +1,4 @@
-import {BaseChannel} from 'sendbird';
+import {BaseChannel, SendBirdError} from 'sendbird';
 import { sendFileMessage } from '../sendbird-actions/message-actions/FileMessageActions';
 import React, {ChangeEvent, useState} from 'react';
 import {markChannelAsRead} from '../sendbird-actions/channel-actions/GroupChannelActions';
@@ -6,7 +6,7 @@ import {KEY_ENTER} from '../constants/constants';
 import {sendUserMessage} from '../sendbird-actions/message-actions/UserMessageActions';
 import {
   fileInputStyle,
-  messageInputStyle,
+  messageInputStyle, textInputAreaStyle,
   textInputStyle,
 } from '../styles/styles';
 
@@ -40,11 +40,16 @@ const ChatInputComponent = (props: ChatInputProps) => {
     setTextMessage(textInput);
   }
 
-  const onKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === KEY_ENTER && !e.shiftKey && textMessage) {
       e.preventDefault();
-      await sendUserMessage(channel, textMessage);
-      if (channel.isGroupChannel()) channel.endTyping();
+      console.log('## entered: ', textMessage);
+      sendUserMessage(channel, textMessage)
+        .then(() => {
+          if (channel.isGroupChannel()) channel.endTyping();
+          setTextMessage('');
+        })
+        .catch((error: SendBirdError) => alert('sendUserMessage error: ' + error))
     } else {
       if (channel.isGroupChannel()) channel.startTyping();
     }
@@ -54,6 +59,7 @@ const ChatInputComponent = (props: ChatInputProps) => {
     <div className={messageInputStyle}>
       <div className={textInputStyle}>
         <input
+          className={textInputAreaStyle}
           placeholder='Write a chat...'
           onClick={onChannelRead}
           onKeyPress={onKeyPress}
@@ -61,14 +67,14 @@ const ChatInputComponent = (props: ChatInputProps) => {
           value={textMessage}
         />
       </div>
-      <div className={fileInputStyle}>
+      <label className={fileInputStyle}>
         <input
           type='file'
           style={{ display: 'none' }}
           onChange={onFileInputChange}
           onClick={onChannelRead}
         />
-      </div>
+      </label>
     </div>
   );
 }

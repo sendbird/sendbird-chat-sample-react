@@ -1,9 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {BaseChannel, GroupChannel, SendBirdError, User} from 'sendbird';
+import {GroupChannel, SendBirdError, User} from 'sendbird';
 import {getUserList} from '../sendbird-actions/SendbirdActions';
 import {createGroupChannel} from '../sendbird-actions/channel-actions/GroupChannelActions';
 import {createChannelDialogStyle, userItemStyle } from '../styles/styles';
-import { CREATE_CHANNEL_DIALOG_STATE } from './MainComponent';
 
 type UserItemProps = {
   userId: string,
@@ -20,8 +19,8 @@ const UserItemComponent = (props: UserItemProps) => {
 
   return (
     <div
+      style={{ color: isSelected ? 'green' : 'black' }}
       className={userItemStyle}
-      style={{ borderColor: isSelected ? 'green' : 'black' }}
       onClick={() => onUserSelect(userId)}
     >
       {userId}
@@ -31,8 +30,8 @@ const UserItemComponent = (props: UserItemProps) => {
 
 const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
   const {
-    setCurrentChannel,
-    setIsDialogOpen,
+    isDialogOpen,
+    createChannel,
   } = props;
 
   const [loading, setLoading] = useState(true);
@@ -40,25 +39,23 @@ const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
   const [userIdsToInvite, setUserIdsToInvite] = useState<string[]>([]);
 
   useEffect(() => {
-    getUserList()
-      .then((users: User[]) => setUserList(users))
-      .catch((error: SendBirdError) => alert('getUserList error: ' + error))
-      .finally(() => setLoading(false));
-  }, []);
+    if (isDialogOpen) {
+      getUserList()
+        .then((users: User[]) => setUserList(users))
+        .catch((error: SendBirdError) => alert('getUserList error: ' + error))
+        .finally(() => setLoading(false));
+    }
+  }, [isDialogOpen]);
 
   const onUserSelect = (selectedUserId: string) => {
-    setUserIdsToInvite([...userIdsToInvite, selectedUserId]);
-  }
-
-  const createChannel = async () => {
-    try {
-      const groupChannel: GroupChannel = await createGroupChannel(userIdsToInvite);
-      setCurrentChannel(groupChannel);
-    } catch (e) {
-      alert('Create open channel error: ' + e);
-    } finally {
-      setIsDialogOpen(false);
+    const selectedUsers: string[] = [...userIdsToInvite];
+    const foundAt = selectedUsers.indexOf(selectedUserId);
+    if (foundAt >= 0) {
+      selectedUsers.splice(foundAt, 1);
+    } else {
+      selectedUsers.push(selectedUserId);
     }
+    setUserIdsToInvite(selectedUsers);
   }
 
   return (
@@ -73,7 +70,10 @@ const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
             key={i}
           />
         ))}
-        <button onClick={createChannel}>
+        <button
+          style={{ margin: '10px 20px' }}
+          onClick={() => createChannel(userIdsToInvite)}
+        >
           Create
         </button>
       </div>
@@ -81,8 +81,8 @@ const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
 }
 
 type CreateChannelDialogProps = {
-  setCurrentChannel: (channel: GroupChannel) => void;
-  setIsDialogOpen: (isOpen: boolean) => void;
+  isDialogOpen: boolean,
+  createChannel: (userIdsToInvite: string[]) => void;
 }
 
 export default CreateGroupChannelDialogComponent;
