@@ -1,9 +1,5 @@
-import {
-  BaseChannel,
-  GroupChannel,
-  OpenChannel
-} from 'sendbird';
 import {channelListCategoryStyle, channelListStyle} from '../styles/styles';
+import {CHANNEL_TYPE} from './MainComponent';
 
 type ChannelCategoryProps = {
   categoryName: string,
@@ -24,30 +20,24 @@ const ChannelCategoryComponent = (props: ChannelCategoryProps) => {
   )
 }
 
-const ChannelListComponent = (props: ChannelListProps) => {
+const ChannelListComponent = <T extends unknown>(props: ChannelListProps<T>) => {
   const {
-    groupChannels,
-    openChannels,
-    openCreateGroupChannelDialog,
-    openCreateOpenChannelDialog,
+    channelType,
+    channels,
+    openCreateChannelDialog,
     setCurrentChannel,
   } = props;
 
   return (
     <div className={channelListStyle}>
-      <ChannelCategoryComponent categoryName='Group Channels' openDialog={openCreateGroupChannelDialog}/>
+      <ChannelCategoryComponent
+        categoryName={channelType === CHANNEL_TYPE.GROUP ? 'Group Channels' : 'Open Channels'}
+        openDialog={openCreateChannelDialog}
+      />
       {
-        groupChannels.map((groupChannel: GroupChannel, index) => {
+        channels.map((channel: T, index) => {
           return (
-            <div onClick={() => setCurrentChannel(groupChannel)} key={ index }/>
-          );
-        })
-      }
-      <ChannelCategoryComponent categoryName='Open Channels' openDialog={openCreateOpenChannelDialog}/>
-      {
-        openChannels.map((openChannel: OpenChannel, index) => {
-          return (
-            <div onClick={() => setCurrentChannel(openChannel)} key={ index }/>
+            <div onClick={() => setCurrentChannel(channel)} key={ index }/>
           );
         })
       }
@@ -55,12 +45,11 @@ const ChannelListComponent = (props: ChannelListProps) => {
   );
 };
 
-type ChannelListProps = {
-  groupChannels: GroupChannel[],
-  openChannels: OpenChannel[],
-  openCreateGroupChannelDialog: () => void,
-  openCreateOpenChannelDialog: () => void,
-  setCurrentChannel: (channel: BaseChannel) => void,
+interface ChannelListProps<T> {
+  channelType: CHANNEL_TYPE,
+  channels: T[],
+  openCreateChannelDialog: () => void,
+  setCurrentChannel: (channel: T) => void,
 };
 
 export default ChannelListComponent;

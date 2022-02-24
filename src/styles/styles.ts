@@ -42,7 +42,11 @@ export const chatStyle = css`
 `;
 
 export const chatBodyStyle = css`
-  overflow-y: scroll;
+`;
+
+export const messageListStyle = css`
+  overflow-y: auto;
+  height: 800px;
 `;
 
 export const userMessageStyle = css`
@@ -51,4 +55,16 @@ export const userMessageStyle = css`
 
 export const fileMessageStyle = css`
   display: flex;
+`;
+
+export const messageInputStyle = css`
+  display: flex;
+`;
+
+export const textInputStyle = css`
+`;
+
+export const fileInputStyle = css`
+  width: 36px;
+  height: 36px;
 `;

@@ -24,3 +24,5 @@ export const SENDBIRD_OPTIONS: SendbirdOptions = {
     'DghYnN1WnpfZXRqbVdlb2hkQEhG=',
   secretKey: 'dlwlrma0516,imtei0528<3!!',
 };
+
+export const KEY_ENTER = 'Enter';

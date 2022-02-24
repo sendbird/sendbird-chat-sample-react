@@ -7,7 +7,7 @@ import { createChannelDialogStyle } from '../styles/styles';
 const CreateChannelDialogComponent = (props: CreateChannelDialogProps) => {
   const {
     setCurrentChannel,
-    setCreateChannelDialogState,
+    setIsDialogOpen,
   } = props;
 
   const [channelName, setChannelName] = useState<string>('');
@@ -25,7 +25,7 @@ const CreateChannelDialogComponent = (props: CreateChannelDialogProps) => {
     } catch (e) {
       alert('Create open channel error: ' + e);
     } finally {
-      setCreateChannelDialogState(CREATE_CHANNEL_DIALOG_STATE.CLOSED);
+      setIsDialogOpen(false);
     }
   }
 
@@ -41,8 +41,8 @@ const CreateChannelDialogComponent = (props: CreateChannelDialogProps) => {
 }
 
 type CreateChannelDialogProps = {
-  setCurrentChannel: (channel: BaseChannel) => void;
-  setCreateChannelDialogState: (state: CREATE_CHANNEL_DIALOG_STATE) => void;
+  setCurrentChannel: (channel: OpenChannel) => void;
+  setIsDialogOpen: (isOpen: boolean) => void;
 }
 
 export default CreateChannelDialogComponent;

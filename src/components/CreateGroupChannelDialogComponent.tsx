@@ -32,7 +32,7 @@ const UserItemComponent = (props: UserItemProps) => {
 const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
   const {
     setCurrentChannel,
-    setCreateChannelDialogState,
+    setIsDialogOpen,
   } = props;
 
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,7 @@ const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
     } catch (e) {
       alert('Create open channel error: ' + e);
     } finally {
-      setCreateChannelDialogState(CREATE_CHANNEL_DIALOG_STATE.CLOSED);
+      setIsDialogOpen(false);
     }
   }
 
@@ -81,8 +81,8 @@ const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
 }
 
 type CreateChannelDialogProps = {
-  setCurrentChannel: (channel: BaseChannel) => void;
-  setCreateChannelDialogState: (state: CREATE_CHANNEL_DIALOG_STATE) => void;
+  setCurrentChannel: (channel: GroupChannel) => void;
+  setIsDialogOpen: (isOpen: boolean) => void;
 }
 
 export default CreateGroupChannelDialogComponent;
