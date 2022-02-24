@@ -59,6 +59,14 @@ export const compareGroupChannelByOrder = (channel1: GroupChannel, channel2: Gro
   }
 };
 
+export const upsertGroupChannels = (showingChannels: GroupChannel[], channelsToUpsert: GroupChannel[], order: string): GroupChannel[] => {
+  for (let i = 0; i < channelsToUpsert.length; i++) {
+    const channel = channelsToUpsert[i];
+    upsertGroupChannel(showingChannels, channel as GroupChannel, order);
+  }
+  return showingChannels;
+}
+
 export const upsertGroupChannel = (channels: GroupChannel[], channel: GroupChannel, order: string): void => {
   const showingChannelUrls = channels.map((channel: GroupChannel) => channel.url);
   const index = showingChannelUrls.indexOf(channel.url);
@@ -70,9 +78,28 @@ export const upsertGroupChannel = (channels: GroupChannel[], channel: GroupChann
     if (insertAt === index) {
       channels[insertAt] = channel;
     } else {
-      if (index < insertAt) insertAt--;
       channels.splice(index, 1);
+      if (index < insertAt) insertAt--;
       channels.splice(insertAt, 0, channel);
     }
   }
+}
+
+export const deleteGroupChannels = (showingChannels: GroupChannel[], channelUrlsToDelete: string[]): GroupChannel[] => {
+  let updatedChannelList: GroupChannel[] = [];
+  const numChannels = showingChannels.length;
+
+  let i = 0;
+  while (channelUrlsToDelete.length > 0 && i < numChannels) {
+    const currentChannel: GroupChannel = showingChannels[i];
+    const foundAt = channelUrlsToDelete.indexOf(currentChannel.url);
+    if (foundAt >= 0) {
+      channelUrlsToDelete.splice(foundAt, 1);
+    } else {
+      updatedChannelList.push(currentChannel);
+    }
+    i++;
+  }
+  if (i < showingChannels.length) updatedChannelList = updatedChannelList.concat(showingChannels.slice(i));
+  return updatedChannelList;
 }

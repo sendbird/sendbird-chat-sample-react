@@ -1,24 +1,77 @@
-import moment from "moment";
-import { useEffect } from "react";
-import {BaseChannel, BaseMessageInstance, UserMessage } from "sendbird";
-import { userMessageStyle } from "../styles/styles";
+import {useEffect, useState} from "react";
+import {BaseChannel, BaseMessageInstance, UserMessage} from "sendbird";
+import {
+  messageButtonStyle,
+  messageContentStyle,
+  messageNickNameStyle,
+  messageRootStyle,
+  messageSentTimeStyle,
+  messageUnreadCountStyle
+} from "../styles/styles";
+import {getCreatedAtFromNow} from '../utils/messageUtils';
+import {getReadReceipt} from '../sendbird-actions/channel-actions/GroupChannelActions';
 
 const UserMessageComponent = (props: UserMessageProps) => {
   const {
     channel,
     message,
     deleteMessage,
+    setMessageToUpdate,
   } = props;
 
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (channel.isGroupChannel()) {
+      setUnreadCount(getReadReceipt(channel, message));
+    }
+  }, []);
+
   return (
-    <div className={userMessageStyle}>
-      <img src={message.sender ? message.sender.profileUrl : undefined} alt='Profile' />
-      <div style={{ display: 'inline-block' }}>
-        <div>${message.sender ? message.sender.nickname : null}</div>
-        <div>${message.message}</div>
-        <div>${moment(message.createdAt).fromNow()}</div>
+    <div
+      className={messageRootStyle}
+      id={message.messageId ? message.messageId.toString() : message.reqId}
+      style={ message.sendingStatus === 'pending' ? { backgroundColor: 'hsla(0, 100%, 50%, 0.3)' } : {}}
+    >
+      {
+        message.sender
+          ? <div className={messageNickNameStyle}>
+            {message.sender ? message.sender.nickname : null}:&nbsp;
+          </div>
+          : null
+      }
+      <div className={messageContentStyle}>
+        {message.message}
       </div>
-      <button onClick={() => deleteMessage(message)}>x</button>
+      <div className={messageSentTimeStyle}>
+        {getCreatedAtFromNow(message.createdAt)}
+      </div>
+      <div
+        className={messageUnreadCountStyle}
+        style={unreadCount === 0 ? { display: 'none' } : {}}
+      >
+        {unreadCount}
+      </div>
+      {
+        message.sender
+          ? <div>
+            <div
+              className={messageButtonStyle}
+              style={{ color: 'green' }}
+              onClick={() => setMessageToUpdate(message)}
+            >
+              UPDATE
+            </div>
+            <div
+              className={messageButtonStyle}
+              style={{ color: 'red' }}
+              onClick={() => deleteMessage(message)}
+            >
+              DELETE
+            </div>
+          </div>
+          : null
+      }
     </div>
   );
 }
@@ -26,7 +79,8 @@ const UserMessageComponent = (props: UserMessageProps) => {
 type UserMessageProps = {
   channel: BaseChannel,
   message: UserMessage,
-  deleteMessage: (message: BaseMessageInstance) => void,
+  deleteMessage: (message: UserMessage) => void,
+  setMessageToUpdate: (message: BaseMessageInstance) => void,
 };
 
 export default UserMessageComponent;

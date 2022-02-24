@@ -1,24 +1,37 @@
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from 'react';
 import {
   BaseChannel,
   BaseMessageInstance,
-  OpenChannel,
   SendBirdError,
   UserMessage,
-} from "sendbird";
-import { getMessagesByTimestamp } from "../sendbird-actions/message-actions/MessagesActions";
-import { chatBodyStyle } from "../styles/styles";
-import FileMessageComponent from "./FileMessageComponent";
-import UserMessageComponent from "./UserMessageComponent";
+} from 'sendbird';
+import { getMessagesByTimestamp } from '../sendbird-actions/message-actions/MessagesActions';
+import FileMessageComponent from './FileMessageComponent';
+import UserMessageComponent from './UserMessageComponent';
+import {messageListStyle} from '../styles/styles';
 
 const ChatBodyComponent = (props: ChatBodyProps) => {
   const {
     channel,
+    setMessageToUpdate,
   } = props;
 
   const [loading, setLoading] = useState(true);
   const [messageList, setMessageList] = useState<BaseMessageInstance[]>([]);
-  const [scrollPosition, setScrollPosition] = useState(0);
+
+  const messageListRef = useRef(null);
+
+  const onScroll = () => {
+    if (messageListRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messageListRef.current;
+      if (scrollTop === 0) { // Reached top.
+        loadMore();
+      }
+      // else if (scrollTop + clientHeight === scrollHeight) { // Reached bottom.
+      //   console.log('reached bottom');
+      // }
+    }
+  };
 
   useEffect(() => {
     getMessagesByTimestamp(channel)
@@ -44,30 +57,38 @@ const ChatBodyComponent = (props: ChatBodyProps) => {
   }
 
   return (
-    <div className={chatBodyStyle}>
-      {
-        messageList.map((message: BaseMessageInstance, i: number) => {
-          return message.isFileMessage() 
-            ? <FileMessageComponent
-              channel={channel}
-              message={message}
-              deleteMessage={deleteMessage}
-              key={i}
-            />
-            : <UserMessageComponent
-              channel={channel}
-              message={message as UserMessage}
-              deleteMessage={deleteMessage}
-              key={i}
-            />
-        })
-      }
+    <div>
+      <div
+        className={messageListStyle}
+        onScroll={onScroll}
+        ref={messageListRef}
+      >
+        {
+          messageList.map((message: BaseMessageInstance, i: number) => {
+            return message.isFileMessage()
+              ? <FileMessageComponent
+                channel={channel}
+                message={message}
+                deleteMessage={deleteMessage}
+                key={i}
+              />
+              : <UserMessageComponent
+                channel={channel}
+                message={message as UserMessage}
+                deleteMessage={deleteMessage}
+                setMessageToUpdate={setMessageToUpdate}
+                key={i}
+              />
+          })
+        }
+      </div>
     </div>
   );
 }
 
 type ChatBodyProps = {
   channel: BaseChannel,
+  setMessageToUpdate: (message: BaseMessageInstance) => void,
 };
 
 export default ChatBodyComponent;

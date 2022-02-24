@@ -33,8 +33,12 @@ export const updateUserMessage = async (
   const userMessageParams = new sb.UserMessageParams();
   userMessageParams.message = message;
 
-  const updatedUserMessage: UserMessage = await channel.updateUserMessage(messageId, userMessageParams);
-  return updatedUserMessage;
+  return new Promise((resolve, reject) => {
+    channel.updateUserMessage(messageId, userMessageParams, (updatedMessage: UserMessage, err: SendBirdError) => {
+      if (err) reject(err);
+      resolve(updatedMessage);
+    });
+  });
 }
 
 export const copyUserMessage = (channel: BaseChannel, userMessage: UserMessage): Promise<UserMessage> => {

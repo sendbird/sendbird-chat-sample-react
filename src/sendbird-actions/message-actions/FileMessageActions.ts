@@ -11,11 +11,10 @@ import SendBird, {
  * @param channel base channel.
  * @param message pending file message.
  */
-export const sendFileMessage = (channel: BaseChannel, file: Blob, fileName: string): Promise<FileMessage> => {
+export const sendFileMessage = (channel: BaseChannel, file: Blob): Promise<FileMessage> => {
   const sb: SendBirdInstance = SendBird.getInstance();
   const fileMessageParams = new sb.FileMessageParams();
   fileMessageParams.file = file;
-  fileMessageParams.fileName = fileName;
 
   return new Promise((resolve, reject) => {
     // FIXME: Message type should be FileMessage.

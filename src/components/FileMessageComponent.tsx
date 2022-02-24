@@ -1,7 +1,15 @@
-import moment from "moment";
-import { useEffect } from "react";
-import {BaseChannel, BaseMessageInstance, FileMessage, UserMessage } from "sendbird";
-import { fileMessageStyle } from "../styles/styles";
+import {BaseChannel, FileMessage} from "sendbird";
+import {
+  imageStyle,
+  messageButtonStyle,
+  messageContentStyle,
+  messageNickNameStyle,
+  messageRootStyle,
+  messageSentTimeStyle, messageUnreadCountStyle
+} from "../styles/styles";
+import {useEffect, useState} from 'react';
+import {getReadReceipt} from '../sendbird-actions/channel-actions/GroupChannelActions';
+import {getCreatedAtFromNow, protectFromXSS} from '../utils/messageUtils';
 
 const FileMessageComponent = (props: FileMessageProps) => {
   const {
@@ -10,15 +18,63 @@ const FileMessageComponent = (props: FileMessageProps) => {
     deleteMessage,
   } = props;
 
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (channel.isGroupChannel()) {
+      setUnreadCount(getReadReceipt(channel, message));
+    }
+  }, []);
+
+  const openLink = (messageUrl: string) => {
+    window.open(messageUrl);
+  }
+
   return (
-    <div className={fileMessageStyle}>
-      <img src={message.sender ? message.sender.profileUrl : undefined} alt='Profile' />
-      <div style={{ display: 'inline-block' }}>
-        <div>${message.sender ? message.sender.nickname : null}</div>
-        <div>${message.plainUrl}</div>
-        <div>${moment(message.createdAt).fromNow()}</div>
+    <div
+      className={messageRootStyle}
+      id={message.messageId ? message.messageId.toString() : message.reqId}
+    >
+      {
+        message.sender
+          ? <div className={messageNickNameStyle}>
+            {message.sender ? message.sender.nickname : null}:&nbsp;
+          </div>
+          : null
+      }
+      <div
+        className={messageContentStyle}
+      >
+        <a href={message.url}>
+          {message.url}
+          <img
+            className={imageStyle}
+            src={protectFromXSS(message.url)}
+          />
+        </a>
       </div>
-      <button onClick={() => deleteMessage(message)}>x</button>
+      <div className={messageSentTimeStyle}>
+        {getCreatedAtFromNow(message.createdAt)}
+      </div>
+      <div
+        className={messageUnreadCountStyle}
+        style={unreadCount === 0 ? { display: 'none' } : {}}
+      >
+        {unreadCount}
+      </div>
+      {
+        message.sender
+          ? <div>
+            <div
+              className={messageButtonStyle}
+              style={{ color: 'red' }}
+              onClick={() => deleteMessage(message)}
+            >
+              DELETE
+            </div>
+          </div>
+          : null
+      }
     </div>
   );
 }
@@ -26,7 +82,7 @@ const FileMessageComponent = (props: FileMessageProps) => {
 type FileMessageProps = {
   channel: BaseChannel,
   message: FileMessage,
-  deleteMessage: (message: BaseMessageInstance) => void,
+  deleteMessage: (message: FileMessage) => void,
 };
 
 export default FileMessageComponent;

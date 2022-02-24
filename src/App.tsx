@@ -1,13 +1,12 @@
 import React, {useEffect, useState } from 'react';
-import './App.css';
 import './styles/styles';
 import { Routes, Route } from 'react-router-dom';
-import {SampleList} from './components/SampleList';
 import BasicGroupChannelSample from './samples/basic-samples/group-channel/BasicGroupChannelSample';
 import BasicOpenChannelSample from './samples/basic-samples/open-channel/BasicOpenChannelSample';
 import {connectSendbird, createSendbird } from './sendbird-actions/SendbirdActions';
 import {SendBirdError, User} from 'sendbird';
-import { homeStyle } from './styles/styles';
+import {appRoot, homeStyle} from './styles/styles';
+import SampleListComponent from './components/SampleListComponent';
 
 const Home = () => {
   return (
@@ -26,8 +25,6 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User>();
 
-  console.log('## user: ', user);
-
   useEffect(() => {
     createSendbird();
     connectSendbird()
@@ -39,15 +36,13 @@ const App = () => {
   return (
     loading
       ? null
-      : <div className='App'>
-        <SampleList/>
-        <div className='sample-page'>
+      : <div className={appRoot}>
+        <SampleListComponent/>
           <Routes>
             <Route path='/' element={<Home/>} />
             <Route path='/basic-samples/group-channel' element={<BasicGroupChannelSample/>} />
             <Route path='/basic-samples/open-channel' element={<BasicOpenChannelSample/>} />
           </Routes>
-        </div>
       </div>
   );
 }

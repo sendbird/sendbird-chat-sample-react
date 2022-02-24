@@ -1,13 +1,12 @@
-import {CHANNEL_TYPE, CREATE_CHANNEL_DIALOG_STATE} from './MainComponent';
 import React, {useState} from 'react';
-import {BaseChannel, OpenChannel} from 'sendbird';
+import {  OpenChannel} from 'sendbird';
 import {createOpenChannel} from '../sendbird-actions/channel-actions/OpenChannelActions';
 import { createChannelDialogStyle } from '../styles/styles';
 
 const CreateChannelDialogComponent = (props: CreateChannelDialogProps) => {
   const {
     setCurrentChannel,
-    setCreateChannelDialogState,
+    setIsDialogOpen,
   } = props;
 
   const [channelName, setChannelName] = useState<string>('');
@@ -25,24 +24,26 @@ const CreateChannelDialogComponent = (props: CreateChannelDialogProps) => {
     } catch (e) {
       alert('Create open channel error: ' + e);
     } finally {
-      setCreateChannelDialogState(CREATE_CHANNEL_DIALOG_STATE.CLOSED);
+      setIsDialogOpen(false);
     }
   }
 
   return (
-    <form className={createChannelDialogStyle} onSubmit={createChannel}>
-      <label>
-        Name:
-        <input type='text' value={channelName} onChange={onChannelNameEntered} />
-      </label>
-      <input type='submit' value='Create' />
-    </form>
+    <div className={createChannelDialogStyle}>
+      <form onSubmit={createChannel}>
+        <label>
+          Name:
+          <input type='text' value={channelName} onChange={onChannelNameEntered} />
+        </label>
+        <input type='submit' value='Create' />
+      </form>
+    </div>
   );
 }
 
 type CreateChannelDialogProps = {
-  setCurrentChannel: (channel: BaseChannel) => void;
-  setCreateChannelDialogState: (state: CREATE_CHANNEL_DIALOG_STATE) => void;
+  setCurrentChannel: (channel: OpenChannel) => void;
+  setIsDialogOpen: (isOpen: boolean) => void;
 }
 
 export default CreateChannelDialogComponent;

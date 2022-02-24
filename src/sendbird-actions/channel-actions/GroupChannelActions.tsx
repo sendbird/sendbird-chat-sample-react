@@ -1,10 +1,13 @@
 import SendBird, {
+  AdminMessage,
+  BaseMessageInstance, FileMessage,
   GroupChannel,
-  GroupChannelParams,
+  GroupChannelParams, Member,
   SendBirdInstance,
-  User,
+  User, UserMessage,
 } from 'sendbird';
 import {SENDBIRD_USER_INFO} from '../../constants/constants';
+import {isCurrentUser} from '../../utils/userUtils';
 
 export const createGroupChannel = async (userIdsToInvite: string[], accessCode?: string): Promise<GroupChannel> => {
   const sb: SendBirdInstance = SendBird.getInstance();
@@ -46,10 +49,6 @@ export const leaveGroupChannel = async (channel: GroupChannel): Promise<null> =>
   return await channel.leave();
 }
 
-export const inviteUsersToGroupChannel = async (channel: GroupChannel, users: User[]): Promise<GroupChannel> => {
-  return await channel.invite(users);
-}
-
 export const inviteUserIdsToGroupChannel = async (channel: GroupChannel, userIds: string[]): Promise<GroupChannel> => {
   return await channel.inviteWithUserIds(userIds);
 }
@@ -57,3 +56,11 @@ export const inviteUserIdsToGroupChannel = async (channel: GroupChannel, userIds
 export const markChannelAsRead = async (channel: GroupChannel): Promise<void> => {
   return await channel.markAsRead();
 }
+
+export const getReadReceipt = (channel: GroupChannel, message: UserMessage | FileMessage): number => {
+  if (message.sender && isCurrentUser(message.sender)) {
+    return channel.getUnreadMemberCount(message);
+  }
+  return 0;
+}
+
