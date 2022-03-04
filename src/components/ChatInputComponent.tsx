@@ -43,7 +43,6 @@ const ChatInputComponent = (props: ChatInputProps) => {
   const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === KEY_ENTER && !e.shiftKey && textMessage) {
       e.preventDefault();
-      console.log('## entered: ', textMessage);
       sendUserMessage(channel, textMessage)
         .then(() => {
           if (channel.isGroupChannel()) channel.endTyping();

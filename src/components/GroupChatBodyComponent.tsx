@@ -20,11 +20,7 @@ const ChatBodyComponent = (props: ChatBodyProps) => {
 
   const [loading, setLoading] = useState(true);
   const [state, dispatch] = useReducer(messageListReducer, { messageList: [] });
-
-  const { messageList } = state; // state.data 를 users 키워드로 조회
-
-  console.log('## fresh rendered messageLists: ', messageList);
-
+  const { messageList } = state;
   const messageListRef = useRef(null);
 
   const onScroll = () => {
@@ -71,20 +67,21 @@ const ChatBodyComponent = (props: ChatBodyProps) => {
         // createMessageCollection(sb, channel);
       },
     });
-    messageCollection // @ts-ignore
-      .initialize('cache_and_replace_by_api')
+
+    messageCollection
+      .initialize(sb.MessageCollection.MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
       .onCacheResult(function (err, messages) {
         console.log('MessageCollection.onCacheResult: ', err, messages);
-        if (!err) dispatch({ type: MessageListActionKinds.upsertMessages, messageList: messages });
+        if (!err) dispatch({ type: MessageListActionKinds.setMessages, messageList: messages });
         setLoading(false);
         // goToBottom();
       })
       .onApiResult(function (err, messages) {
         console.log('MessageCollection.onApiResult: ', err, messages);
-        if (!err) dispatch({ type: MessageListActionKinds.upsertMessages, messageList: messages });
+        if (!err) dispatch({ type: MessageListActionKinds.setMessages, messageList: messages });
         setLoading(false);
       });
-  }, []);
+  }, [channel]);
 
   return (
     <div

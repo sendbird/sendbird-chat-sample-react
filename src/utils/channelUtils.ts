@@ -1,0 +1,18 @@
+import {BaseChannel} from 'sendbird';
+
+export const updateCurrentChannel = (
+  updatedChannels: BaseChannel[],
+  currentChannel: BaseChannel,
+): BaseChannel | null => {
+  const updatedChannelUrls: string[] = updatedChannels.map((channel: BaseChannel) => channel.url);
+  const index = updatedChannelUrls.indexOf(currentChannel.url);
+  if (index >= 0) return updatedChannels[index];
+  return null;
+}
+
+export const isCurrentChannelDeleted = (deletedChannelUrls: string[], currentChannel: BaseChannel): boolean => {
+  if (currentChannel && deletedChannelUrls.indexOf(currentChannel.url) >= 0) {
+    return true;
+  }
+  return false;
+}

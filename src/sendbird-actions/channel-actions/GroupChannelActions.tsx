@@ -62,7 +62,6 @@ export const markChannelAsRead = async (channel: GroupChannel): Promise<void> =>
 }
 
 export const getReadReceipt = (channel: GroupChannel, message: UserMessage | FileMessage): number => {
-  console.log('## sender: ', message.sender);
   if (message.sender && isCurrentUser(message.sender)) {
     return channel.getUnreadMemberCount(message);
   }

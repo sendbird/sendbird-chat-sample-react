@@ -26,8 +26,6 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User>();
 
-  console.log('## user: ', user);
-
   useEffect(() => {
     createSendbird();
     connectSendbird()

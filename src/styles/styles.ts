@@ -42,9 +42,19 @@ export const channelListCategoryStyle = css`
 `;
 
 export const channelListItemStyle = css`
-  padding: 6px 0;
-  width: 200px;
+  display: flex;
+  padding: 6px 20px;
+  max-width: 200px;
+  justify-content: space-between;
+`;
+
+export const channelListItemNameStyle = css`
+  max-width: 130px;
+  width: 100%;
+  text-align: left;
   overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   &:hover {
     cursor: pointer;
     color: blueviolet;

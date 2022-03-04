@@ -1,26 +1,22 @@
 import SendBird, {
   BaseChannel,
   GroupChannel,
-  GroupChannelCollection,
-  GroupChannelFilter, SendBirdError,
-  SendBirdInstance, User,
+  SendBirdInstance,
 } from 'sendbird';
-import {useCallback, useEffect, useState} from 'react';
+import {useEffect, useReducer, useState} from 'react';
 import CreateGroupChannelDialogComponent from '../../../components/CreateGroupChannelDialogComponent';
 import GroupChatComponent from '../../../components/GroupChatComponent';
 import GroupChannelListComponent from '../../../components/GroupChannelListComponent';
-import {upsertGroupChannel} from '../../../utils/groupChannelUtils';
-import {CHANNEL_TYPE} from '../../../constants/enums';
 import {createGroupChannel} from '../../../sendbird-actions/channel-actions/GroupChannelActions';
-import {getUserList} from '../../../sendbird-actions/SendbirdActions';
 import {samplePageStyle} from '../../../styles/styles';
+import {ChannelActionKinds, channelReducer} from '../../../reducers/channelReducer';
 
 const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
   const {} = props;
 
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [currentChannel, setCurrentChannel] = useState<GroupChannel>();
   const [user, setUser] = useState<SendBirdInstance>();
+  const [channelState, dispatchChannel] = useReducer(channelReducer, { channel: null });
 
   const openCreateChannelDialog = () => {
     setIsDialogOpen(true);
@@ -43,6 +39,27 @@ const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
     }
   }
 
+  const setCurrentChannel = (channel: GroupChannel | null): void => {
+    dispatchChannel({
+      type: ChannelActionKinds.setChannel,
+      channel: channel as BaseChannel,
+    });
+  }
+
+  const deleteCurrentChannel = (deletedChannelUrls: string[]): void => {
+    dispatchChannel({
+      type: ChannelActionKinds.deleteChannel,
+      deletedChannelUrls,
+    });
+  }
+
+  const updateCurrentChannel = (updatedChannels: BaseChannel[]): void => {
+    dispatchChannel({
+      type: ChannelActionKinds.updateChannel,
+      updatedChannels,
+    });
+  }
+
   return (
     <div className={samplePageStyle}>
       { isDialogOpen
@@ -54,12 +71,14 @@ const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
       }
       <GroupChannelListComponent
         openCreateChannelDialog={openCreateChannelDialog}
-        setCurrentChannel={(channel: GroupChannel) => setCurrentChannel(channel)}
-       currentChannel={currentChannel}
+        setCurrentChannel={setCurrentChannel}
+        currentChannel={channelState.channel as GroupChannel}
+        deleteCurrentChannel={deleteCurrentChannel}
+        updateCurrentChannel={updateCurrentChannel}
       />
       {
-        currentChannel
-          ? <GroupChatComponent groupChannel={currentChannel}/>
+        channelState.channel
+          ? <GroupChatComponent groupChannel={channelState.channel as GroupChannel}/>
           : null
       }
     </div>
