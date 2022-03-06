@@ -1,4 +1,4 @@
-import {BaseChannel} from 'sendbird';
+import {BaseChannel, GroupChannel, Member} from 'sendbird';
 
 export const updateCurrentChannel = (
   updatedChannels: BaseChannel[],
@@ -15,4 +15,8 @@ export const isCurrentChannelDeleted = (deletedChannelUrls: string[], currentCha
     return true;
   }
   return false;
+}
+
+export const getGroupChannelTitle = (groupChannel: GroupChannel): string => {
+  return groupChannel.members.map((member: Member) => member.nickname).join(', ');
 }

@@ -28,10 +28,10 @@ const UserItemComponent = (props: UserItemProps) => {
   );
 };
 
-const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
+const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
   const {
     isDialogOpen,
-    createChannel,
+    inviteUserIds,
   } = props;
 
   const [loading, setLoading] = useState(true);
@@ -40,6 +40,7 @@ const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
 
   useEffect(() => {
     if (isDialogOpen) {
+      if (userIdsToInvite.length > 0) setUserIdsToInvite([]);
       getUserList()
         .then((users: User[]) => setUserList(users))
         .catch((error: SendBirdError) => alert('getUserList error: ' + error))
@@ -72,7 +73,7 @@ const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
         ))}
         <button
           style={{ margin: '10px 20px' }}
-          onClick={() => createChannel(userIdsToInvite)}
+          onClick={() => inviteUserIds(userIdsToInvite)}
         >
           Create
         </button>
@@ -82,7 +83,7 @@ const CreateGroupChannelDialogComponent = (props: CreateChannelDialogProps) => {
 
 type CreateChannelDialogProps = {
   isDialogOpen: boolean,
-  createChannel: (userIdsToInvite: string[]) => void;
+  inviteUserIds: (userIdsToInvite: string[]) => void;
 }
 
-export default CreateGroupChannelDialogComponent;
+export default InviteMembersDialogComponent;

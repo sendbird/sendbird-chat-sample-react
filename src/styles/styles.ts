@@ -94,6 +94,15 @@ export const chatBodyStyle = css`
   
 `;
 
+export const chatHeaderStyle = css`
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const chatHeaderMenuStyle = css`
+  display: flex;
+`;
+
 export const messageListStyle = css`
   display: flex;
   flex-direction: column;

@@ -4,17 +4,19 @@ import {
   channelListItemStyle,
   channelListStyle
 } from '../styles/styles';
-import {useEffect, useReducer, useState} from 'react';
+import {useEffect} from 'react';
 import SendBird, {
   BaseChannel,
   GroupChannel,
   GroupChannelCollection,
-  GroupChannelFilter, Member, SendBirdError,
+  GroupChannelFilter, SendBirdError,
   SendBirdInstance
 } from 'sendbird';
 import {deleteGroupChannel} from '../sendbird-actions/channel-actions/GroupChannelActions';
-import {GroupChannelListActionKinds, groupChannelListReducer} from '../reducers/groupChannelListReducer';
-import {ChannelActionKinds, channelReducer} from '../reducers/channelReducer';
+import {GroupChannelListActionKinds} from '../reducers/groupChannelListReducer';
+import {getGroupChannelTitle} from '../utils/channelUtils';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState} from '../reducers';
 
 type GroupChannelCategoryProps = {
   openDialog: () => void,
@@ -49,7 +51,7 @@ const GroupChannelListItemComponent = (props: GroupChannelListItemProps) => {
         style={isSelected() ? { color: 'green' } : {}}
         onClick={() => setCurrentChannel(channel)}
       >
-        {`${channel.members.map((member: Member) => member.nickname).join(', ')}`}
+        {`${getGroupChannelTitle(channel)}`}
       </div>
       <button
         style={{ padding: '0.2px 4px' }}
@@ -85,58 +87,58 @@ const GroupChannelListComponent = (props: GroupChannelListProps) => {
   } = props;
 
   const sb: SendBirdInstance = SendBird.getInstance();
-
-  const [groupChannelListState, dispatchGroupChannelList] = useReducer(groupChannelListReducer, {
-    groupChannelList: [],
-    order: sb.GroupChannelCollection.GroupChannelOrder.LATEST_LAST_MESSAGE,
-    groupChannelCollection: null,
-  });
+  
+  const groupChannelListReducerState = useSelector((state: RootState) => state.groupChannelListReducer);
+  const { groupChannelCollection, groupChannelList } = groupChannelListReducerState;
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (groupChannelListState.groupChannelCollection) return;
+    if (groupChannelCollection) return;
     // Setting up the group channel collection and its event handler.
     const channelFetchOrder = sb.GroupChannelCollection.GroupChannelOrder.LATEST_LAST_MESSAGE;
     const groupChannelFilter: GroupChannelFilter = new sb.GroupChannelFilter();
     groupChannelFilter.includeEmpty = true;
-    const groupChannelCollection: GroupChannelCollection = sb.GroupChannel.createGroupChannelCollection()
+    const newGroupChannelCollection: GroupChannelCollection = sb.GroupChannel.createGroupChannelCollection()
       .setOrder(channelFetchOrder)
       .setLimit(100)
       .setFilter(groupChannelFilter)
       .build();
 
-    groupChannelCollection.setGroupChannelCollectionHandler({
+    newGroupChannelCollection.setGroupChannelCollectionHandler({
       onChannelsAdded: (context, channels) => {
-        dispatchGroupChannelList({
-          type: GroupChannelListActionKinds.upsertChannels,
-          groupChannelList: channels as GroupChannel[]
+        dispatch({
+          type: GroupChannelListActionKinds.UPSERT_CHANNELS,
+          payload: channels as GroupChannel[]
         });
       },
       onChannelsUpdated: (context, channels) => {
-        dispatchGroupChannelList({
-          type: GroupChannelListActionKinds.upsertChannels,
-          groupChannelList: channels as GroupChannel[]
+        dispatch({
+          type: GroupChannelListActionKinds.UPSERT_CHANNELS,
+          payload: channels as GroupChannel[]
         });
         updateCurrentChannel(channels);
       },
       onChannelsDeleted: (context, channelUrls) => {
-        dispatchGroupChannelList({
-          type: GroupChannelListActionKinds.deleteChannels,
-          groupChannelUrls: channelUrls,
+        dispatch({
+          type: GroupChannelListActionKinds.DELETE_CHANNELS,
+          payload: channelUrls,
         });
         deleteCurrentChannel(channelUrls);
       },
     });
 
-    groupChannelCollection.loadMore()
+    newGroupChannelCollection.loadMore()
       .then((channels: GroupChannel[]) => {
-        dispatchGroupChannelList({
-          type: GroupChannelListActionKinds.setChannels,
-          groupChannelList: channels,
-          groupChannelCollection,
+        dispatch({
+          type: GroupChannelListActionKinds.SET_CHANNELS,
+          payload: {
+            groupChannelList: channels,
+            groupChannelCollection: newGroupChannelCollection,
+          },
         });
       })
       .catch((error: SendBirdError) => alert('groupChannelCollection loadMore error: ' + error));
-  }, [groupChannelListState.groupChannelCollection]);
+  }, [groupChannelCollection]);
 
   const deleteChannel = (channel: GroupChannel, index: number) => {
     deleteGroupChannel(channel)
@@ -147,7 +149,7 @@ const GroupChannelListComponent = (props: GroupChannelListProps) => {
     <div className={channelListStyle}>
       <GroupChannelCategoryComponent openDialog={openCreateChannelDialog}/>
       {
-        groupChannelListState.groupChannelList.map((channel: GroupChannel, i: number) => {
+        groupChannelList.map((channel: GroupChannel, i: number) => {
           return (
             <GroupChannelListItemComponent
               channel={channel}

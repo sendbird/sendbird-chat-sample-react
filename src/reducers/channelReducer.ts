@@ -1,48 +1,63 @@
 import {BaseChannel} from 'sendbird';
 import {isCurrentChannelDeleted, updateCurrentChannel} from '../utils/channelUtils';
 
+export enum ChannelActionKinds {
+  SET_CHANNEL = 'SET_CHANNEL',
+  UPDATE_CHANNEL = 'UPDATE_CHANNEL',
+  DELETE_CHANNEL = 'DELETE_CHANNEL',
+  LEAVE_CHANNEL = 'LEAVE_CHANNEL',
+  INVITE_USERS = 'INVITE_USERS',
+}
+
 interface State {
   channel: BaseChannel | null,
 }
 
-interface Action {
-  type: string,
-  channel?: BaseChannel,
-  updatedChannels?: BaseChannel[],
-  deletedChannelUrls?: string[],
+interface setChannelAction {
+  type: ChannelActionKinds.SET_CHANNEL,
+  payload: BaseChannel,
 }
 
-export enum ChannelActionKinds {
-  setChannel = 'SET_CHANNEL',
-  updateChannel = 'UPDATE_CHANNEL',
-  deleteChannel = 'DELETE_CHANNEL',
+interface updateChannelAction {
+  type: ChannelActionKinds.UPDATE_CHANNEL,
+  payload: BaseChannel[],
 }
 
-export const channelReducer = (state: State, action: Action): State => {
+interface deleteChannelAction {
+  type: ChannelActionKinds.DELETE_CHANNEL,
+  payload: string[],
+}
+
+interface leaveChannelAction {
+  type: ChannelActionKinds.LEAVE_CHANNEL,
+}
+
+type Action = setChannelAction | updateChannelAction | deleteChannelAction | leaveChannelAction;
+
+const initialState: State = {
+  channel: null,
+};
+
+export const channelReducer = (state: State = initialState, action: Action): State => {
   switch (action.type) {
-    case ChannelActionKinds.setChannel:
-      if (action.channel) {
-        return {channel: action.channel};
-      }
-      return state;
-    case ChannelActionKinds.updateChannel:
-      if (state.channel && action.updatedChannels) {
-        const updatedChannel: BaseChannel | null = updateCurrentChannel(action.updatedChannels, state.channel);
+    case ChannelActionKinds.SET_CHANNEL:
+      return {channel: action.payload};
+    case ChannelActionKinds.UPDATE_CHANNEL:
+      if (state.channel) {
+        const updatedChannel: BaseChannel | null = updateCurrentChannel(action.payload, state.channel);
         if (updatedChannel) {
           return {channel: updatedChannel};
         }
       }
       return state;
-    case ChannelActionKinds.deleteChannel:
-      if (
-        state.channel
-        && action.deletedChannelUrls
-        && isCurrentChannelDeleted(action.deletedChannelUrls, state.channel)
-      ) {
+    case ChannelActionKinds.DELETE_CHANNEL:
+      if (state.channel && isCurrentChannelDeleted(action.payload, state.channel)) {
         return {channel: null};
       }
       return state;
+    case ChannelActionKinds.LEAVE_CHANNEL:
+      return {channel: null};
     default:
-      throw new Error(`Unhandled action type: ${action.type}`);
+      return state;
   }
 }

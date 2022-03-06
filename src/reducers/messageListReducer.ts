@@ -1,36 +1,52 @@
 import {BaseMessageInstance} from 'sendbird';
 import {deleteMessagesFromMessageList, upsertMessagesToMessageList} from '../utils/messageUtils';
 
+export enum MessageListActionKinds {
+  SET_MESSAGES = 'SET_MESSAGES',
+  UPSERT_MESSAGES = 'UPSERT_MESSAGES',
+  DELETE_MESSAGES = 'DELETE_MESSAGES',
+}
+
 interface State {
   messageList: BaseMessageInstance[],
 }
 
-interface Action {
-  type: string,
-  messageList: BaseMessageInstance[],
+interface setMessagesAction {
+  type: MessageListActionKinds.SET_MESSAGES,
+  payload: BaseMessageInstance[],
 }
 
-export enum MessageListActionKinds {
-  setMessages = 'SET_MESSAGES',
-  upsertMessages = 'UPSERT_MESSAGES',
-  deleteMessages = 'DELETE_MESSAGES',
+interface upsertMessagesAction {
+  type: MessageListActionKinds.UPSERT_MESSAGES,
+  payload: BaseMessageInstance[],
 }
 
-export const messageListReducer = (state: State, action: Action): State => {
+interface deleteMessagesAction {
+  type: MessageListActionKinds.DELETE_MESSAGES,
+  payload: BaseMessageInstance[],
+}
+
+type Action = setMessagesAction | upsertMessagesAction | deleteMessagesAction;
+
+const initialState: State = {
+  messageList: [],
+};
+
+export const messageListReducer = (state: State = initialState, action: Action): State => {
   switch (action.type) {
-    case MessageListActionKinds.setMessages:
+    case MessageListActionKinds.SET_MESSAGES:
       return {
-        messageList: action.messageList,
+        messageList: action.payload,
       };
-    case MessageListActionKinds.upsertMessages:
+    case MessageListActionKinds.UPSERT_MESSAGES:
       return {
-        messageList: upsertMessagesToMessageList(state.messageList, action.messageList),
+        messageList: upsertMessagesToMessageList(state.messageList, action.payload),
       };
-    case MessageListActionKinds.deleteMessages:
+    case MessageListActionKinds.DELETE_MESSAGES:
       return {
-        messageList: deleteMessagesFromMessageList(state.messageList, action.messageList),
+        messageList: deleteMessagesFromMessageList(state.messageList, action.payload),
       };
     default:
-      throw new Error(`Unhandled action type: ${action.type}`);
+      return state;
   }
 }
