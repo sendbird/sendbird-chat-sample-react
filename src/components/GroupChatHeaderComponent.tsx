@@ -33,6 +33,7 @@ const GroupChatHeaderComponent = (props: GroupChatHeaderProps) => {
           ADD USERS
         </button>
         <button
+          style={{ marginLeft: '12px'}}
           onClick={leaveCurrentChannel}
         >
           LEAVE

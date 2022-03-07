@@ -41,6 +41,14 @@ export const channelListCategoryStyle = css`
   justify-content: center;
 `;
 
+export const smallButtonStyle = css`
+  display: flex;
+  width: 18px;
+  height: 18px;
+  justify-content: center;
+  align-items: center;
+`
+
 export const channelListItemStyle = css`
   display: flex;
   padding: 6px 20px;
@@ -48,17 +56,32 @@ export const channelListItemStyle = css`
   justify-content: space-between;
 `;
 
-export const channelListItemNameStyle = css`
+export const channelListItemTitleStyle = css`
   max-width: 130px;
   width: 100%;
   text-align: left;
+  &:hover {
+    cursor: pointer;
+    div:first-child {
+      color: blueviolet;
+    }
+  }
+`;
+
+export const channelListItemNameStyle = css`
+  width: 100%;
   overflow-x: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  &:hover {
-    cursor: pointer;
-    color: blueviolet;
-  }
+`;
+
+export const channelListItemLastMessageStyle = css`
+  width: 100%;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.5;
+  margin-top: 8px;
 `;
 
 export const userItemStyle = css`
@@ -96,7 +119,11 @@ export const chatBodyStyle = css`
 
 export const chatHeaderStyle = css`
   display: flex;
+  padding: 0 20px;
   justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  border-bottom: black solid 1px;
 `;
 
 export const chatHeaderMenuStyle = css`

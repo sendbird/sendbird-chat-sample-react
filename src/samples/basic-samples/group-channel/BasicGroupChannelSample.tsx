@@ -8,21 +8,31 @@ import { useSelector, useDispatch } from 'react-redux';
 import InviteMembersDialogComponent from '../../../components/InviteMembersDialogComponent';
 import GroupChatComponent from '../../../components/GroupChatComponent';
 import GroupChannelListComponent from '../../../components/GroupChannelListComponent';
-import {createGroupChannel, leaveGroupChannel} from '../../../sendbird-actions/channel-actions/GroupChannelActions';
+import {
+  createGroupChannel,
+  inviteUserIdsToGroupChannel,
+  leaveGroupChannel
+} from '../../../sendbird-actions/channel-actions/GroupChannelActions';
 import {samplePageStyle} from '../../../styles/styles';
 import {ChannelActionKinds} from '../../../reducers/channelReducer';
 import {RootState} from '../../../reducers';
 
+export enum DialogState {
+  CREATE = 'CREATE',
+  INVITE = 'INVITE',
+  CLOSED = 'CLOSED',
+}
+
 const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
   const {} = props;
 
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [dialogState, setDialogState] = useState<DialogState>(DialogState.CLOSED);
   const [user, setUser] = useState<SendBirdInstance>();
   const currentChannel: BaseChannel | null = useSelector((state: RootState) => state.channelReducer.channel);
   const dispatch = useDispatch();
 
   const openCreateChannelDialog = () => {
-    setIsDialogOpen(true);
+    setDialogState(DialogState.CREATE);
   }
 
   useEffect(() => {
@@ -31,16 +41,6 @@ const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
       setUser(sb);
     }
   }, []);
-
-  const createChannel = async (userIdsToInvite: string[]) => {
-    try {
-      const groupChannel: GroupChannel = await createGroupChannel(userIdsToInvite);
-      setIsDialogOpen(false);
-      setCurrentChannel(groupChannel);
-    } catch (e) {
-      alert('Create open channel error: ' + e);
-    }
-  }
 
   const setCurrentChannel = (channel: GroupChannel | null): void => {
     dispatch({
@@ -71,15 +71,42 @@ const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
   }
 
   const openInviteUsersDialog = () => {
+    setDialogState(DialogState.INVITE);
+  }
 
+  const createChannel = async (userIdsToInvite: string[]) => {
+    try {
+      const groupChannel: GroupChannel = await createGroupChannel(userIdsToInvite);
+      setDialogState(DialogState.CLOSED);
+      setCurrentChannel(groupChannel);
+    } catch (e) {
+      alert('Create group channel error: ' + e);
+    }
+  }
+
+  const inviteUsers = async (userIdsToInvite: string[]) => {
+    try {
+      const groupChannel: GroupChannel = await inviteUserIdsToGroupChannel(currentChannel as GroupChannel,
+        userIdsToInvite);
+      setDialogState(DialogState.CLOSED);
+      setCurrentChannel(groupChannel);
+    } catch (e) {
+      alert('Invite userIds to group channel error: ' + e);
+    }
+  }
+
+  const closeDialog = () => {
+    setDialogState(DialogState.CLOSED);
   }
 
   return (
     <div className={samplePageStyle}>
-      { isDialogOpen
+      { dialogState !== DialogState.CLOSED
         ? <InviteMembersDialogComponent
-          isDialogOpen={isDialogOpen}
-          inviteUserIds={createChannel}
+          dialogState={dialogState}
+          createChannel={createChannel}
+          inviteUsers={inviteUsers}
+          closeDialog={closeDialog}
         />
         : null
       }

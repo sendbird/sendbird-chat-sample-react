@@ -1,8 +1,8 @@
 import {
-  channelListCategoryStyle,
+  channelListCategoryStyle, channelListItemLastMessageStyle,
   channelListItemNameStyle,
-  channelListItemStyle,
-  channelListStyle
+  channelListItemStyle, channelListItemTitleStyle,
+  channelListStyle, smallButtonStyle
 } from '../styles/styles';
 import {useEffect} from 'react';
 import SendBird, {
@@ -47,14 +47,25 @@ const GroupChannelListItemComponent = (props: GroupChannelListItemProps) => {
   return (
     <div className={channelListItemStyle} key={index}>
       <div
-        className={channelListItemNameStyle}
-        style={isSelected() ? { color: 'green' } : {}}
+        className={channelListItemTitleStyle}
         onClick={() => setCurrentChannel(channel)}
       >
-        {`${getGroupChannelTitle(channel)}`}
+        <div
+          className={channelListItemNameStyle}
+          style={isSelected() ? { color: 'green' } : {}}
+        >
+          {`${getGroupChannelTitle(channel)}`}
+        </div>
+        <div className={channelListItemLastMessageStyle}>
+          {
+            channel.lastMessage && channel.lastMessage.isUserMessage()
+              ? channel.lastMessage.message
+              : null
+          }
+        </div>
       </div>
       <button
-        style={{ padding: '0.2px 4px' }}
+        className={smallButtonStyle}
         onClick={() => deleteChannel(channel, index)}
       >x</button>
     </div>
@@ -70,7 +81,7 @@ const GroupChannelCategoryComponent = (props: GroupChannelCategoryProps) => {
     <div className={channelListCategoryStyle}>
       <p style={{ marginRight: '10px' }}>Group Channels</p>
       <button
-        style={{ padding: '0.5px 3px' }}
+        className={smallButtonStyle}
         onClick={() => openDialog()}
       >+</button>
     </div>

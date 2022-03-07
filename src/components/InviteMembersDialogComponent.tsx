@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {GroupChannel, SendBirdError, User} from 'sendbird';
+import {SendBirdError, User} from 'sendbird';
 import {getUserList} from '../sendbird-actions/SendbirdActions';
-import {createGroupChannel} from '../sendbird-actions/channel-actions/GroupChannelActions';
-import {createChannelDialogStyle, userItemStyle } from '../styles/styles';
+import {createChannelDialogStyle, userItemStyle} from '../styles/styles';
+import {DialogState} from '../samples/basic-samples/group-channel/BasicGroupChannelSample';
 
 type UserItemProps = {
   userId: string,
@@ -30,8 +30,10 @@ const UserItemComponent = (props: UserItemProps) => {
 
 const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
   const {
-    isDialogOpen,
-    inviteUserIds,
+    dialogState,
+    createChannel,
+    inviteUsers,
+    closeDialog,
   } = props;
 
   const [loading, setLoading] = useState(true);
@@ -39,14 +41,14 @@ const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
   const [userIdsToInvite, setUserIdsToInvite] = useState<string[]>([]);
 
   useEffect(() => {
-    if (isDialogOpen) {
+    if (dialogState !== DialogState.CLOSED) {
       if (userIdsToInvite.length > 0) setUserIdsToInvite([]);
       getUserList()
         .then((users: User[]) => setUserList(users))
         .catch((error: SendBirdError) => alert('getUserList error: ' + error))
         .finally(() => setLoading(false));
     }
-  }, [isDialogOpen]);
+  }, [dialogState]);
 
   const onUserSelect = (selectedUserId: string) => {
     const selectedUsers: string[] = [...userIdsToInvite];
@@ -57,6 +59,19 @@ const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
       selectedUsers.push(selectedUserId);
     }
     setUserIdsToInvite(selectedUsers);
+  }
+
+  const onDialogSubmit = () => {
+    switch (dialogState) {
+      case DialogState.CREATE:
+        createChannel(userIdsToInvite);
+        break;
+      case DialogState.INVITE:
+        inviteUsers(userIdsToInvite);
+        break;
+      default:
+        return;
+    }
   }
 
   return (
@@ -71,19 +86,26 @@ const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
             key={i}
           />
         ))}
-        <button
-          style={{ margin: '10px 20px' }}
-          onClick={() => inviteUserIds(userIdsToInvite)}
-        >
-          Create
-        </button>
+        <div style={{ margin: '10px 20px', display: 'flex' }}>
+          <button
+            style={{ marginRight: '10px' }}
+            onClick={onDialogSubmit}
+          >
+            Submit
+          </button>
+          <button onClick={closeDialog}>
+            Close
+          </button>
+        </div>
       </div>
   );
 }
 
 type CreateChannelDialogProps = {
-  isDialogOpen: boolean,
-  inviteUserIds: (userIdsToInvite: string[]) => void;
+  dialogState: DialogState,
+  createChannel: (userIdsToInvite: string[]) => void;
+  inviteUsers: (userIdsToInvite: string[]) => void;
+  closeDialog: () => void;
 }
 
 export default InviteMembersDialogComponent;
