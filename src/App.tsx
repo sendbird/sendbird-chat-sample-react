@@ -3,14 +3,18 @@ import './styles/styles';
 import { Routes, Route } from 'react-router-dom';
 import BasicGroupChannelSample from './samples/basic-samples/group-channel/BasicGroupChannelSample';
 import BasicOpenChannelSample from './samples/basic-samples/open-channel/BasicOpenChannelSample';
-import {connectSendbird, createSendbird } from './sendbird-actions/SendbirdActions';
+import {
+  connectSendbird,
+  createSendbird,
+  setupDefaultSendbirdSettings
+} from './sendbird-actions/SendbirdActions';
 import {SendBirdError, User} from 'sendbird';
-import {appRoot, homeStyle} from './styles/styles';
+import {appRoot} from './styles/styles';
 import SampleListComponent from './components/SampleListComponent';
 
 const Home = () => {
   return (
-    <div className={homeStyle}>
+    <div>
       <h1>
         Home
       </h1>
@@ -28,6 +32,7 @@ const App = () => {
   useEffect(() => {
     createSendbird();
     connectSendbird()
+      .then(() => setupDefaultSendbirdSettings())
       .then((user: User) => setUser(user))
       .catch((error: SendBirdError) => alert('getUserList error: ' + error))
       .finally(() => setLoading(false));

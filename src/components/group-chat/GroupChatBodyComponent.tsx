@@ -4,14 +4,14 @@ import {
   GroupChannel,
   UserMessage,
 } from 'sendbird';
-import FileMessageComponent from './FileMessageComponent';
-import UserMessageComponent from './UserMessageComponent';
-import {messageListStyle} from '../styles/styles';
-import {deleteUserMessage} from '../sendbird-actions/message-actions/UserMessageActions';
-import {deleteFileMessage} from '../sendbird-actions/message-actions/FileMessageActions';
+import FileMessageComponent from '../FileMessageComponent';
+import UserMessageComponent from '../UserMessageComponent';
+import {messageListStyle} from '../../styles/styles';
+import {deleteUserMessage} from '../../sendbird-actions/message-actions/UserMessageActions';
+import {deleteFileMessage} from '../../sendbird-actions/message-actions/FileMessageActions';
 import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '../reducers';
-import {MessageListActionKinds} from '../reducers/messageListReducer';
+import {RootState} from '../../reducers';
+import {MessageListActionKinds} from '../../reducers/messageListReducer';
 
 const GroupChatBodyComponent = (props: GroupChatBodyProps) => {
   const {
@@ -24,7 +24,7 @@ const GroupChatBodyComponent = (props: GroupChatBodyProps) => {
   const messageListReducerState = useSelector((state: RootState) => {
     return state.messageListReducer
   });
-  const { messageList, messageCollection, isInitialized } = messageListReducerState;
+  const { messageList, messageCollection, channelUrl } = messageListReducerState;
   const dispatch = useDispatch();
   const messageListEndRef = useRef<null | HTMLDivElement>(null);
   const [wasAtBottom, setWasAtBottom] = useState(false);
@@ -39,11 +39,11 @@ const GroupChatBodyComponent = (props: GroupChatBodyProps) => {
   }
 
   useEffect(() => {
-    if (messageCollection && isInitialized) {
+    if (messageCollection && channelUrl) {
       scrollToBottom();
       if (isLoading) finishLoading();
     }
-  }, [messageCollection, isInitialized]);
+  }, [messageCollection, channelUrl]);
 
   useEffect(() => {
     if (!isLoading && messageListEndRef.current && wasAtBottom) {

@@ -1,10 +1,9 @@
 import SendBird, {
-  AdminMessage,
-  BaseMessageInstance, FileMessage,
+  FileMessage,
   GroupChannel,
-  GroupChannelParams, Member,
+  GroupChannelParams,
   SendBirdInstance,
-  User, UserMessage,
+  UserMessage,
 } from 'sendbird';
 import {SENDBIRD_USER_INFO} from '../../constants/constants';
 import {isCurrentUser} from '../../utils/userUtils';

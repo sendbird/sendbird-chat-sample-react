@@ -1,15 +1,21 @@
-import {BaseChannel, BaseMessageInstance, FileMessage, SendBirdError} from 'sendbird';
-import { sendFileMessage } from '../sendbird-actions/message-actions/FileMessageActions';
+import {BaseChannel, BaseMessageInstance, FileMessage, SendBirdError, UserMessage} from 'sendbird';
+import {sendFileMessage, sendFileMessageWithCallback} from '../sendbird-actions/message-actions/FileMessageActions';
 import React, {ChangeEvent, useEffect, useRef, useState} from 'react';
 import {markChannelAsRead} from '../sendbird-actions/channel-actions/GroupChannelActions';
 import {KEY_ENTER} from '../constants/constants';
-import {sendUserMessage, updateUserMessage} from '../sendbird-actions/message-actions/UserMessageActions';
+import {
+  sendUserMessage,
+  sendUserMessageWithCallback,
+  updateUserMessage
+} from '../sendbird-actions/message-actions/UserMessageActions';
 import {
   fileInputStyle,
   messageInputStyle,
   textInputAreaStyle,
   textInputStyle,
 } from '../styles/styles';
+import {MessageListActionKinds} from '../reducers/messageListReducer';
+import {useDispatch} from 'react-redux';
 
 const ChatInputComponent = (props: ChatInputProps) => {
   const {
@@ -22,6 +28,7 @@ const ChatInputComponent = (props: ChatInputProps) => {
   const [textMessage, setTextMessage] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const dispatch = useDispatch();
 
   useEffect(()=>{
     if (!isLoading) {
@@ -41,10 +48,8 @@ const ChatInputComponent = (props: ChatInputProps) => {
 
   useEffect(() => {
     if (file) {
-      sendFileMessage(channel, file).then((fileMessage: FileMessage) => {
-        setFile(null);
-      }).catch((e) => {
-        alert('user message send/update error: ' + e);
+      sendFileMessageByChannelType(file).catch((e) => {
+        alert('file message send/update error: ' + e);
       });
     }
   }, [file]);
@@ -70,16 +75,50 @@ const ChatInputComponent = (props: ChatInputProps) => {
     setTextMessage(textInput);
   }
 
+  const sendUserMessageByChannelType = async (): Promise<void> => {
+    if (channel.isGroupChannel()) {
+      await sendUserMessage(channel, textMessage);
+      channel.endTyping();
+    } else {
+      const pendingMessage: UserMessage = sendUserMessageWithCallback(
+        channel,
+        textMessage,
+        (message: UserMessage, error: SendBirdError) => {
+          if (error) throw error;
+          dispatch({ type: MessageListActionKinds.UPDATE_MESSAGES, payload: [message] });
+        });
+      dispatch({ type: MessageListActionKinds.ADD_MESSAGES, payload: [pendingMessage] });
+    }
+  }
+
+  const sendFileMessageByChannelType = async (file: Blob): Promise<void> => {
+    if (channel.isGroupChannel()) {
+      await sendFileMessage(channel, file);
+      setFile(null);
+    } else {
+      const pendingMessage: FileMessage = sendFileMessageWithCallback(
+        channel,
+        file,
+        (message: FileMessage, error: SendBirdError) => {
+          if (error) throw error;
+          dispatch({type: MessageListActionKinds.UPDATE_MESSAGES, payload: [message]});
+        });
+      dispatch({type: MessageListActionKinds.ADD_MESSAGES, payload: [pendingMessage]});
+    }
+  }
+
   const onKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === KEY_ENTER && !e.shiftKey && textMessage) {
       e.preventDefault();
       try {
         if (messageToUpdate && messageToUpdate.isUserMessage()) {
-          await updateUserMessage(channel, messageToUpdate.messageId, textMessage);
+          const updatedMessage: UserMessage = await updateUserMessage(channel, messageToUpdate.messageId, textMessage);
+          if (channel.isOpenChannel()) {
+            dispatch({type: MessageListActionKinds.UPDATE_MESSAGES, payload: [updatedMessage]});
+          }
           unsetMessageToUpdate();
         } else {
-          await sendUserMessage(channel, textMessage)
-          if (channel.isGroupChannel()) channel.endTyping();
+          await sendUserMessageByChannelType();
           setTextMessage('');
         }
       } catch (e) {

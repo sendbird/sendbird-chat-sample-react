@@ -11,7 +11,7 @@ export const updateCurrentChannel = (
 }
 
 export const isCurrentChannelDeleted = (deletedChannelUrls: string[], currentChannel: BaseChannel): boolean => {
-  if (currentChannel && deletedChannelUrls.indexOf(currentChannel.url) >= 0) {
+  if (deletedChannelUrls.indexOf(currentChannel.url) >= 0) {
     return true;
   }
   return false;

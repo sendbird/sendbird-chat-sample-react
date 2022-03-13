@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {GroupChannel, Member} from "sendbird";
 import {MemberListCategoryStyle, MemberListItemStyle, MemberListStyle} from "../styles/styles";
 
-
 const MemberListItemComponent = (props: MemberListItemComponentProps) => {
   const {
     member,
@@ -19,7 +18,6 @@ type MemberListItemComponentProps = {
   member: Member,
 };
 
-
 const MemberListComponent = (props: MemberListComponentProps) => {
   const {
     groupChannel,
@@ -28,7 +26,6 @@ const MemberListComponent = (props: MemberListComponentProps) => {
   const [memberList, setMemberList] = useState<Member[]>([]);
 
   useEffect(() => {
-    console.log('## groupChannel.members: ', groupChannel.members);
     setMemberList(groupChannel.members);
   }, [groupChannel]);
 

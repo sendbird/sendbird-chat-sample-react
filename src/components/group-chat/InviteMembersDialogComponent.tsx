@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {SendBirdError, User} from 'sendbird';
-import {getUserList} from '../sendbird-actions/SendbirdActions';
+import {getUserList} from '../../sendbird-actions/SendbirdActions';
 import {
   createChannelDialogStyle, DialogButtonContainer,
-  MemberListCategoryStyle,
   userItemStyle,
   UserListCategoryStyle, UserListStyle
-} from '../styles/styles';
-import {DialogState} from '../samples/basic-samples/group-channel/BasicGroupChannelSample';
+} from '../../styles/styles';
+import {DialogState} from '../../constants/enums';
 
 type UserItemProps = {
   userId: string,

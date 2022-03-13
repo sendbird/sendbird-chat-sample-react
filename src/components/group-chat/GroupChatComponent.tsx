@@ -1,19 +1,18 @@
 import SendBird, {
   BaseMessageInstance,
-  FileMessage,
   GroupChannel,
   MessageCollection,
   SendBirdInstance,
-  UserMessage
 } from "sendbird";
-import {ChatBodyStyle, chatStyle} from '../styles/styles';
-import ChatInputComponent from './ChatInputComponent';
+import {ChatBodyStyle, chatStyle} from '../../styles/styles';
+import ChatInputComponent from '../ChatInputComponent';
 import GroupChatBodyComponent from './GroupChatBodyComponent';
 import GroupChatHeaderComponent from './GroupChatHeaderComponent';
 import {useEffect, useState} from 'react';
-import {MessageListActionKinds} from '../reducers/messageListReducer';
+import {MessageListActionKinds} from '../../reducers/messageListReducer';
 import {useDispatch} from 'react-redux';
-import MemberListComponent from './MemberListComponent';
+import MemberListComponent from '../MemberListComponent';
+import {BIDIRECTIONAL_MESSAGE_FETCH_LIMIT} from '../../constants/constants';
 
 const GroupChatComponent = (props: GroupChatProps) => {
   const {
@@ -30,37 +29,27 @@ const GroupChatComponent = (props: GroupChatProps) => {
   useEffect(() => {
     const sb: SendBirdInstance = SendBird.getInstance();
     const filter = new sb.MessageFilter();
-    const MESSAGE_FETCH_LIMIT = 74;
     const messageCollection: MessageCollection = groupChannel.createMessageCollection()
       .setFilter(filter)
       .setStartingPoint(Date.now())
-      .setLimit(MESSAGE_FETCH_LIMIT)
+      .setLimit(BIDIRECTIONAL_MESSAGE_FETCH_LIMIT)
       .build();
     messageCollection.setMessageCollectionHandler({
       onMessagesAdded: function (context, channel, messages) {
         dispatch({ type: MessageListActionKinds.ADD_MESSAGES, payload: messages });
       },
       onMessagesUpdated: function (context, channel, messages) {
-        if (context.source === sb.CollectionEventSource.EVENT_MESSAGE_SENT) {
-          dispatch({
-            type: MessageListActionKinds.UPSERT_SENT_MESSAGES,
-            payload: messages as (UserMessage | FileMessage)[],
-          });
-        } else {
-          dispatch({ type: MessageListActionKinds.UPDATE_MESSAGES, payload: messages });
-        }
+        dispatch({ type: MessageListActionKinds.UPDATE_MESSAGES, payload: messages });
       },
       onMessagesDeleted: function (context, channel, messages) {
         dispatch({ type: MessageListActionKinds.DELETE_MESSAGES, payload: messages });
       },
       onChannelUpdated: function (context, channel) {},
       onChannelDeleted: function (context, channelUrl) {
-        messageCollection.dispose();
-        // clearView();
+        // messageCollection.dispose();
       },
       onHugeGapDetected: function () {
-        messageCollection.dispose();
-        // createMessageCollection(sb, channel);
+        // messageCollection.dispose();
       },
     });
 
@@ -71,6 +60,7 @@ const GroupChatComponent = (props: GroupChatProps) => {
           dispatch({
             type: MessageListActionKinds.SET_MESSAGES,
             payload: {
+              channelUrl: groupChannel.url,
               messages,
               messageCollection
             }
@@ -82,6 +72,7 @@ const GroupChatComponent = (props: GroupChatProps) => {
           dispatch({
             type: MessageListActionKinds.SET_MESSAGES,
             payload: {
+              channelUrl: groupChannel.url,
               messages,
               messageCollection
             }

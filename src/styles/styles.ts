@@ -7,9 +7,6 @@ export const appRoot = css`
   height: 100vh;
 `;
 
-export const homeStyle = css`
-`;
-
 export const sampleListStyle = css`
   padding: 50px 0;
   height: calc(100% - 100px);
@@ -127,8 +124,18 @@ export const UserListCategoryStyle = css`
   font-size: 16px;
   font-weight: 500;
   border-bottom: 1px solid black;
-  margin-bottom: 6px;
 `;
+
+export const DialogBodyStyle = css`
+  padding: 32px  20px;
+`
+
+export const DialogTextInputStyle = css`
+  width: calc(100% - 8px);
+  padding: 4px 4px;
+  margin-top: 14px;
+  border: 1px solid black;
+`
 
 export const DialogButtonContainer = css`
   display: flex;
@@ -152,6 +159,7 @@ export const userItemStyle = css`
     color: blueviolet;
   }
 `;
+
 export const createChannelDialogStyle = css`
   margin: 0 auto;
   border: solid 1px;

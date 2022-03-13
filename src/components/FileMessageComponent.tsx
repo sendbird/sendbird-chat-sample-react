@@ -9,7 +9,7 @@ import {
 } from "../styles/styles";
 import {useEffect, useState} from 'react';
 import {getReadReceipt} from '../sendbird-actions/channel-actions/GroupChannelActions';
-import {getCreatedAtFromNow, protectFromXSS} from '../utils/messageUtils';
+import {timestampToTime, protectFromXSS} from '../utils/messageUtils';
 
 const FileMessageComponent = (props: FileMessageProps) => {
   const {
@@ -25,10 +25,6 @@ const FileMessageComponent = (props: FileMessageProps) => {
       setUnreadCount(getReadReceipt(channel, message));
     }
   }, []);
-
-  const openLink = (messageUrl: string) => {
-    window.open(messageUrl);
-  }
 
   return (
     <div
@@ -54,7 +50,7 @@ const FileMessageComponent = (props: FileMessageProps) => {
         </a>
       </div>
       <div className={messageSentTimeStyle}>
-        {getCreatedAtFromNow(message.createdAt)}
+        {timestampToTime(message.createdAt)}
       </div>
       <div
         className={messageUnreadCountStyle}

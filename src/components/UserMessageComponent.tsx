@@ -8,8 +8,8 @@ import {
   messageSentTimeStyle,
   messageUnreadCountStyle
 } from "../styles/styles";
-import {getCreatedAtFromNow} from '../utils/messageUtils';
 import {getReadReceipt} from '../sendbird-actions/channel-actions/GroupChannelActions';
+import {timestampToTime} from '../utils/messageUtils';
 
 const UserMessageComponent = (props: UserMessageProps) => {
   const {
@@ -44,7 +44,7 @@ const UserMessageComponent = (props: UserMessageProps) => {
         {message.message}
       </div>
       <div className={messageSentTimeStyle}>
-        {getCreatedAtFromNow(message.createdAt)}
+        {timestampToTime(message.createdAt)}
       </div>
       <div
         className={messageUnreadCountStyle}

@@ -5,6 +5,7 @@ export const insertGroupChannelAt = (channels: GroupChannel[], channel: GroupCha
     let start = 0,
       end = channels.length - 1,
       pivot = Math.floor((start + end) / 2);
+
     while (start < end) {
       const compared = compareGroupChannelByOrder(channels[pivot], channel, order);
       if (compared > 0) {
@@ -41,9 +42,6 @@ export const compareGroupChannelByOrder = (channel1: GroupChannel, channel2: Gro
         }
         return compared;
       } else {
-        const lc1 = channel1.createdAt;
-        const lc2 = channel2.createdAt;
-        let compared = lc2 - lc1;
         return compared;
       }
     }
@@ -60,32 +58,24 @@ export const compareGroupChannelByOrder = (channel1: GroupChannel, channel2: Gro
 };
 
 export const upsertGroupChannels = (showingChannels: GroupChannel[], channelsToUpsert: GroupChannel[], order: string): GroupChannel[] => {
+  const channelsCopy: GroupChannel[] = [...showingChannels];
   for (let i = 0; i < channelsToUpsert.length; i++) {
     const channel = channelsToUpsert[i];
-    upsertGroupChannel(showingChannels, channel as GroupChannel, order);
+    upsertGroupChannel(channelsCopy, channel as GroupChannel, order);
   }
-  return showingChannels;
+  return channelsCopy;
 }
 
 export const upsertGroupChannel = (channels: GroupChannel[], channel: GroupChannel, order: string): void => {
   const showingChannelUrls = channels.map((channel: GroupChannel) => channel.url);
   const index = showingChannelUrls.indexOf(channel.url);
+  if (index >= 0) channels.splice(index, 1);
   let insertAt = insertGroupChannelAt(channels, channel, order);
-
-  if (index < 0) { // new channel
-    channels.splice(insertAt, 0, channel);
-  } else { // existing channel
-    if (insertAt === index) {
-      channels[insertAt] = channel;
-    } else {
-      channels.splice(index, 1);
-      if (index < insertAt) insertAt--;
-      channels.splice(insertAt, 0, channel);
-    }
-  }
+  channels.splice(insertAt, 0, channel);
 }
 
-export const deleteGroupChannels = (showingChannels: GroupChannel[], channelUrlsToDelete: string[]): GroupChannel[] => {
+export const deleteGroupChannels = (showingChannels: GroupChannel[], channelUrls: string[]): GroupChannel[] => {
+  const channelUrlsToDelete: string[] = [...channelUrls];
   let updatedChannelList: GroupChannel[] = [];
   const numChannels = showingChannels.length;
 

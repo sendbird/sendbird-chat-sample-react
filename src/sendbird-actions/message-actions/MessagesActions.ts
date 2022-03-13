@@ -5,30 +5,28 @@ import SendBird, {
   SendBirdInstance
 } from 'sendbird';
 
-export const getMessagesByTimestamp = async (
+export const getPreviousMessagesByTimestamp = async (
   channel: BaseChannel,
   ts: number = 0,
+  limit: number = 20,
 ): Promise<BaseMessageInstance[]> => {
   const sb: SendBirdInstance = SendBird.getInstance();
   const messageListParams: MessageListParams = new sb.MessageListParams();
-  messageListParams.isInclusive = true;
-  messageListParams.prevResultSize = 20;
-  messageListParams.nextResultSize = 20;
+  messageListParams.prevResultSize = limit;
 
   const messages: BaseMessageInstance[] = await channel.getMessagesByTimestamp(ts, messageListParams);
   return messages;
 }
 
-export const getMessagesByMessageId = async (
+export const getNextMessagesByTimestamp = async (
   channel: BaseChannel,
-  messageId: number,
+  ts: number = 0,
+  limit: number = 20,
 ): Promise<BaseMessageInstance[]> => {
   const sb: SendBirdInstance = SendBird.getInstance();
   const messageListParams: MessageListParams = new sb.MessageListParams();
-  messageListParams.isInclusive = true;
-  messageListParams.prevResultSize = 20;
-  messageListParams.nextResultSize = 20;
+  messageListParams.nextResultSize = limit;
 
-  const messages: BaseMessageInstance[] = await channel.getMessagesByMessageId(messageId, messageListParams);
+    const messages: BaseMessageInstance[] = await channel.getMessagesByTimestamp(ts, messageListParams);
   return messages;
 }

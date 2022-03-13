@@ -1,4 +1,6 @@
-export enum CHANNEL_TYPE {
-  GROUP,
-  OPEN,
-}
+export enum DialogState {
+  CREATE = 'CREATE',
+  INVITE = 'INVITE',
+  CLOSED = 'CLOSED',
+  UPDATE_CHANNEL_NAME = 'UPDATE_CHANNEL_NAME',
+};

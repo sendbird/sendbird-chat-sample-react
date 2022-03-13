@@ -47,6 +47,4 @@ const SampleListComponent = () => {
   );
 };
 
-type SampleListComponentProps = {};
-
 export default SampleListComponent;

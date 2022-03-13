@@ -1,44 +1,40 @@
-import {BaseMessageInstance, FileMessage, MessageCollection, UserMessage} from 'sendbird';
+import {BaseMessageInstance, MessageCollection} from 'sendbird';
 import {
   addLoadedNextMessagesToMessageList,
   addLoadedPreviousMessagesToMessageList,
-  addMessagesToMessageList,
+  addMessagesToMessageList, deleteMessagesByMessageIdFromMessageList,
   deleteMessagesFromMessageList, updateMessagesToMessageList,
-  upsertSentMessagesToMessageList
 } from '../utils/messageUtils';
+import {resetSampleAction, SampleActionKinds} from './sampleReducer';
 
 export enum MessageListActionKinds {
   SET_MESSAGES = 'SET_MESSAGES',
   ADD_MESSAGES = 'ADD_MESSAGES',
-  UPSERT_SENT_MESSAGES = 'UPSERT_SENT_MESSAGES',
   UPDATE_MESSAGES = 'UPDATE_MESSAGES',
   DELETE_MESSAGES = 'DELETE_MESSAGES',
+  DELETE_MESSAGES_BY_MESSAGE_ID = 'DELETE_MESSAGES_BY_MESSAGE_ID',
   ADD_PREVIOUS_MESSAGES = 'ADD_PREVIOUS_MESSAGES',
   ADD_NEXT_MESSAGES = 'ADD_NEXT_MESSAGES',
 }
 
 interface State {
+  channelUrl: string | null,
   messageList: BaseMessageInstance[],
   messageCollection: MessageCollection | null,
-  isInitialized: boolean,
 }
 
 interface setMessagesAction {
   type: MessageListActionKinds.SET_MESSAGES,
   payload: {
+    channelUrl: string,
     messages: BaseMessageInstance[],
-    messageCollection: MessageCollection,
+    messageCollection?: MessageCollection,
   }
 }
 
 interface addMessagesAction {
   type: MessageListActionKinds.ADD_MESSAGES,
   payload: BaseMessageInstance[],
-}
-
-interface upsertSentMessagesAction {
-  type: MessageListActionKinds.UPSERT_SENT_MESSAGES,
-  payload: (UserMessage | FileMessage)[],
 }
 
 interface updateMessagesAction {
@@ -49,6 +45,11 @@ interface updateMessagesAction {
 interface deleteMessagesAction {
   type: MessageListActionKinds.DELETE_MESSAGES,
   payload: BaseMessageInstance[],
+}
+
+interface deleteMessagesByMessageIdAction {
+  type: MessageListActionKinds.DELETE_MESSAGES_BY_MESSAGE_ID,
+  payload: number[],
 }
 
 interface addPreviousMessagesAction {
@@ -62,33 +63,31 @@ interface addNextMessagesAction {
 }
 
 
-type Action = setMessagesAction | addMessagesAction | upsertSentMessagesAction | updateMessagesAction
-  | deleteMessagesAction | addPreviousMessagesAction | addNextMessagesAction;
+type Action = resetSampleAction | setMessagesAction | addMessagesAction | updateMessagesAction | deleteMessagesAction
+  | deleteMessagesByMessageIdAction | addPreviousMessagesAction | addNextMessagesAction;
 
 const initialState: State = {
+  channelUrl: null,
   messageList: [],
   messageCollection: null,
-  isInitialized: false,
 };
 
 export const messageListReducer = (state: State = initialState, action: Action): State => {
   switch (action.type) {
+    case SampleActionKinds.RESET_SAMPLE:
+      if (state.messageCollection) state.messageCollection.dispose();
+      return initialState;
     case MessageListActionKinds.SET_MESSAGES:
       if (state.messageCollection) state.messageCollection.dispose();
       return {
+        channelUrl: action.payload.channelUrl,
         messageList: action.payload.messages,
-        messageCollection: action.payload.messageCollection,
-        isInitialized: true,
+        messageCollection: action.payload.messageCollection ?? null,
       };
     case MessageListActionKinds.ADD_MESSAGES:
       return {
         ...state,
         messageList: addMessagesToMessageList(state.messageList, action.payload),
-      };
-    case MessageListActionKinds.UPSERT_SENT_MESSAGES:
-      return {
-        ...state,
-        messageList: upsertSentMessagesToMessageList(state.messageList, action.payload),
       };
     case MessageListActionKinds.UPDATE_MESSAGES:
       return {
@@ -99,6 +98,11 @@ export const messageListReducer = (state: State = initialState, action: Action):
       return {
         ...state,
         messageList: deleteMessagesFromMessageList(state.messageList, action.payload),
+      };
+    case MessageListActionKinds.DELETE_MESSAGES_BY_MESSAGE_ID:
+      return {
+        ...state,
+        messageList: deleteMessagesByMessageIdFromMessageList(state.messageList, action.payload),
       };
     case MessageListActionKinds.ADD_PREVIOUS_MESSAGES:
       return {

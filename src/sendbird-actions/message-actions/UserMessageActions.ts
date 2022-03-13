@@ -1,17 +1,12 @@
 import SendBird, {
-  BaseChannel,
+  BaseChannel, messageCallback,
   SendBirdError,
   SendBirdInstance,
   UserMessage
 } from 'sendbird';
+import {MessageListActionKinds} from '../../reducers/messageListReducer';
 
-/**
- * Creates and returns a pending user message and then makes a send request to the server.
- * Sent message will be received by a handler.
- * @param channel base channel.
- * @param message pending user message.
- */
-export const sendUserMessage = (channel: BaseChannel, message: string): Promise<UserMessage> => {
+export const sendUserMessage = (channel: BaseChannel, message: string, callback?: () => void): Promise<UserMessage> => {
   const sb: SendBirdInstance = SendBird.getInstance();
   const userMessageParams = new sb.UserMessageParams();
   userMessageParams.message = message;
@@ -22,6 +17,19 @@ export const sendUserMessage = (channel: BaseChannel, message: string): Promise<
       resolve(message);
     });
   });
+}
+
+export const sendUserMessageWithCallback = (
+  channel: BaseChannel,
+  message: string,
+  callback: messageCallback<UserMessage>,
+): UserMessage => {
+  const sb: SendBirdInstance = SendBird.getInstance();
+  const userMessageParams = new sb.UserMessageParams();
+  userMessageParams.message = message;
+
+  const pendingMessage: UserMessage = channel.sendUserMessage(userMessageParams, callback);
+  return pendingMessage;
 }
 
 export const updateUserMessage = async (

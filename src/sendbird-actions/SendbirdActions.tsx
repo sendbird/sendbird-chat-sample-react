@@ -9,24 +9,30 @@ export const createSendbird = (localCacheEnabled: boolean = false) => {
   return sb;
 }
 
+/**
+ * Documentation: https://sendbird.com/docs/chat/v3/javascript/guides/logger#2-how-to-configure-the-log-level
+ * You can call this before/after creating SendBird instance.
+ */
+export const setErrorLogLevel = () => {
+  SendBird.setLogLevel(SendBird.LogLevel.ERROR);
+}
+
 export const connectSendbird = async (): Promise<User> => {
   const sb: SendBirdInstance = SendBird.getInstance();
-
-  await sb.connect(
+  return await sb.connect(
     SENDBIRD_USER_INFO.userId,
   );
+}
+
+export const setupDefaultSendbirdSettings = async (): Promise<User> => {
+  setErrorLogLevel();
+  const sb: SendBirdInstance = SendBird.getInstance();
+  // You only need to set this once.
+  await sb.setChannelInvitationPreference(true);
   const sendbirdUser: User = await sb.updateCurrentUserInfo(
     decodeURIComponent(SENDBIRD_USER_INFO.nickname), ''
   );
   return sendbirdUser;
-}
-
-export const setupDefaultSendbirdSettings = async (): Promise<void> => {
-  const sb: SendBirdInstance = SendBird.getInstance();
-
-  // sb.setErrorFirstCallback(true);
-  await sb.updateCurrentUserInfo(SENDBIRD_USER_INFO.nickname, '');
-  await sb.setChannelInvitationPreference(true);
 }
 
 export const getUserList = async () => {

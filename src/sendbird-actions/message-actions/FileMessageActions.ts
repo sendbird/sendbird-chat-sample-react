@@ -1,16 +1,10 @@
 import SendBird, {
   BaseChannel,
-  FileMessage,
+  FileMessage, messageCallback,
   SendBirdError,
-  SendBirdInstance
+  SendBirdInstance, UserMessage
 } from 'sendbird';
 
-/**
- * Creates and returns a pending file message and then makes a send request to the server.
- * Sent message will be received by a handler.
- * @param channel base channel.
- * @param message pending file message.
- */
 export const sendFileMessage = (channel: BaseChannel, file: Blob): Promise<FileMessage> => {
   const sb: SendBirdInstance = SendBird.getInstance();
   const fileMessageParams = new sb.FileMessageParams();
@@ -23,6 +17,19 @@ export const sendFileMessage = (channel: BaseChannel, file: Blob): Promise<FileM
       resolve(message as FileMessage);
     });
   });
+}
+
+export const sendFileMessageWithCallback = (
+  channel: BaseChannel,
+  file: Blob,
+  callback: messageCallback<FileMessage>,
+): FileMessage => {
+  const sb: SendBirdInstance = SendBird.getInstance();
+  const fileMessageParams = new sb.FileMessageParams();
+  fileMessageParams.file = file;
+  // @ts-ignore
+  const pendingMessage: FileMessage = channel.sendFileMessage(fileMessageParams, callback);
+  return pendingMessage;
 }
 
 export const updateFileMessage = async (
