@@ -5,19 +5,19 @@ import SendBird, {
 } from 'sendbird';
 import {useEffect, useState} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import InviteMembersDialogComponent from '../../../components/group-chat/InviteMembersDialogComponent';
-import GroupChatComponent from '../../../components/group-chat/GroupChatComponent';
-import GroupChannelListComponent from '../../../components/group-chat/GroupChannelListComponent';
+import InviteMembersDialogComponent from '../../components/group-chat/InviteMembersDialogComponent';
+import GroupChatComponent from '../../components/group-chat/GroupChatComponent';
+import GroupChannelListComponent from '../../components/group-chat/GroupChannelListComponent';
 import {
   createGroupChannel,
   inviteUserIdsToGroupChannel,
-} from '../../../sendbird-actions/channel-actions/GroupChannelActions';
-import {samplePageStyle} from '../../../styles/styles';
-import {ChannelActionKinds} from '../../../reducers/channelReducer';
-import {RootState} from '../../../reducers';
-import {MessageListActionKinds} from '../../../reducers/messageListReducer';
-import {DialogState} from '../../../constants/enums';
-import {SampleActionKinds} from '../../../reducers/sampleReducer';
+} from '../../sendbird-actions/channel-actions/GroupChannelActions';
+import {samplePageStyle} from '../../styles/styles';
+import {ChannelActionKinds} from '../../reducers/channelReducer';
+import {RootState} from '../../reducers';
+import {MessageListActionKinds} from '../../reducers/messageListReducer';
+import {DialogState} from '../../constants/enums';
+import {SampleActionKinds} from '../../reducers/sampleReducer';
 
 const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
   const {} = props;

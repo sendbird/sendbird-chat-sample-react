@@ -1,8 +1,8 @@
 import React, {useEffect, useState } from 'react';
 import './styles/styles';
 import { Routes, Route } from 'react-router-dom';
-import BasicGroupChannelSample from './samples/basic-samples/group-channel/BasicGroupChannelSample';
-import BasicOpenChannelSample from './samples/basic-samples/open-channel/BasicOpenChannelSample';
+import BasicGroupChannelSample from './samples/basic-samples/BasicGroupChannelSample';
+import BasicOpenChannelSample from './samples/basic-samples/BasicOpenChannelSample';
 import {
   connectSendbird,
   createSendbird,

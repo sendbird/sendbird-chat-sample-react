@@ -6,20 +6,20 @@ import SendBird, {
 } from 'sendbird';
 import {useEffect, useState} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {samplePageStyle} from '../../../styles/styles';
-import {ChannelActionKinds} from '../../../reducers/channelReducer';
-import {RootState} from '../../../reducers';
-import {MessageListActionKinds} from '../../../reducers/messageListReducer';
-import CreateOpenChannelDialogComponent from '../../../components/open-chat/CreateOpenChannelDialogComponent';
-import {DialogState} from '../../../constants/enums';
+import {samplePageStyle} from '../../styles/styles';
+import {ChannelActionKinds} from '../../reducers/channelReducer';
+import {RootState} from '../../reducers';
+import {MessageListActionKinds} from '../../reducers/messageListReducer';
+import CreateOpenChannelDialogComponent from '../../components/open-chat/CreateOpenChannelDialogComponent';
+import {DialogState} from '../../constants/enums';
 import {
   createOpenChannel, enterOpenChannel,
   updateOpenChannelName
-} from '../../../sendbird-actions/channel-actions/OpenChannelActions';
-import OpenChannelListComponent from '../../../components/open-chat/OpenChannelListComponent';
-import OpenChatComponent from '../../../components/open-chat/OpenChatComponent';
-import {OpenChannelListActionKinds} from '../../../reducers/openChannelListReducer';
-import {SampleActionKinds} from '../../../reducers/sampleReducer';
+} from '../../sendbird-actions/channel-actions/OpenChannelActions';
+import OpenChannelListComponent from '../../components/open-chat/OpenChannelListComponent';
+import OpenChatComponent from '../../components/open-chat/OpenChatComponent';
+import {OpenChannelListActionKinds} from '../../reducers/openChannelListReducer';
+import {SampleActionKinds} from '../../reducers/sampleReducer';
 import { v4 as uuid } from 'uuid';
 
 const BasicOpenChannelSample = (props: BasicGroupChannelSampleProps) => {
