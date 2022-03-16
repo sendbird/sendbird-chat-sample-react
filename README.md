@@ -4,7 +4,7 @@ This repository provides feature-level Chat samples with React.
 
 ## 🚀 Get started
 
-You must use [NodeJS](https://nodejs.org/en/) to build these sample apps. Node version >16 is required. Please download [here](https://nodejs.org/en/).
+You must use [NodeJS](https://nodejs.org/en/) to build these sample apps. Node version >16 is required.
 
 ### Running the App
 
@@ -82,7 +82,7 @@ When working on a feature sample, you may find yourself needing to either:
 
 Generally, **option 1 is highly recommended** because it uses the existing code. If existing components is not implemented in a way to make composition possible, feel free to edit them to make composition possible.
 
-Depending on cases, if you think option 2 or 3 is a better option, you can think of them as exceptional cases and therefore feel free to go with these options as needed.
+Depending on cases, if you think option 2 or 3 is necessary (or combine with option 1), feel free to use them.
 
 ## Project Specifications
 
