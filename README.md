@@ -86,7 +86,7 @@ Depending on cases, if you think option 2 or 3 is necessary (or combine with opt
 
 ## Project Specifications
 
-- Language used: TypeScript
+- Language: TypeScript
 - Data management: React Hook (functional component)
 - Data storage: Redux
 - Style library: [Emotion](https://emotion.sh/docs/introduction)
