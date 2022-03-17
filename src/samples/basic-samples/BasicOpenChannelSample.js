@@ -105,11 +105,10 @@ const BasicOpenChannelSample = (props) => {
         }
     }
 
-    const deleteMessage = async (messageToDelete) => {
-        const { currentlyJoinedChannel } = state;
-
-        await currentlyJoinedChannel.deleteMessage(messageToDelete);
-        const updatedMessages = state.messages.filter((message) => {
+    const handleDeleteMessage = async (messageToDelete) => {
+        const { currentlyJoinedChannel, messages } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete);
+        const updatedMessages = messages.filter((message) => {
             return message.messageId !== messageToDelete.messageId;
         });
         updateState({ ...state, messages: updatedMessages });
@@ -164,7 +163,7 @@ const BasicOpenChannelSample = (props) => {
                 <MembersList />
                 <MessagesList
                     messages={state.messages}
-                    deleteMessage={deleteMessage}
+                    handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
                 <MessageInput
@@ -226,13 +225,14 @@ const MembersList = () => {
 
 }
 
-const MessagesList = ({ messages, deleteMessage, updateMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return messages.map(message => {
-        return <div class="message-item">
-            <Message message={message} />
-            <button onClick={() => updateMessage(message)}>update</button>
-            <button onClick={() => deleteMessage(message)}>delete</button>
-        </div>;
+        return (
+            <div class="message-item">
+                <Message message={message} />
+                <button onClick={() => updateMessage(message)}>update</button>
+                <button onClick={() => handleDeleteMessage(message)}>delete</button>
+            </div>);
     })
 }
 
@@ -337,5 +337,8 @@ const updateChannel = async (currentlyUpdatingChannel, channelNameUpdateValue) =
     await channel.updateChannel(openChannelParams);
 }
 
+const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
+    await currentlyJoinedChannel.deleteMessage(messageToDelete);
+}
 
 export default BasicOpenChannelSample;

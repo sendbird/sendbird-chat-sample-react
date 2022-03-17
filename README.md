@@ -1,11 +1,5 @@
 # SendBird Chat SDK sample for React
 
-## Specifications
-- Language: TypeScript
-- Data management: React Hook (functional component)
-- Data storage: Redux
-- Style: [Emotion](https://emotion.sh/docs/introduction)
-
 ## Requirement
 
 Node version >16 is required. Download [here](https://nodejs.org/en/).
