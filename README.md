@@ -59,31 +59,6 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 - **styles**: Contains styles being used in components.
 - **utils**: Contains utility functions.
 
-## Feature Samples
-
-### Naming Convention
-
-- GroupChannelFeatureASample.tsx, GroupChannelFeatureBSample.tsx, ..., GroupChannelFeatureNSample.tsx.
-- OpenChannelFeatureASample.tsx, OpenChannelFeatureBSample.tsx, ..., OpenChannelFeatureNSample.tsx.
-
-### Creating a new feature sample
-
-You can copy BasicGroupChannelSample.tsx or BasicOpenChannelSample.tsx file and rename it to use most of the basic features that is required for the feature sample. And then add to **App.tsx** a new route.
-
-```
-<Route path='/feature-samples' element={<GroupChannelFeatureASample/>} />
-```
-
-When working on a feature sample, you may find yourself needing to either:
-
-- **Option 1**: Create a new component with [composition](https://reactjs.org/docs/composition-vs-inheritance.html).
-- **Option 2**: Add optional props and functions to an existing component.
-- **Option 3**: Copy an existing component to create a new component with new features.
-
-Generally, **option 1 is highly recommended** because it uses the existing code. If existing components is not implemented in a way to make composition possible, feel free to edit them to make composition possible.
-
-Depending on cases, if you think option 2 or 3 is necessary (or combine with option 1), feel free to use them.
-
 ## Project Specifications
 
 - Language: TypeScript
