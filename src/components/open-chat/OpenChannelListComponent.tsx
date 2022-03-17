@@ -11,7 +11,7 @@ import {
 import {deleteOpenChannel} from '../../sendbird-actions/channel-actions/OpenChannelActions';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../reducers';
-import ChannelListCategoryComponent from '../ChannelListCategoryComponent';
+import OpenChannelListCategoryComponent from './OpenChannelListCategoryComponent';
 import {OpenChannelListActionKinds} from '../../reducers/openChannelListReducer';
 
 type OpenChannelListItemProps = {
@@ -59,6 +59,7 @@ const OpenChannelListItemComponent = (props: OpenChannelListItemProps) => {
 const OpenChannelListComponent = (props: OpenChannelListProps) => {
   const {
     openCreateChannelDialog,
+    openOpenChannelListDialog,
     currentChannel,
     setCurrentChannel,
     deleteCurrentChannel,
@@ -81,7 +82,11 @@ const OpenChannelListComponent = (props: OpenChannelListProps) => {
 
   return (
     <div className={channelListStyle}>
-      <ChannelListCategoryComponent openDialog={openCreateChannelDialog} categoryName='Open Channel'/>
+      <OpenChannelListCategoryComponent
+        openCreateChannelDialog={openCreateChannelDialog}
+        openOpenChannelListDialog={openOpenChannelListDialog}
+        categoryName='Open Channel'
+      />
       {
         openChannelList.map((channel: OpenChannel, i: number) => {
           return (
@@ -102,6 +107,7 @@ const OpenChannelListComponent = (props: OpenChannelListProps) => {
 
 interface OpenChannelListProps {
   openCreateChannelDialog: () => void;
+  openOpenChannelListDialog: () => void;
   currentChannel: OpenChannel | null;
   setCurrentChannel: (channel: OpenChannel | null) => void;
   deleteCurrentChannel: (deletedChannelUrl: string) => void;

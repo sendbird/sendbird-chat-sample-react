@@ -1,5 +1,5 @@
 import SendBird, {
-  OpenChannel,
+  OpenChannel, OpenChannelListQuery,
   SendBirdInstance,
 } from 'sendbird';
 
@@ -44,10 +44,10 @@ export const exitOpenChannel = async (channel: OpenChannel): Promise<null> => {
   return await channel.exit();
 }
 
-export const getMyOpenChannels = (limit: number = 20, isInit: boolean = false, urlKeyword: string = ''): Promise<OpenChannel[]> => {
+export const createOpenChannelListQuery = (limit: number = 20, urlKeyword: string = ''): OpenChannelListQuery => {
   const sb: SendBirdInstance = SendBird.getInstance();
-  const openChannelQuery = sb.OpenChannel.createOpenChannelListQuery();
+  const openChannelQuery: OpenChannelListQuery = sb.OpenChannel.createOpenChannelListQuery();
   openChannelQuery.limit = limit;
   openChannelQuery.urlKeyword = urlKeyword;
-  return openChannelQuery.next();
+  return openChannelQuery;
 }

@@ -1,11 +1,14 @@
 import SendBird, {
   AdminMessage,
-  ChannelHandler, FileMessage,
+  ChannelHandler,
+  FileMessage,
   OpenChannel,
-  SendBirdInstance, User, UserMessage,
+  SendBirdInstance,
+  User,
+  UserMessage,
 } from 'sendbird';
 import {useEffect, useState} from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {samplePageStyle} from '../../styles/styles';
 import {ChannelActionKinds} from '../../reducers/channelReducer';
 import {RootState} from '../../reducers';
@@ -20,7 +23,8 @@ import OpenChannelListComponent from '../../components/open-chat/OpenChannelList
 import OpenChatComponent from '../../components/open-chat/OpenChatComponent';
 import {OpenChannelListActionKinds} from '../../reducers/openChannelListReducer';
 import {SampleActionKinds} from '../../reducers/sampleReducer';
-import { v4 as uuid } from 'uuid';
+import {v4 as uuid} from 'uuid';
+import OpenChannelListDialogComponent from '../../components/open-chat/OpenChannelListDialogComponent';
 
 const BasicOpenChannelSample = (props: BasicGroupChannelSampleProps) => {
   const {} = props;
@@ -172,6 +176,19 @@ const BasicOpenChannelSample = (props: BasicGroupChannelSampleProps) => {
     }
   }
 
+  const enterSelectedOpenChannel = async (openChannel: OpenChannel) => {
+    try {
+      await enterOpenChannel(openChannel);
+      dispatch({
+        type: OpenChannelListActionKinds.UPSERT_OPEN_CHANNEL,
+        payload: openChannel,
+      });
+      setCurrentChannel(openChannel);
+    } catch (e) {
+      alert('Enter open channel error: ' + e);
+    }
+  }
+
   const updateChannelName = async (channel: OpenChannel, channelName: string) => {
     try {
       const openChannel: OpenChannel = await updateOpenChannelName(channel, channelName);
@@ -194,21 +211,44 @@ const BasicOpenChannelSample = (props: BasicGroupChannelSampleProps) => {
     setIsLoading(false);
   }
 
-  return (
-    isSampleReset
-      ? <div className={samplePageStyle}>
-        { dialogState !== DialogState.CLOSED
-          ? <CreateOpenChannelDialogComponent
+  const openOpenChannelListDialog = () => {
+    setDialogState(DialogState.OPEN_CHANNEL_LIST);
+  }
+
+  const getDialogComponent = () => {
+    switch (dialogState) {
+      case DialogState.CREATE:
+      case DialogState.UPDATE_CHANNEL_NAME:
+        return (
+          <CreateOpenChannelDialogComponent
             dialogState={dialogState}
             currentChannel={channelReducerState.channel as OpenChannel}
             createChannel={createChannel}
             closeDialog={closeDialog}
             updateChannelName={updateChannelName}
           />
-          : null
-        }
+        )
+      case DialogState.OPEN_CHANNEL_LIST:
+        return (
+          <OpenChannelListDialogComponent
+            dialogState={dialogState}
+            closeDialog={closeDialog}
+            enterOpenChannel={enterSelectedOpenChannel}
+          />
+        )
+      default:
+        return null;
+    }
+    closeDialog();
+  }
+
+  return (
+    isSampleReset
+      ? <div className={samplePageStyle}>
+        {getDialogComponent()}
         <OpenChannelListComponent
           openCreateChannelDialog={openCreateChannelDialog}
+          openOpenChannelListDialog={openOpenChannelListDialog}
           setCurrentChannel={setCurrentChannel}
           currentChannel={channelReducerState.channel as OpenChannel}
           deleteCurrentChannel={deleteCurrentChannel}

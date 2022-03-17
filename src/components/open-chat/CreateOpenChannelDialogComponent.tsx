@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {
-  createChannelDialogStyle, DialogBodyStyle,
+  DialogStyle, DialogBodyStyle,
   DialogButtonContainer, DialogTextInputStyle,
-  UserListCategoryStyle,
+  DialogItemListCategoryStyle,
 } from '../../styles/styles';
 import {DialogState} from '../../constants/enums';
 import {OpenChannel} from 'sendbird';
@@ -45,8 +45,8 @@ const CreateChannelDialogComponent = (props: CreateChannelDialogProps) => {
   }
 
   return (
-    <div className={createChannelDialogStyle}>
-      <div className={UserListCategoryStyle}>
+    <div className={DialogStyle}>
+      <div className={DialogItemListCategoryStyle}>
         Create Open Channel
       </div>
       <div className={DialogBodyStyle}>

@@ -1,4 +1,4 @@
-import {channelListCategoryStyle, smallButtonStyle} from '../styles/styles';
+import {channelListCategoryStyle, smallButtonStyle} from '../../styles/styles';
 
 const ChannelListCategoryComponent = (props: ChannelListCategoryProps) => {
   const {

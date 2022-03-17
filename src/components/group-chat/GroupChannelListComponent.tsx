@@ -15,7 +15,8 @@ import {GroupChannelListActionKinds} from '../../reducers/groupChannelListReduce
 import {getGroupChannelTitle} from '../../utils/channelUtils';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../reducers';
-import ChannelListCategoryComponent from '../ChannelListCategoryComponent';
+import OpenChannelListCategoryComponent from '../open-chat/OpenChannelListCategoryComponent';
+import GroupChannelListCategoryComponent from './GroupChannelListCategoryComponent';
 
 type GroupChannelListItemProps = {
   channel: GroupChannel,
@@ -137,7 +138,10 @@ const GroupChannelListComponent = (props: GroupChannelListProps) => {
 
   return (
     <div className={channelListStyle}>
-      <ChannelListCategoryComponent openDialog={openCreateChannelDialog} categoryName='Group Channel'/>
+      <GroupChannelListCategoryComponent
+        categoryName='Group Channel'
+        openDialog={openCreateChannelDialog}
+      />
       {
         groupChannelList.map((channel: GroupChannel, i: number) => {
           return (

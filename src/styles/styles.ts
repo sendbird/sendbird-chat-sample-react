@@ -117,7 +117,7 @@ export const MemberListCategoryStyle = css`
   margin-bottom: 6px;
 `;
 
-export const UserListCategoryStyle = css`
+export const DialogItemListCategoryStyle = css`
   text-align: left;
   width: calc(100% - 40px);
   padding: 14px  20px;
@@ -145,13 +145,13 @@ export const DialogButtonContainer = css`
   justify-content: center;
 `;
 
-export const UserListStyle = css`
+export const DialogItemListStyle = css`
   text-align: left;
   max-height: 400px;
   overflow-y: auto;
 `;
 
-export const userItemStyle = css`
+export const DialogItemStyle = css`
   padding: 6px 20px;
   max-width: 180px;
   &:hover {
@@ -160,7 +160,7 @@ export const userItemStyle = css`
   }
 `;
 
-export const createChannelDialogStyle = css`
+export const DialogStyle = css`
   margin: 0 auto;
   border: solid 1px;
   position: absolute;

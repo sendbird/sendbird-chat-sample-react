@@ -2,9 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {SendBirdError, User} from 'sendbird';
 import {getUserList} from '../../sendbird-actions/SendbirdActions';
 import {
-  createChannelDialogStyle, DialogButtonContainer,
-  userItemStyle,
-  UserListCategoryStyle, UserListStyle
+  DialogStyle, DialogButtonContainer,
+  DialogItemStyle,
+  DialogItemListCategoryStyle, DialogItemListStyle
 } from '../../styles/styles';
 import {DialogState} from '../../constants/enums';
 
@@ -24,7 +24,7 @@ const UserItemComponent = (props: UserItemProps) => {
   return (
     <div
       style={{ color: isSelected ? 'green' : 'black' }}
-      className={userItemStyle}
+      className={DialogItemStyle}
       onClick={() => onUserSelect(userId)}
     >
       {userId}
@@ -81,11 +81,11 @@ const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
   return (
     loading
       ? null
-      : <div className={createChannelDialogStyle}>
-        <div className={UserListCategoryStyle}>
+      : <div className={DialogStyle}>
+        <div className={DialogItemListCategoryStyle}>
           User List
         </div>
-      <div className={UserListStyle}>
+      <div className={DialogItemListStyle}>
         {userList.map((user: User, i: number) => (
           <UserItemComponent
             userId={user.userId}
