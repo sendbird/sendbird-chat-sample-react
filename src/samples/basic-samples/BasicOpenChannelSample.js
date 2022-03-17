@@ -10,9 +10,11 @@ const BasicOpenChannelSample = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
+        currentlyUpdatingChannel: null,
         messages: [],
         channels: [],
         messageInputValue: "",
+        channelNameUpdateValue: "",
         file: null,
         messageToUpdate: null,
         loading: true,
@@ -25,46 +27,43 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, channels: channels, loading: false })
     }
 
-    const joinChannel = async (channelUrl) => {
-        // enter channel
+    const handleJoinChannel = async (channelUrl) => {
         updateState({ ...state, loading: true })
-
-        const channel = await sb.OpenChannel.getChannel(channelUrl);
-        await channel.enter();
-
-        //list all messages
-        const messageListParams = new sb.MessageListParams();
-        messageListParams.nextResultSize = 20;
-        const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-
-        //listen for incoming messages
-        const channelHandler = new sb.ChannelHandler();
-
-        channelHandler.onMessageReceived = function (channel, message) {
-            console.log('received message')
-        };
-
-        sb.addChannelHandler("blah-key", channelHandler);
-
+        const { messages, channel } = await joinChannel(channelUrl);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
-    const createChannel = async (channelName = "testChannel") => {
-        const openChannelParams = new sb.OpenChannelParams();
-        openChannelParams.name = channelName;
-        openChannelParams.operatorUserIds = [sb.currentUser.userId];
-        const openChannel = await sb.OpenChannel.createChannel(openChannelParams);
-        const updatedChannels = [openChannel, ...state.channels]
+    const handleCreateChannel = async (channelName = "testChannel") => {
+        const openChannel = await createChannel(channelName);
+        const updatedChannels = [openChannel, ...state.channels];
         updateState({ ...state, channels: updatedChannels });
     }
 
-    const deleteChannel = async (channelUrl) => {
-        const channel = await sb.OpenChannel.getChannel(channelUrl);
-        await channel.delete();
+    const handleDeleteChannel = async (channelUrl) => {
+        const channel = await deleteChannel(channelUrl);
         const updatedChannels = state.channels.filter((channel) => {
             return channel.url !== channelUrl;
         });
         updateState({ ...state, channels: updatedChannels });
+    }
+
+    const handleUpdateChannel = async () => {
+        const { currentlyUpdatingChannel, channelNameUpdateValue } = state;
+        await updateChannel(currentlyUpdatingChannel, channelNameUpdateValue);
+    }
+
+    const toggleChannelDetails = (channel) => {
+        if (channel) {
+            updateState({ ...state, currentlyUpdatingChannel: channel });
+        } else {
+            updateState({ ...state, currentlyUpdatingChannel: null });
+
+        }
+    }
+
+    const onChannelNamenputChange = (e) => {
+        const channelNameUpdateValue = e.currentTarget.value;
+        updateState({ ...state, channelNameUpdateValue });
     }
 
     const onMessageInputChange = (e) => {
@@ -92,13 +91,13 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const sendFileMessage = async () => {
-        const { currentlyJoinedChannel, file } = state;
+        const { currentlyJoinedChannel, file, messages } = state;
 
         const fileMessageParams = new sb.FileMessageParams();
         fileMessageParams.file = file;
-        // @ts-ignore
-        currentlyJoinedChannel.sendFileMessage(fileMessageParams, () => {
-            console.log('worked')
+        currentlyJoinedChannel.sendFileMessage(fileMessageParams, (message) => {
+            const updatedMessages = [...messages, message];
+            updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
         });
     }
 
@@ -154,10 +153,15 @@ const BasicOpenChannelSample = (props) => {
         <>
             <ChannelList
                 channels={state.channels}
-                joinChannel={joinChannel}
-                createChannel={createChannel}
-                deleteChannel={deleteChannel} />
-            <CreateChannelPopup />
+                toggleChannelDetails={toggleChannelDetails}
+                handleJoinChannel={handleJoinChannel}
+                handleCreateChannel={handleCreateChannel}
+                handleDeleteChannel={handleDeleteChannel} />
+            <ChannelDetails
+                currentlyUpdatingChannel={state.currentlyUpdatingChannel}
+                handleUpdateChannel={handleUpdateChannel}
+                onChannelNamenputChange={onChannelNamenputChange}
+                toggleChannelDetails={toggleChannelDetails} />
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
                 <MembersList />
                 <MessagesList
@@ -170,27 +174,37 @@ const BasicOpenChannelSample = (props) => {
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
                     sendFileMessage={sendFileMessage}
+                    fileSelected={state.file}
                     onFileInputChange={onFileInputChange} />
             </Channel>
         </>
     );
 };
 
-const ChannelList = ({ channels, joinChannel, createChannel, deleteChannel }) => {
+
+const ChannelList = ({ channels, handleJoinChannel, handleCreateChannel, handleDeleteChannel, toggleChannelDetails }) => {
     return (
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Open Channels</h1>
-                <button onClick={() => createChannel("name")}>Create</button>
+                <button onClick={() => handleCreateChannel("name")}>Create</button>
             </div>
             {channels.map(channel => {
-                return <div className="channel-list-item" onClick={() => { joinChannel(channel.url) }}>
-                    <div>{channel.name}</div>
-                    <button onClick={() => deleteChannel(channel.url)}>delete</button>
-                </div>;
+                return (
+                    <div className="channel-list-item" >
+                        <div class="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
+                        </div>
+                        <div>
+                            <button onClick={() => toggleChannelDetails(channel)}>update</button>
+                            <button onClick={() => handleDeleteChannel(channel.url)}>delete</button>
+                        </div>
+                    </div>);
             })}
         </div >);
 }
+
 
 const Channel = ({ currentlyJoinedChannel, children }) => {
     if (currentlyJoinedChannel) {
@@ -218,8 +232,8 @@ const MessagesList = ({ messages, deleteMessage, updateMessage }) => {
     return messages.map(message => {
         return <div class="message-item">
             <Message message={message} />
-            <button onClick={() => deleteMessage(message)}>delete</button>
             <button onClick={() => updateMessage(message)}>update</button>
+            <button onClick={() => deleteMessage(message)}>delete</button>
         </div>;
     })
 }
@@ -240,7 +254,7 @@ const Message = (message) => {
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInputChange }) => {
+const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInputChange, fileSelected }) => {
     return (
         <div class="message-input">
             <input
@@ -249,21 +263,80 @@ const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInp
                 onChange={onChange} />
 
             <div class="message-input-buttons">
-                <button onClick={sendMessage}>Send</button>
-                <button onClick={sendFileMessage}>Send File</button>
-
+                <button onClick={sendMessage}>Send Message</button>
                 <input
                     type='file'
                     onChange={onFileInputChange}
                     onClick={() => { }}
                 />
+                <button onClick={sendFileMessage} disabled={!fileSelected}>Send File</button>
+
             </div>
+
         </div>);
 }
 
-const CreateChannelPopup = () => {
-    return "";
+const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handleUpdateChannel, onChannelNamenputChange }) => {
+    if (currentlyUpdatingChannel) {
+        return <div className="details-overlay">
+            <div className="details-content">
+                <div>
+                    <h3>Channel Details</h3>
+                    <button onClick={() => toggleChannelDetails(null)}>Close</button>
+                </div>
+                Name
+                <input onChange={onChannelNamenputChange} />
+                <button onClick={() => handleUpdateChannel()}>Update channel name</button>
+            </div>
+        </div >;
+    }
+    return null;
+}
 
+const joinChannel = async (channelUrl) => {
+
+    const channel = await sb.OpenChannel.getChannel(channelUrl);
+    await channel.enter();
+
+    //list all messages
+    const messageListParams = new sb.MessageListParams();
+    messageListParams.nextResultSize = 20;
+    const messages = await channel.getMessagesByTimestamp(0, messageListParams);
+
+    //listen for incoming messages
+    const channelHandler = new sb.ChannelHandler();
+
+    channelHandler.onMessageReceived = function (channel, message) {
+        console.log('received message')
+    };
+
+    sb.addChannelHandler("blah-key", channelHandler);
+    return { channel, messages };
+
+}
+
+const createChannel = async (channelName) => {
+    const openChannelParams = new sb.OpenChannelParams();
+    openChannelParams.name = channelName;
+    openChannelParams.operatorUserIds = [sb.currentUser.userId];
+    const openChannel = await sb.OpenChannel.createChannel(openChannelParams);
+    return openChannel;
+}
+
+const deleteChannel = async (channelUrl) => {
+    const channel = await sb.OpenChannel.getChannel(channelUrl);
+    await channel.delete();
+    return channel;
+}
+
+const updateChannel = async (currentlyUpdatingChannel, channelNameUpdateValue) => {
+    const channel = await sb.OpenChannel.getChannel(currentlyUpdatingChannel.url);
+    const openChannelParams = new sb.OpenChannelParams();
+    openChannelParams.name = channelNameUpdateValue;
+
+    openChannelParams.operatorUserIds = [sb.currentUser.userId];
+
+    await channel.updateChannel(openChannelParams);
 }
 
 
