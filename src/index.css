@@ -1,3 +1,7 @@
+html, body, #root, #root>div {
+  height: 100%
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -7,6 +11,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+img{
+  width:300px;
+}
+
+input{
+  width: 50%;
+  padding: 6px;
+  border: 1px solid #f2f2f2;
+}
+
+
 p {
   margin: 0;
 }
@@ -14,4 +29,69 @@ p {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+.container{
+  height:100%;
+  background:white;
+  display: flex;
+}
+
+.channel-type{
+  padding: 12px;
+  color: #6210CC;
+}
+
+.channel-list {
+  background: white;
+  flex:1;
+  border-right: 1px solid #f2f2f2;
+  overflow-y: scroll;
+}
+
+.channel-list-item{
+  background: #fcfcfc;
+  padding:12px;
+  border-top: 1px solid #f2f2f2;
+  display:flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.channel{
+  background: white;
+  flex: 3 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  margin-bottom: 60px;
+}
+
+.message-item{
+  background: #f6f6f6;
+  padding: 12px;
+  margin: 12px;
+  border-radius: 18px;
+}
+
+.message{
+  padding:12px 0px;
+}
+
+.message-sender-name{
+  font-weight: 600;
+}
+
+.channel-header{
+  padding: 12px;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.message-input{
+  position: fixed;
+  bottom: 0px;
+  display: flex;
+  border-top: 1px solid #f2f2f2;
+  width: 100%;
+  padding: 12px;
 }

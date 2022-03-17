@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './styles/styles';
 import { Routes, Route } from 'react-router-dom';
 import BasicGroupChannelSample from './samples/basic-samples/BasicGroupChannelSample';
@@ -8,8 +8,8 @@ import {
   createSendbird,
   setupDefaultSendbirdSettings
 } from './sendbird-actions/SendbirdActions';
-import {SendBirdError, User} from 'sendbird';
-import {appRoot} from './styles/styles';
+import { SendBirdError, User } from 'sendbird';
+import { appRoot } from './styles/styles';
 import SampleListComponent from './components/SampleListComponent';
 
 const Home = () => {
@@ -41,13 +41,12 @@ const App = () => {
   return (
     loading
       ? null
-      : <div className={appRoot}>
-        <SampleListComponent/>
-          <Routes>
-            <Route path='/' element={<Home/>} />
-            <Route path='/basic-samples/group-channel' element={<BasicGroupChannelSample/>} />
-            <Route path='/basic-samples/open-channel' element={<BasicOpenChannelSample/>} />
-          </Routes>
+      : <div className="container">
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/basic-samples/group-channel' element={<BasicGroupChannelSample />} />
+          <Route path='/basic-samples/open-channel' element={<BasicOpenChannelSample />} />
+        </Routes>
       </div>
   );
 }
