@@ -1,6 +1,4 @@
-import SendBird, {
-    OpenChannel,
-} from 'sendbird';
+import SendBird from 'sendbird';
 import { useEffect, useState } from 'react';
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
 
