@@ -1,7 +1,12 @@
 import SendBird from 'sendbird';
 import { useEffect, useState } from 'react';
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
+import SendbirdChat from '../../out/sendbird.js';
+import { OpenChannelModule } from '../../out/module/openChannel.js';
+import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
+console.log(OpenChannelModule);
 
+// console.log("updated")
 let sb;
 
 const BasicOpenChannelSample = (props) => {
@@ -19,8 +24,9 @@ const BasicOpenChannelSample = (props) => {
     });
 
 
-    const loadChannels = async (sendbird) => {
-        const openChannelQuery = sendbird.OpenChannel.createOpenChannelListQuery();
+    const loadChannels = async () => {
+        // console.log(sb.openChannel.createOpenChannelListQuery);
+        const openChannelQuery = sb.OpenChannel.createOpenChannelListQuery();
         const channels = await openChannelQuery.next();
         updateState({ ...state, channels: channels, loading: false })
     }
@@ -121,6 +127,25 @@ const BasicOpenChannelSample = (props) => {
 
     useEffect(() => {
         const setup = async () => {
+            // const sendbirdChat = await SendbirdChat.init({
+            //     appId: SENDBIRD_USER_INFO.appId,
+            //     modules: [new OpenChannelModule()]
+            // });
+            // console.log();
+            // const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
+            // userUpdateParams.nickname = SENDBIRD_USER_INFO.nickname;
+            // await sendbirdChat.connect(SENDBIRD_USER_INFO.userId);
+            // await sendbirdChat.setChannelInvitationPreference(true);
+
+            // const sendbirdUser2 = await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+            // sb = sendbirdChat;
+
+            // loadChannels();
+
+
+
+
+
             const sendbird = new SendBird({
                 appId: SENDBIRD_USER_INFO.appId,
                 localCacheEnabled: false
@@ -132,9 +157,9 @@ const BasicOpenChannelSample = (props) => {
             const sendbirdUser = await sendbird.updateCurrentUserInfo(
                 decodeURIComponent(SENDBIRD_USER_INFO.nickname), ''
             );
-
-            loadChannels(sendbird);
             sb = sendbird;
+
+            loadChannels();
         }
         setup();
     }, []);

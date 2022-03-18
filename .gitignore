@@ -25,4 +25,5 @@ yarn-error.log*
 # build files
 yarn.lock
 package-lock.json
+src/out
 
