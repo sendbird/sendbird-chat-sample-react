@@ -139,7 +139,7 @@ const GroupChannelListComponent = (props: GroupChannelListProps) => {
   return (
     <div className={channelListStyle}>
       <GroupChannelListCategoryComponent
-        categoryName='Group Channel'
+        categoryName='Group Channels'
         openDialog={openCreateChannelDialog}
       />
       {

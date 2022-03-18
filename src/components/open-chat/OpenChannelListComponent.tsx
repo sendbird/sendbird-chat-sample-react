@@ -85,7 +85,7 @@ const OpenChannelListComponent = (props: OpenChannelListProps) => {
       <OpenChannelListCategoryComponent
         openCreateChannelDialog={openCreateChannelDialog}
         openOpenChannelListDialog={openOpenChannelListDialog}
-        categoryName='Open Channel'
+        categoryName='Open Channels'
       />
       {
         openChannelList.map((channel: OpenChannel, i: number) => {
