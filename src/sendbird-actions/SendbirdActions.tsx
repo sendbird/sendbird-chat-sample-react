@@ -1,4 +1,4 @@
-import SendBird, {SendBirdInstance, User} from 'sendbird';
+import SendBird, {ApplicationUserListQuery, SendBirdInstance, User} from 'sendbird';
 import {SENDBIRD_USER_INFO} from '../constants/constants';
 
 export const createSendbird = (localCacheEnabled: boolean = false) => {
@@ -35,15 +35,10 @@ export const setupDefaultSendbirdSettings = async (): Promise<User> => {
   return sendbirdUser;
 }
 
-export const getUserList = async () => {
+export const createUserListQuery = (limit: number = 15): ApplicationUserListQuery => {
   const sb: SendBirdInstance = SendBird.getInstance();
 
   const userQuery = sb.createApplicationUserListQuery();
-  userQuery.limit = 15;
-
-  let users: User[] = [];
-  if (userQuery.hasNext && !userQuery.isLoading) {
-    users = await userQuery.next();
-  }
-  return users;
+  userQuery.limit = limit;
+  return userQuery;
 }

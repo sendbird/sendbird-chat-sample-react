@@ -114,8 +114,6 @@ const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
       setCurrentChannel(groupChannel);
     } catch (e) {
       alert('Create group channel error: ' + e);
-    } finally {
-      setDialogState(DialogState.CLOSED);
     }
   }
 
@@ -123,7 +121,6 @@ const BasicGroupChannelSample = (props: BasicGroupChannelSampleProps) => {
     try {
       const groupChannel: GroupChannel = await inviteUserIdsToGroupChannel(currentChannel as GroupChannel,
         userIdsToInvite);
-      setDialogState(DialogState.CLOSED);
       setCurrentChannel(groupChannel);
     } catch (e) {
       alert('Invite userIds to group channel error: ' + e);

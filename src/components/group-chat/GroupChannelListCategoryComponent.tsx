@@ -1,4 +1,9 @@
-import {channelListCategoryStyle, smallButtonStyle} from '../../styles/styles';
+import {
+  channelListCategoryButtonContainerStyle,
+  channelListCategoryStyle,
+  messageButtonStyle,
+  smallButtonStyle
+} from '../../styles/styles';
 
 const ChannelListCategoryComponent = (props: ChannelListCategoryProps) => {
   const {
@@ -7,12 +12,19 @@ const ChannelListCategoryComponent = (props: ChannelListCategoryProps) => {
   } = props;
 
   return (
-    <div className={channelListCategoryStyle}>
-      <p style={{ marginRight: '10px' }}>{categoryName}</p>
-      <button
-        className={smallButtonStyle}
-        onClick={() => openDialog()}
-      >+</button>
+    <div>
+      <div className={channelListCategoryButtonContainerStyle}>
+        <div
+          className={messageButtonStyle}
+          style={{ color: 'green' }}
+          onClick={openDialog}
+        >
+          CREATE
+        </div>
+      </div>
+      <div className={channelListCategoryStyle}>
+        <p style={{ marginRight: '10px' }}>{categoryName}</p>
+      </div>
     </div>
   )
 }

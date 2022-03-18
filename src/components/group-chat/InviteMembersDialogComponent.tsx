@@ -1,12 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {SendBirdError, User} from 'sendbird';
-import {getUserList} from '../../sendbird-actions/SendbirdActions';
+import React, {useEffect, useRef, useState} from 'react';
+import {ApplicationUserListQuery, OpenChannel, OpenChannelListQuery, SendBirdError, User} from 'sendbird';
+import {createUserListQuery} from '../../sendbird-actions/SendbirdActions';
 import {
   DialogStyle, DialogButtonContainer,
   DialogItemStyle,
   DialogItemListCategoryStyle, DialogItemListStyle
 } from '../../styles/styles';
 import {DialogState} from '../../constants/enums';
+import {createOpenChannelListQuery} from '../../sendbird-actions/channel-actions/OpenChannelActions';
 
 type UserItemProps = {
   userId: string,
@@ -41,18 +42,39 @@ const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
   } = props;
 
   const [loading, setLoading] = useState(true);
+  const [userListQuery, setUserListQuery] = useState<ApplicationUserListQuery>(createUserListQuery());
   const [userList, setUserList] = useState<User[]>([]);
   const [userIdsToInvite, setUserIdsToInvite] = useState<string[]>([]);
+  const listEndRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
-    if (dialogState !== DialogState.CLOSED) {
+    if (dialogState !== DialogState.CLOSED && !userListQuery.isLoading) {
       if (userIdsToInvite.length > 0) setUserIdsToInvite([]);
-      getUserList()
+      userListQuery.next()
         .then((users: User[]) => setUserList(users))
         .catch((error: SendBirdError) => alert('getUserList error: ' + error))
         .finally(() => setLoading(false));
     }
-  }, [dialogState]);
+  }, [dialogState, userListQuery.isLoading]);
+
+  const onScroll = async () => {
+    if (listEndRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = listEndRef.current;
+      if (scrollTop === scrollHeight - clientHeight) { // Reached bottom.
+        fetchMoreUserList();
+      }
+    }
+  };
+
+  const fetchMoreUserList = () => {
+    if (userListQuery.hasNext) {
+      userListQuery.next()
+        .then((users: User[]) => {
+          setUserList(userList.concat(users));
+        })
+        .catch((error) => alert('OpenChat getOpenChannelList error: ' + error));
+    }
+  }
 
   const onUserSelect = (selectedUserId: string) => {
     const selectedUsers: string[] = [...userIdsToInvite];
@@ -65,17 +87,28 @@ const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
     setUserIdsToInvite(selectedUsers);
   }
 
+  const resetAndCloseDialog = () => {
+    setUserListQuery(createUserListQuery());
+    setUserList([]);
+    setUserIdsToInvite([]);
+    setLoading(true);
+    closeDialog();
+  }
+
   const onDialogSubmit = () => {
-    switch (dialogState) {
-      case DialogState.CREATE:
-        createChannel(userIdsToInvite);
-        break;
-      case DialogState.INVITE:
-        inviteUsers(userIdsToInvite);
-        break;
-      default:
-        return;
+    if (userIdsToInvite.length > 0) {
+      switch (dialogState) {
+        case DialogState.CREATE:
+          createChannel(userIdsToInvite);
+          break;
+        case DialogState.INVITE:
+          inviteUsers(userIdsToInvite);
+          break;
+        default:
+          return;
+      }
     }
+    resetAndCloseDialog();
   }
 
   return (
@@ -85,7 +118,11 @@ const InviteMembersDialogComponent = (props: CreateChannelDialogProps) => {
         <div className={DialogItemListCategoryStyle}>
           User List
         </div>
-      <div className={DialogItemListStyle}>
+      <div
+        className={DialogItemListStyle}
+        onScroll={onScroll}
+        ref={listEndRef}
+      >
         {userList.map((user: User, i: number) => (
           <UserItemComponent
             userId={user.userId}

@@ -1,4 +1,8 @@
-import {channelListCategoryStyle, messageButtonStyle} from '../../styles/styles';
+import {
+  channelListCategoryButtonContainerStyle,
+  channelListCategoryStyle,
+  messageButtonStyle
+} from '../../styles/styles';
 
 const OpenChannelListCategoryComponent = (props: OpenChannelListCategoryProps) => {
   const {
@@ -9,7 +13,7 @@ const OpenChannelListCategoryComponent = (props: OpenChannelListCategoryProps) =
 
   return (
     <div>
-      <div style={{ display:'flex', justifyContent: 'flex-end', padding: '0 8px' }}>
+      <div className={channelListCategoryButtonContainerStyle}>
         <div
           className={messageButtonStyle}
           style={{ color: 'green' }}

@@ -46,6 +46,13 @@ export const channelListCategoryStyle = css`
   justify-content: center;
 `;
 
+export const channelListCategoryButtonContainerStyle = css`
+  display: flex;
+  padding: 0 20px;
+  font-weight: 500;
+  justify-content: flex-end;
+`;
+
 export const smallButtonStyle = css`
   display: flex;
   width: 18px;

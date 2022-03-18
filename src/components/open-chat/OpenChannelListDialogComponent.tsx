@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {OpenChannel, OpenChannelListQuery} from 'sendbird';
+import React, {useEffect, useRef, useState} from 'react';
+import {BaseMessageInstance, OpenChannel, OpenChannelListQuery} from 'sendbird';
 import {
   DialogStyle, DialogButtonContainer,
   DialogItemStyle,
@@ -8,7 +8,6 @@ import {
 import {DialogState} from '../../constants/enums';
 import {
   createOpenChannelListQuery,
-  enterOpenChannel,
 } from '../../sendbird-actions/channel-actions/OpenChannelActions';
 
 type OpenChannelItemProps = {
@@ -46,6 +45,7 @@ const OpenChannelListDialogComponent = (props: OpenChannelListDialogComponentPro
   const [openChannelList, setOpenChannelList] = useState<OpenChannel[]>([]);
   const [channelToEnter, setChannelToEnter] = useState<OpenChannel | null>(null);
   const [openChannelListQuery, setOpenChannelListQuery] = useState<OpenChannelListQuery>(createOpenChannelListQuery());
+  const listEndRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
     if (dialogState === DialogState.OPEN_CHANNEL_LIST) {
@@ -58,6 +58,15 @@ const OpenChannelListDialogComponent = (props: OpenChannelListDialogComponentPro
     }
   }, [dialogState]);
 
+  const onScroll = async () => {
+    if (listEndRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = listEndRef.current;
+      if (scrollTop === scrollHeight - clientHeight) { // Reached bottom.
+        fetchMoreOpenChannelList();
+      }
+    }
+  };
+  
   const fetchMoreOpenChannelList = () => {
     if (openChannelListQuery.hasNext) {
       openChannelListQuery.next()
@@ -96,7 +105,11 @@ const OpenChannelListDialogComponent = (props: OpenChannelListDialogComponentPro
         <div className={DialogItemListCategoryStyle}>
           Open Channel List
         </div>
-      <div className={DialogItemListStyle}>
+      <div
+        className={DialogItemListStyle}
+        onScroll={onScroll}
+        ref={listEndRef}
+      >
         {openChannelList.map((channel: OpenChannel, i: number) => (
           <OpenChannelItemComponent
             channel={channel}
