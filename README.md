@@ -1,4 +1,4 @@
-# SendBird Chat SDK sample for React
+# Sendbird Chat SDK sample for React
 
 This repository provides feature-level Chat samples with React.
 
