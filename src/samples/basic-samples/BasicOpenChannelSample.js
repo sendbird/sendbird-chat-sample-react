@@ -2,8 +2,12 @@ import SendBird from 'sendbird';
 import { useEffect, useState } from 'react';
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
 import SendbirdChat from '../../out/sendbird.js';
-import { OpenChannelModule } from '../../out/module/openChannel.js';
+import { OpenChannelModule, OpenChannelHandler } from '../../out/module/openChannel.js';
+import { UserMessageParams } from '../../out/module/message.js';
+
 import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
+import MessageListParams from '../../out/model/params/messageListParams.js';
+
 console.log(OpenChannelModule);
 
 // console.log("updated")
@@ -26,7 +30,7 @@ const BasicOpenChannelSample = (props) => {
 
     const loadChannels = async () => {
         // console.log(sb.openChannel.createOpenChannelListQuery);
-        const openChannelQuery = sb.OpenChannel.createOpenChannelListQuery();
+        const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
         const channels = await openChannelQuery.next();
         updateState({ ...state, channels: channels, loading: false })
     }
@@ -78,7 +82,7 @@ const BasicOpenChannelSample = (props) => {
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
 
-        const userMessageParams = new sb.UserMessageParams();
+        const userMessageParams = new UserMessageParams();
         userMessageParams.message = state.messageInputValue;
         if (messageToUpdate) {
             currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageParams, (updatedMessage, err) => {
@@ -86,11 +90,11 @@ const BasicOpenChannelSample = (props) => {
                 messages[messageIndex] = updatedMessage
                 updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
             });
+
         } else {
-            currentlyJoinedChannel.sendUserMessage(userMessageParams, (message) => {
-                const updatedMessages = [...messages, message];
-                updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-            });
+            const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
+            // const updatedMessages = [...messages, message];
+            // updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
         }
     }
 
@@ -127,37 +131,19 @@ const BasicOpenChannelSample = (props) => {
 
     useEffect(() => {
         const setup = async () => {
-            // const sendbirdChat = await SendbirdChat.init({
-            //     appId: SENDBIRD_USER_INFO.appId,
-            //     modules: [new OpenChannelModule()]
-            // });
-            // console.log();
-            // const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
-            // userUpdateParams.nickname = SENDBIRD_USER_INFO.nickname;
-            // await sendbirdChat.connect(SENDBIRD_USER_INFO.userId);
-            // await sendbirdChat.setChannelInvitationPreference(true);
-
-            // const sendbirdUser2 = await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
-            // sb = sendbirdChat;
-
-            // loadChannels();
-
-
-
-
-
-            const sendbird = new SendBird({
+            const sendbirdChat = await SendbirdChat.init({
                 appId: SENDBIRD_USER_INFO.appId,
-                localCacheEnabled: false
+                localCacheEnabled: false,
+                modules: [new OpenChannelModule()]
             });
+            console.log();
+            const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
+            userUpdateParams.nickname = SENDBIRD_USER_INFO.nickname + Math.random();
+            await sendbirdChat.connect(SENDBIRD_USER_INFO.userId + Math.random());
+            await sendbirdChat.setChannelInvitationPreference(true);
 
-            await sendbird.connect(SENDBIRD_USER_INFO.userId);
-            await sendbird.setChannelInvitationPreference(true);
-
-            const sendbirdUser = await sendbird.updateCurrentUserInfo(
-                decodeURIComponent(SENDBIRD_USER_INFO.nickname), ''
-            );
-            sb = sendbird;
+            const sendbirdUser2 = await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+            sb = sendbirdChat;
 
             loadChannels();
         }
@@ -318,22 +304,21 @@ const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handle
 
 const joinChannel = async (channelUrl) => {
 
-    const channel = await sb.OpenChannel.getChannel(channelUrl);
+    const channel = await sb.openChannel.getChannel(channelUrl);
     await channel.enter();
 
     //list all messages
-    const messageListParams = new sb.MessageListParams();
+    const messageListParams = new MessageListParams();
     messageListParams.nextResultSize = 20;
     const messages = await channel.getMessagesByTimestamp(0, messageListParams);
 
     //listen for incoming messages
-    const channelHandler = new sb.ChannelHandler();
-
+    const channelHandler = new OpenChannelHandler();
     channelHandler.onMessageReceived = function (channel, message) {
         console.log('received message')
     };
 
-    sb.addChannelHandler("blah-key", channelHandler);
+    sb.openChannel.addOpenChannelHandler("blah-key", channelHandler);
     return { channel, messages };
 
 }
