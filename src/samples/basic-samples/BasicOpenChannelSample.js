@@ -168,10 +168,12 @@ const BasicOpenChannelSample = (props) => {
                 localCacheEnabled: false,
                 modules: [new OpenChannelModule()]
             });
-            console.log();
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const user = urlParams.get('user');
             const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
-            userUpdateParams.nickname = SENDBIRD_USER_INFO.nickname + Math.random();
-            await sendbirdChat.connect(SENDBIRD_USER_INFO.userId + Math.random());
+            userUpdateParams.nickname = user || SENDBIRD_USER_INFO.nickname;
+            await sendbirdChat.connect(user || SENDBIRD_USER_INFO.userId);
             await sendbirdChat.setChannelInvitationPreference(true);
 
             const sendbirdUser2 = await sendbirdChat.updateCurrentUserInfo(userUpdateParams);

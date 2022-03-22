@@ -1,7 +1,7 @@
 export const SENDBIRD_USER_INFO = {
   appId: '9DA1B1F4-0BE6-4DA8-82C5-2E81DAB56F23',
-  userId: 'SandBird',
-  nickname: 'SandBird',
+  userId: 'SendBird',
+  nickname: 'SendBird',
 };
 
 export const KEY_ENTER = 'Enter';
