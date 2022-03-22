@@ -1,16 +1,16 @@
 import SendBird from 'sendbird';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
 import SendbirdChat from '../../out/sendbird.js';
 import { OpenChannelModule, OpenChannelHandler } from '../../out/module/openChannel.js';
 import { UserMessageParams } from '../../out/module/message.js';
+import UserMessageUpdateParams from '../../out/model/params/userMessageUpdateParams.js';
+import OpenChannelCreateParams from '../../out/model/params/openChannelCreateParams.js';
+import OpenChannelUpdateParams from '../../out/model/params/openChannelUpdateParams.js';
 
 import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
 import MessageListParams from '../../out/model/params/messageListParams.js';
 
-console.log(OpenChannelModule);
-
-// console.log("updated")
 let sb;
 
 const BasicOpenChannelSample = (props) => {
@@ -27,17 +27,42 @@ const BasicOpenChannelSample = (props) => {
         loading: true,
     });
 
+    //need to access state in message reeived callback
+    const stateRef = useRef();
+    stateRef.current = state;
+
+
 
     const loadChannels = async () => {
-        // console.log(sb.openChannel.createOpenChannelListQuery);
         const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
         const channels = await openChannelQuery.next();
         updateState({ ...state, channels: channels, loading: false })
     }
 
     const handleJoinChannel = async (channelUrl) => {
-        updateState({ ...state, loading: true })
+        updateState({ ...state, loading: true });
         const { messages, channel } = await joinChannel(channelUrl);
+        //listen for incoming messages
+        const channelHandler = new OpenChannelHandler();
+        channelHandler.onUserEntered = () => { };
+        channelHandler.onChannelParticipantCountChanged = () => { };
+
+        channelHandler.onMessageReceived = (channel, message) => {
+
+            const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
+            if (messageIndex >= 0) {
+                messages[messageIndex] = message;
+                updateState({ ...stateRef.current, messages });
+
+
+            } else {
+                const updatedMessages = [...messages, message];
+                updateState({ ...stateRef.current, messages: updatedMessages });
+            }
+
+        };
+
+        sb.openChannel.addOpenChannelHandler("blah-key", channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
@@ -82,19 +107,26 @@ const BasicOpenChannelSample = (props) => {
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
 
-        const userMessageParams = new UserMessageParams();
-        userMessageParams.message = state.messageInputValue;
+
+
         if (messageToUpdate) {
-            currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageParams, (updatedMessage, err) => {
-                const messageIndex = messages.findIndex((message => message.messageId == messageToUpdate.messageId));
-                messages[messageIndex] = updatedMessage
-                updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
-            });
+            const userMessageUpdateParams = new UserMessageUpdateParams();
+            userMessageUpdateParams.message = state.messageInputValue;
+            const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
+            const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
+            messages[messageIndex] = updatedMessage;
+            updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
+
+
 
         } else {
+            const userMessageParams = new UserMessageParams();
+            userMessageParams.message = state.messageInputValue;
             const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
-            // const updatedMessages = [...messages, message];
-            // updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
+            message.onSucceeded((message) => {
+                const updatedMessages = [...messages, message];
+                updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
+            });
         }
     }
 
@@ -199,8 +231,8 @@ const ChannelList = ({ channels, handleJoinChannel, handleCreateChannel, handleD
             </div>
             {channels.map(channel => {
                 return (
-                    <div className="channel-list-item" >
-                        <div class="channel-list-item-name"
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
                             onClick={() => { handleJoinChannel(channel.url) }}>
                             {channel.name}
                         </div>
@@ -239,7 +271,8 @@ const MembersList = () => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return messages.map(message => {
         return (
-            <div class="message-item">
+            <div key={message.messageId} className="message-item">
+                {message.messageId}
                 <Message message={message} />
                 <button onClick={() => updateMessage(message)}>update</button>
                 <button onClick={() => handleDeleteMessage(message)}>delete</button>
@@ -256,7 +289,7 @@ const Message = (message) => {
     }
     return (
         <div className="message">
-            <div class="message-sender-name">{message.message.sender.nickname}</div>
+            <div className="message-sender-name">{message.message.sender.userId}</div>
             <div>{message.message.message}</div>
         </div >
     );
@@ -265,13 +298,13 @@ const Message = (message) => {
 
 const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInputChange, fileSelected }) => {
     return (
-        <div class="message-input">
+        <div className="message-input">
             <input
                 placeholder="write a message"
                 value={value}
                 onChange={onChange} />
 
-            <div class="message-input-buttons">
+            <div className="message-input-buttons">
                 <button onClick={sendMessage}>Send Message</button>
                 <input
                     type='file'
@@ -311,35 +344,28 @@ const joinChannel = async (channelUrl) => {
     const messageListParams = new MessageListParams();
     messageListParams.nextResultSize = 20;
     const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-
-    //listen for incoming messages
-    const channelHandler = new OpenChannelHandler();
-    channelHandler.onMessageReceived = function (channel, message) {
-        console.log('received message')
-    };
-
-    sb.openChannel.addOpenChannelHandler("blah-key", channelHandler);
     return { channel, messages };
 
 }
 
+
 const createChannel = async (channelName) => {
-    const openChannelParams = new sb.OpenChannelParams();
+    const openChannelParams = new OpenChannelCreateParams();
     openChannelParams.name = channelName;
     openChannelParams.operatorUserIds = [sb.currentUser.userId];
-    const openChannel = await sb.OpenChannel.createChannel(openChannelParams);
+    const openChannel = await sb.openChannel.createChannel(openChannelParams);
     return openChannel;
 }
 
 const deleteChannel = async (channelUrl) => {
-    const channel = await sb.OpenChannel.getChannel(channelUrl);
+    const channel = await sb.openChannel.getChannel(channelUrl);
     await channel.delete();
     return channel;
 }
 
 const updateChannel = async (currentlyUpdatingChannel, channelNameUpdateValue) => {
-    const channel = await sb.OpenChannel.getChannel(currentlyUpdatingChannel.url);
-    const openChannelParams = new sb.OpenChannelParams();
+    const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
+    const openChannelParams = new OpenChannelUpdateParams();
     openChannelParams.name = channelNameUpdateValue;
 
     openChannelParams.operatorUserIds = [sb.currentUser.userId];
