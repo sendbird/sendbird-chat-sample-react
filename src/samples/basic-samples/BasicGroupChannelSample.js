@@ -30,7 +30,7 @@ const BasicGroupChannelSample = (props) => {
         loading: true,
     });
 
-    //need to access state in message reeived callback
+    //need to access state in message received callback
     const stateRef = useRef();
     stateRef.current = state;
 
@@ -51,6 +51,7 @@ const BasicGroupChannelSample = (props) => {
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserEntered = () => { };
         channelHandler.onChannelParticipantCountChanged = () => { };
+        channelHandler.onChannelChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
             messages[messageIndex] = message;
@@ -133,7 +134,11 @@ const BasicGroupChannelSample = (props) => {
 
         const fileMessageParams = new FileMessageParams();
         fileMessageParams.file = file;
-        currentlyJoinedChannel.sendFileMessage(fileMessageParams, (message) => {
+        debugger;
+        // fileMessageParams.thumbnailSizes = [{ maxWidth: 100, maxHeight: 100 }, { maxWidth: 200, maxHeight: 200 }];
+        const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
+
+        message.onSucceeded((message) => {
             const updatedMessages = [...messages, message];
             updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
         });

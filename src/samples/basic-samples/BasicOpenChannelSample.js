@@ -7,6 +7,7 @@ import { UserMessageParams } from '../../out/module/message.js';
 import UserMessageUpdateParams from '../../out/model/params/userMessageUpdateParams.js';
 import OpenChannelCreateParams from '../../out/model/params/openChannelCreateParams.js';
 import OpenChannelUpdateParams from '../../out/model/params/openChannelUpdateParams.js';
+import FileMessageParams from '../../out/model/params/fileMessageParams.js';
 
 import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
 import MessageListParams from '../../out/model/params/messageListParams.js';
@@ -121,6 +122,7 @@ const BasicOpenChannelSample = (props) => {
             const userMessageParams = new UserMessageParams();
             userMessageParams.message = state.messageInputValue;
             const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
+            debugger;
             message.onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
@@ -131,9 +133,10 @@ const BasicOpenChannelSample = (props) => {
     const sendFileMessage = async () => {
         const { currentlyJoinedChannel, file, messages } = state;
 
-        const fileMessageParams = new sb.FileMessageParams();
+        const fileMessageParams = new FileMessageParams();
         fileMessageParams.file = file;
-        currentlyJoinedChannel.sendFileMessage(fileMessageParams, (message) => {
+        const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
+        message.onSucceeded((message) => {
             const updatedMessages = [...messages, message];
             updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
         });
@@ -227,7 +230,7 @@ const ChannelList = ({ channels, handleJoinChannel, handleCreateChannel, handleD
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Open Channels</h1>
-                <button onClick={() => handleCreateChannel("name")}>Create</button>
+                <button onClick={() => handleCreateChannel("new open channel")}>Create</button>
             </div>
             {channels.map(channel => {
                 return (
