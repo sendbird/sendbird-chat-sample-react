@@ -2,20 +2,22 @@ import SendBird from 'sendbird';
 import { useEffect, useState, useRef } from 'react';
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
 import SendbirdChat from '../../out/sendbird.js';
-import { OpenChannelModule, OpenChannelHandler } from '../../out/module/openChannel.js';
+import { GroupChannelModule, GroupChannelHandler } from '../../out/module/groupChannel.js';
 import { UserMessageParams } from '../../out/module/message.js';
 import UserMessageUpdateParams from '../../out/model/params/userMessageUpdateParams.js';
-import OpenChannelCreateParams from '../../out/model/params/openChannelCreateParams.js';
-import OpenChannelUpdateParams from '../../out/model/params/openChannelUpdateParams.js';
+import GroupChannelCreateParams from '../../out/model/params/groupChannelCreateParams.js';
+import GroupChannelUpdateParams from '../../out/model/params/groupChannelUpdateParams.js';
 
 import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
 import MessageListParams from '../../out/model/params/messageListParams.js';
 
 let sb;
 
-const BasicOpenChannelSample = (props) => {
+const BasicGroupChannelSample = (props) => {
 
     const [state, updateState] = useState({
+        applicationUsers: [],
+        groupChannelMembers: [],
         currentlyJoinedChannel: null,
         currentlyUpdatingChannel: null,
         messages: [],
@@ -34,8 +36,8 @@ const BasicOpenChannelSample = (props) => {
 
 
     const loadChannels = async () => {
-        const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
-        const channels = await openChannelQuery.next();
+        const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
+        const channels = await groupChannelQuery.next();
         updateState({ ...state, channels: channels, loading: false })
     }
 
@@ -44,8 +46,8 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, loading: true });
         const channelToJoin = channels.find((channel) => channel.url === channelUrl);
         const { messages, channel } = await joinChannel(channelToJoin);
-        //listen for incoming messages
-        const channelHandler = new OpenChannelHandler();
+        // listen for incoming messages
+        const channelHandler = new GroupChannelHandler();
         channelHandler.onUserEntered = () => { };
         channelHandler.onChannelParticipantCountChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
@@ -60,14 +62,15 @@ const BasicOpenChannelSample = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
 
-        sb.openChannel.addOpenChannelHandler("blah-key", channelHandler);
+        sb.groupChannel.addGroupChannelHandler("blah-key", channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
-    const handleCreateChannel = async (channelName = "testChannel") => {
-        const openChannel = await createChannel(channelName);
-        const updatedChannels = [openChannel, ...state.channels];
-        updateState({ ...state, channels: updatedChannels });
+    const handleCreateChannel = async (channelName = "testChannel",) => {
+        const groupChannel = await createChannel(channelName, state.groupChannelMembers);
+
+        const updatedChannels = [groupChannel, ...state.channels];
+        updateState({ ...state, channels: updatedChannels, applicationUsers: [] });
     }
 
     const handleDeleteChannel = async (channelUrl) => {
@@ -159,12 +162,23 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
     }
 
+    const handleGetAllApplicationUsers = async () => {
+        const users = await getAllApplicationUsers();
+        updateState({ ...state, applicationUsers: users, groupChannelMembers: [sb.currentUser.userId] });
+    }
+
+    const addToChannelMembersList = (userId) => {
+        const groupChannelMembers = [...state.groupChannelMembers, userId];
+        updateState({ ...state, groupChannelMembers: groupChannelMembers });
+
+    }
+
     useEffect(() => {
         const setup = async () => {
             const sendbirdChat = await SendbirdChat.init({
                 appId: SENDBIRD_USER_INFO.appId,
                 localCacheEnabled: false,
-                modules: [new OpenChannelModule()]
+                modules: [new GroupChannelModule()]
             });
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
@@ -191,12 +205,16 @@ const BasicOpenChannelSample = (props) => {
 
     return (
         <>
+
             <ChannelList
                 channels={state.channels}
                 toggleChannelDetails={toggleChannelDetails}
                 handleJoinChannel={handleJoinChannel}
-                handleCreateChannel={handleCreateChannel}
-                handleDeleteChannel={handleDeleteChannel} />
+                handleCreateChannel={handleGetAllApplicationUsers}
+                handleDeleteChannel={handleDeleteChannel}
+                handleGetAllApplicationUsers={handleGetAllApplicationUsers} />
+            <MembersSelect applicationUsers={state.applicationUsers} addToChannelMembersList={addToChannelMembersList} handleCreateChannel={handleCreateChannel} />
+
             <ChannelDetails
                 currentlyUpdatingChannel={state.currentlyUpdatingChannel}
                 handleUpdateChannel={handleUpdateChannel}
@@ -222,12 +240,18 @@ const BasicOpenChannelSample = (props) => {
 };
 
 
-const ChannelList = ({ channels, handleJoinChannel, handleCreateChannel, handleDeleteChannel, toggleChannelDetails }) => {
+const ChannelList = ({
+    channels,
+    handleJoinChannel,
+    handleDeleteChannel,
+    toggleChannelDetails,
+    handleGetAllApplicationUsers
+}) => {
     return (
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Open Channels</h1>
-                <button onClick={() => handleCreateChannel("name")}>Create</button>
+                <button onClick={() => handleGetAllApplicationUsers()}>Create</button>
             </div>
             {channels.map(channel => {
                 return (
@@ -318,6 +342,20 @@ const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInp
         </div>);
 }
 
+const MembersSelect = ({ applicationUsers, addToChannelMembersList, handleCreateChannel }) => {
+    if (applicationUsers.length > 0) {
+        return <div className="overlay">
+            <div className="overlay-content">
+                {applicationUsers.map((user) => {
+                    return <div key={user.userId} onClick={() => addToChannelMembersList(user.userId)}>{user.nickname}</div>
+                })}
+            </div>
+            <button onClick={() => handleCreateChannel()}>Create</button>
+        </div >;
+    }
+    return null;
+}
+
 const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handleUpdateChannel, onChannelNamenputChange }) => {
     if (currentlyUpdatingChannel) {
         return <div className="overlay">
@@ -336,7 +374,8 @@ const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handle
 }
 
 const joinChannel = async (channel) => {
-    await channel.enter();
+
+    await channel.join("");
 
     //list all messages
     const messageListParams = new MessageListParams();
@@ -347,32 +386,41 @@ const joinChannel = async (channel) => {
 }
 
 
-const createChannel = async (channelName) => {
-    const openChannelParams = new OpenChannelCreateParams();
-    openChannelParams.name = channelName;
-    openChannelParams.operatorUserIds = [sb.currentUser.userId];
-    const openChannel = await sb.openChannel.createChannel(openChannelParams);
-    return openChannel;
+const createChannel = async (channelName, userIdsToInvite, accessCode) => {
+    const groupChannelParams = new GroupChannelCreateParams();
+    console.log(groupChannelParams)
+    groupChannelParams.addUserIds(userIdsToInvite);
+    groupChannelParams.name = channelName;
+    // In production, you will want to pass in the access code supplied when creating a group channel
+    groupChannelParams.accessCode = "";
+    groupChannelParams.operatorUserIds = [SENDBIRD_USER_INFO.userId];
+    const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
+    return groupChannel;
 }
 
 const deleteChannel = async (channelUrl) => {
-    const channel = await sb.openChannel.getChannel(channelUrl);
+    const channel = await sb.groupChannel.getChannel(channelUrl);
     await channel.delete();
     return channel;
 }
 
 const updateChannel = async (currentlyUpdatingChannel, channelNameUpdateValue) => {
-    const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
-    const openChannelParams = new OpenChannelUpdateParams();
-    openChannelParams.name = channelNameUpdateValue;
+    const channel = await sb.groupChannel.getChannel(currentlyUpdatingChannel.url);
+    const groupChannelParams = new GroupChannelUpdateParams();
+    groupChannelParams.name = channelNameUpdateValue;
 
-    openChannelParams.operatorUserIds = [sb.currentUser.userId];
+    groupChannelParams.operatorUserIds = [sb.currentUser.userId];
 
-    await channel.updateChannel(openChannelParams);
+    await channel.updateChannel(groupChannelParams);
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default BasicOpenChannelSample;
+const getAllApplicationUsers = async () => {
+    const userQuery = sb.createApplicationUserListQuery({ limit: 30 });
+    return await userQuery.next();
+}
+
+export default BasicGroupChannelSample;

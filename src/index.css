@@ -106,7 +106,7 @@ code {
   background: white;
 }
 
-.details-overlay{
+.overlay{
   position: fixed;
   display: flex;
   justify-content: center;
@@ -117,7 +117,9 @@ code {
   z-index: 1;
 }
 
-.details-content{
+.overlay-content{
+  overflow-y: scroll;
+
   padding:24px;
   opacity: 1;
   background: white;
