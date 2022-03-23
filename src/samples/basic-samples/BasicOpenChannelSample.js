@@ -46,20 +46,16 @@ const BasicOpenChannelSample = (props) => {
         const channelHandler = new OpenChannelHandler();
         channelHandler.onUserEntered = () => { };
         channelHandler.onChannelParticipantCountChanged = () => { };
+        channelHandler.onMessageUpdated = (channel, message) => {
+            const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
+            messages[messageIndex] = message;
+            updateState({ ...stateRef.current, messages });
+
+        }
 
         channelHandler.onMessageReceived = (channel, message) => {
-
-            const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
-            if (messageIndex >= 0) {
-                messages[messageIndex] = message;
-                updateState({ ...stateRef.current, messages });
-
-
-            } else {
-                const updatedMessages = [...messages, message];
-                updateState({ ...stateRef.current, messages: updatedMessages });
-            }
-
+            const updatedMessages = [...messages, message];
+            updateState({ ...stateRef.current, messages: updatedMessages });
         };
 
         sb.openChannel.addOpenChannelHandler("blah-key", channelHandler);
