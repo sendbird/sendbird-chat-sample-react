@@ -34,8 +34,6 @@ const BasicGroupChannelSample = (props) => {
     const stateRef = useRef();
     stateRef.current = state;
 
-
-
     const loadChannels = async () => {
         const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
         const channels = await groupChannelQuery.next();
@@ -86,6 +84,12 @@ const BasicGroupChannelSample = (props) => {
     const handleUpdateChannel = async () => {
         const { currentlyUpdatingChannel, channelNameUpdateValue } = state;
         await updateChannel(currentlyUpdatingChannel, channelNameUpdateValue);
+    }
+
+    const handleMemberInvite = async () => {
+        const users = await getAllApplicationUsers();
+        updateState({ ...state, applicationUsers: users });
+
     }
 
     const toggleChannelDetails = (channel) => {
@@ -222,13 +226,15 @@ const BasicGroupChannelSample = (props) => {
                 handleUpdateChannel={handleUpdateChannel}
                 onChannelNamenputChange={onChannelNamenputChange}
                 toggleChannelDetails={toggleChannelDetails} />
+            <MembersList channel={state.currentlyJoinedChannel} handleMemberInvite={handleMemberInvite} />
+
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
-                <MembersList />
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
+
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
@@ -241,7 +247,7 @@ const BasicGroupChannelSample = (props) => {
     );
 };
 
-
+// Chat UI Components
 const ChannelList = ({
     channels,
     handleJoinChannel,
@@ -289,8 +295,18 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MembersList = () => {
-    return "";
+const MembersList = ({ channel, handleMemberInvite }) => {
+    if (channel) {
+        return <div>
+            <button onClick={handleMemberInvite}>Invite</button>
+            {channel.members.map((member) =>
+                <div>{member.nickname}</div>
+            )}
+        </div>;
+    } else {
+        return null;
+    }
+
 
 }
 
@@ -375,8 +391,8 @@ const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handle
     return null;
 }
 
+// Helpful functions that call Sendbird
 const joinChannel = async (channel) => {
-    // list all messages
     const messageListParams = new MessageListParams();
     messageListParams.nextResultSize = 20;
     const messages = await channel.getMessagesByTimestamp(0, messageListParams);

@@ -206,7 +206,6 @@ const BasicOpenChannelSample = (props) => {
                 onChannelNamenputChange={onChannelNamenputChange}
                 toggleChannelDetails={toggleChannelDetails} />
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
-                <MembersList />
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -224,7 +223,7 @@ const BasicOpenChannelSample = (props) => {
     );
 };
 
-
+// Chat UI Components
 const ChannelList = ({ channels, handleJoinChannel, handleCreateChannel, handleDeleteChannel, toggleChannelDetails }) => {
     return (
         <div className='channel-list'>
@@ -263,11 +262,6 @@ const Channel = ({ currentlyJoinedChannel, children }) => {
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
-}
-
-const MembersList = () => {
-    return "";
 
 }
 
@@ -338,6 +332,7 @@ const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handle
     return null;
 }
 
+// Helpful functions that call Sendbird
 const joinChannel = async (channel) => {
     await channel.enter();
 
