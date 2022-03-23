@@ -227,6 +227,7 @@ const BasicGroupChannelSample = (props) => {
                 handleGetAllApplicationUsers={handleGetAllApplicationUsers} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
                 addToChannelMembersList={addToChannelMembersList}
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
@@ -376,6 +377,7 @@ const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInp
 
 const MembersSelect = ({
     applicationUsers,
+    currentlyJoinedChannel,
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
@@ -389,14 +391,13 @@ const MembersSelect = ({
                 })}
             </div>
             <button onClick={() => {
-                if (true) {
-                    handleCreateChannel()
-
+                if (currentlyJoinedChannel) {
+                    handleUpdateChannelMembersList();
                 } else {
-                    handleUpdateChannelMembersList()
+                    handleCreateChannel();
 
                 }
-            }}>Create</button>
+            }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
         </div >;
     }
     return null;
@@ -428,7 +429,7 @@ const joinChannel = async (channel) => {
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
-    const returnVal = await channel.inviteWithUserIds(userIds);
+    await channel.inviteWithUserIds(userIds);
 
 }
 
