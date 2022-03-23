@@ -273,7 +273,7 @@ const ChannelList = ({
     return (
         <div className='channel-list'>
             <div className="channel-type">
-                <h1>Open Channels</h1>
+                <h1>Group Channels</h1>
                 <button onClick={() => handleGetAllApplicationUsers()}>Create</button>
             </div>
             {channels.map(channel => {
@@ -281,7 +281,7 @@ const ChannelList = ({
                     <div key={channel.url} className="channel-list-item" >
                         <div className="channel-list-item-name"
                             onClick={() => { handleJoinChannel(channel.url) }}>
-                            {channel.name}
+                            <ChannelName members={channel.members} />
                         </div>
                         <div>
                             <button onClick={() => toggleChannelDetails(channel)}>update</button>
@@ -290,6 +290,12 @@ const ChannelList = ({
                     </div>);
             })}
         </div >);
+}
+
+const ChannelName = ({ members }) => {
+    return members.map((member) => {
+        return <span key={member.id}>{member.nickname} </span>
+    })
 }
 
 
