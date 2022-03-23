@@ -1,5 +1,6 @@
 import SendBird from 'sendbird';
 import { useEffect, useState, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
 import SendbirdChat from '../../out/sendbird.js';
 import { OpenChannelModule, OpenChannelHandler } from '../../out/module/openChannel.js';
@@ -61,7 +62,7 @@ const BasicOpenChannelSample = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
 
-        sb.openChannel.addOpenChannelHandler("blah-key", channelHandler);
+        sb.openChannel.addOpenChannelHandler(uuid(), channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
@@ -115,14 +116,10 @@ const BasicOpenChannelSample = (props) => {
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
-
-
-
         } else {
             const userMessageParams = new UserMessageParams();
             userMessageParams.message = state.messageInputValue;
             const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
-            debugger;
             message.onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });

@@ -67,6 +67,7 @@ code {
   max-width: 75ch;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex:1;
 
 }
 

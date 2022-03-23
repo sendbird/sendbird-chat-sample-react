@@ -28,4 +28,5 @@ Chat is based around user generated input so consider mitigations against XSS at
 Users should always pass an access token when connection to group channels 
 User creation
 Pagination of channel and message lists
+Pull in Sendbird from npm
 

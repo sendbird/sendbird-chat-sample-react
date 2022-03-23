@@ -1,5 +1,7 @@
 import SendBird from 'sendbird';
 import { useEffect, useState, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
+
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
 import SendbirdChat from '../../out/sendbird.js';
 import { GroupChannelModule, GroupChannelHandler } from '../../out/module/groupChannel.js';
@@ -64,7 +66,7 @@ const BasicGroupChannelSample = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
 
-        sb.groupChannel.addGroupChannelHandler("blah-key", channelHandler);
+        sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
