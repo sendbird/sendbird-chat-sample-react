@@ -279,9 +279,11 @@ const ChannelList = ({
             {channels.map(channel => {
                 return (
                     <div key={channel.url} className="channel-list-item" >
-                        <div className="channel-list-item-name"
+                        <div
+                            className="channel-list-item-name"
                             onClick={() => { handleJoinChannel(channel.url) }}>
                             <ChannelName members={channel.members} />
+                            <div className="last-message">{channel.lastMessage?.message}</div>
                         </div>
                         <div>
                             <button onClick={() => toggleChannelDetails(channel)}>update</button>
@@ -294,7 +296,7 @@ const ChannelList = ({
 
 const ChannelName = ({ members }) => {
     return members.map((member) => {
-        return <span key={member.id}>{member.nickname} </span>
+        return <span key={member.userId}>{member.nickname} </span>
     })
 }
 

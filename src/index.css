@@ -56,6 +56,10 @@ code {
   justify-content: space-between;
 }
 
+.last-message{
+  font-weight:300;
+}
+
 .channel-list-item-name{
   font-weight: 600;
   cursor: pointer;
