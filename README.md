@@ -21,6 +21,8 @@ Update the routes in App.js js to include your newly created component.
 `<Route path='/basic-samples/group-channel-feature1' element={<BasicGroupChannelFeature1 />} />`
 
 ## Considerations in production
-Error handling
-Security like XSS
+Typescript types are avaiable 
+Error handling SDK requests
+Chat is based around user generated input so consider mitigations against XSS attacks
+Users should always pass an access token when connection to group channels 
 

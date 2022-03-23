@@ -7,6 +7,7 @@ import { UserMessageParams } from '../../out/module/message.js';
 import UserMessageUpdateParams from '../../out/model/params/userMessageUpdateParams.js';
 import GroupChannelCreateParams from '../../out/model/params/groupChannelCreateParams.js';
 import GroupChannelUpdateParams from '../../out/model/params/groupChannelUpdateParams.js';
+import FileMessageParams from '../../out/model/params/fileMessageParams.js';
 
 import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
 import MessageListParams from '../../out/model/params/messageListParams.js';
@@ -44,8 +45,8 @@ const BasicGroupChannelSample = (props) => {
     const handleJoinChannel = async (channelUrl) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
-        const channelToJoin = channels.find((channel) => channel.url === channelUrl);
-        const { messages, channel } = await joinChannel(channelToJoin);
+        const channel = channels.find((channel) => channel.url === channelUrl);
+        const messages = await joinChannel(channel);
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserEntered = () => { };
@@ -107,9 +108,7 @@ const BasicGroupChannelSample = (props) => {
 
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
-
-
-
+        debugger;
         if (messageToUpdate) {
             const userMessageUpdateParams = new UserMessageUpdateParams();
             userMessageUpdateParams.message = state.messageInputValue;
@@ -117,13 +116,11 @@ const BasicGroupChannelSample = (props) => {
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
-
-
-
         } else {
             const userMessageParams = new UserMessageParams();
             userMessageParams.message = state.messageInputValue;
             const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
+            // should be onSucceeded but not firing. One for QA
             message.onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
@@ -134,7 +131,7 @@ const BasicGroupChannelSample = (props) => {
     const sendFileMessage = async () => {
         const { currentlyJoinedChannel, file, messages } = state;
 
-        const fileMessageParams = new sb.FileMessageParams();
+        const fileMessageParams = new FileMessageParams();
         fileMessageParams.file = file;
         currentlyJoinedChannel.sendFileMessage(fileMessageParams, (message) => {
             const updatedMessages = [...messages, message];
@@ -374,25 +371,19 @@ const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handle
 }
 
 const joinChannel = async (channel) => {
-
-    await channel.join("");
-
-    //list all messages
+    // list all messages
     const messageListParams = new MessageListParams();
     messageListParams.nextResultSize = 20;
     const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-    return { channel, messages };
+    return messages;
 
 }
 
 
 const createChannel = async (channelName, userIdsToInvite, accessCode) => {
     const groupChannelParams = new GroupChannelCreateParams();
-    console.log(groupChannelParams)
     groupChannelParams.addUserIds(userIdsToInvite);
     groupChannelParams.name = channelName;
-    // In production, you will want to pass in the access code supplied when creating a group channel
-    groupChannelParams.accessCode = "";
     groupChannelParams.operatorUserIds = [SENDBIRD_USER_INFO.userId];
     const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
     return groupChannel;
