@@ -20,10 +20,12 @@ Import the newly created component into App.js.
 Update the routes in App.js js to include your newly created component.
 `<Route path='/basic-samples/group-channel-feature1' element={<BasicGroupChannelFeature1 />} />`
 
-## Considerations in production
+## Considerations in real world use case
 Typescript types are avaiable 
 Display thumbnail verion of images. Auto thumbnailing is available with Sendbird premium
 Error handling SDK requests
 Chat is based around user generated input so consider mitigations against XSS attacks
 Users should always pass an access token when connection to group channels 
+User creation
+Pagination of channel and message lists
 

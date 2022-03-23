@@ -50,6 +50,8 @@ const BasicGroupChannelSample = (props) => {
         channelHandler.onUserEntered = () => { };
         channelHandler.onChannelParticipantCountChanged = () => { };
         channelHandler.onChannelChanged = () => { };
+        channelHandler.onUserReceivedInvitation = () => { };
+        channelHandler.onUserJoined = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
             messages[messageIndex] = message;
@@ -71,6 +73,12 @@ const BasicGroupChannelSample = (props) => {
 
         const updatedChannels = [groupChannel, ...state.channels];
         updateState({ ...state, channels: updatedChannels, applicationUsers: [] });
+    }
+
+    const handleUpdateChannelMembersList = async () => {
+        const { currentlyJoinedChannel, groupChannelMembers } = state;
+        await inviteUsersToChannel(currentlyJoinedChannel, groupChannelMembers);
+        updateState({ ...state, applicationUsers: [] });
     }
 
     const handleDeleteChannel = async (channelUrl) => {
@@ -113,7 +121,6 @@ const BasicGroupChannelSample = (props) => {
 
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
-        debugger;
         if (messageToUpdate) {
             const userMessageUpdateParams = new UserMessageUpdateParams();
             userMessageUpdateParams.message = state.messageInputValue;
@@ -138,7 +145,6 @@ const BasicGroupChannelSample = (props) => {
 
         const fileMessageParams = new FileMessageParams();
         fileMessageParams.file = file;
-        debugger;
         // fileMessageParams.thumbnailSizes = [{ maxWidth: 100, maxHeight: 100 }, { maxWidth: 200, maxHeight: 200 }];
         const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
 
@@ -206,7 +212,7 @@ const BasicGroupChannelSample = (props) => {
         return <div>Loading...</div>
     }
 
-    console.log('------ state');
+    console.log('- - - - State object very useful for debugging - - - -');
     console.log(state);
 
     return (
@@ -219,14 +225,22 @@ const BasicGroupChannelSample = (props) => {
                 handleCreateChannel={handleGetAllApplicationUsers}
                 handleDeleteChannel={handleDeleteChannel}
                 handleGetAllApplicationUsers={handleGetAllApplicationUsers} />
-            <MembersSelect applicationUsers={state.applicationUsers} addToChannelMembersList={addToChannelMembersList} handleCreateChannel={handleCreateChannel} />
+            <MembersSelect
+                applicationUsers={state.applicationUsers}
+                addToChannelMembersList={addToChannelMembersList}
+                handleCreateChannel={handleCreateChannel}
+                handleUpdateChannelMembersList={handleUpdateChannelMembersList}
+            />
 
             <ChannelDetails
                 currentlyUpdatingChannel={state.currentlyUpdatingChannel}
                 handleUpdateChannel={handleUpdateChannel}
                 onChannelNamenputChange={onChannelNamenputChange}
                 toggleChannelDetails={toggleChannelDetails} />
-            <MembersList channel={state.currentlyJoinedChannel} handleMemberInvite={handleMemberInvite} />
+            <MembersList
+                channel={state.currentlyJoinedChannel}
+                handleMemberInvite={handleMemberInvite}
+            />
 
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
                 <MessagesList
@@ -300,7 +314,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
         return <div>
             <button onClick={handleMemberInvite}>Invite</button>
             {channel.members.map((member) =>
-                <div>{member.nickname}</div>
+                <div key={member.userId}>{member.nickname}</div>
             )}
         </div>;
     } else {
@@ -331,7 +345,7 @@ const Message = (message) => {
     }
     return (
         <div className="message">
-            <div className="message-sender-name">{message.message.sender.userId}</div>
+            <div className="message-sender-name">{message.message.sender?.userId}</div>
             <div>{message.message.message}</div>
         </div >
     );
@@ -360,7 +374,13 @@ const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInp
         </div>);
 }
 
-const MembersSelect = ({ applicationUsers, addToChannelMembersList, handleCreateChannel }) => {
+const MembersSelect = ({
+    applicationUsers,
+    addToChannelMembersList,
+    handleCreateChannel,
+    handleUpdateChannelMembersList
+
+}) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -368,7 +388,15 @@ const MembersSelect = ({ applicationUsers, addToChannelMembersList, handleCreate
                     return <div key={user.userId} onClick={() => addToChannelMembersList(user.userId)}>{user.nickname}</div>
                 })}
             </div>
-            <button onClick={() => handleCreateChannel()}>Create</button>
+            <button onClick={() => {
+                if (true) {
+                    handleCreateChannel()
+
+                } else {
+                    handleUpdateChannelMembersList()
+
+                }
+            }}>Create</button>
         </div >;
     }
     return null;
@@ -397,6 +425,10 @@ const joinChannel = async (channel) => {
     messageListParams.nextResultSize = 20;
     const messages = await channel.getMessagesByTimestamp(0, messageListParams);
     return messages;
+}
+
+const inviteUsersToChannel = async (channel, userIds) => {
+    const returnVal = await channel.inviteWithUserIds(userIds);
 
 }
 

@@ -189,7 +189,7 @@ const BasicOpenChannelSample = (props) => {
         return <div>Loading...</div>
     }
 
-    console.log('------ state');
+    console.log('- - - - State object very useful for debugging - - - -');
     console.log(state);
 
     return (
