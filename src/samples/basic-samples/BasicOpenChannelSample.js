@@ -31,22 +31,31 @@ const BasicOpenChannelSample = (props) => {
         file: null,
         messageToUpdate: null,
         loading: false,
+        error: false
     });
 
     //need to access state in message reeived callback
     const stateRef = useRef();
     stateRef.current = state;
 
-
+    const onError = (error) => {
+        updateState({ ...state, error: error.message });
+        console.log(error);
+    }
 
     const handleJoinChannel = async (channelUrl) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channelToJoin = channels.find((channel) => channel.url === channelUrl);
-        const { messages, channel } = await joinChannel(channelToJoin);
+        const [channel, messages, error] = await joinChannel(channelToJoin);
+        if (error) {
+            return onError(error);
+
+        }
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
         channelHandler.onUserEntered = () => { };
+        channelHandler.onOperatorUpdated = () => { };
         channelHandler.onChannelParticipantCountChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
@@ -65,13 +74,19 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const handleCreateChannel = async (channelName = "testChannel") => {
-        const openChannel = await createChannel(channelName);
+        const [openChannel, error] = await createChannel(channelName);
+        if (error) {
+            return onError(error);
+        }
         const updatedChannels = [openChannel, ...state.channels];
         updateState({ ...state, channels: updatedChannels });
     }
 
     const handleDeleteChannel = async (channelUrl) => {
-        const channel = await deleteChannel(channelUrl);
+        const [channel, error] = await deleteChannel(channelUrl);
+        if (error) {
+            return onError(error);
+        }
         const updatedChannels = state.channels.filter((channel) => {
             return channel.url !== channelUrl;
         });
@@ -79,8 +94,15 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const handleUpdateChannel = async () => {
-        const { currentlyUpdatingChannel, channelNameUpdateValue } = state;
-        await updateChannel(currentlyUpdatingChannel, channelNameUpdateValue);
+        const { currentlyUpdatingChannel, channelNameUpdateValue, channels } = state;
+        const [updatedChannel, error] = await updateChannel(currentlyUpdatingChannel, channelNameUpdateValue);
+        if (error) {
+            return onError(error);
+        }
+        const indexToReplace = channels.findIndex((channel) => channel.url === currentlyUpdatingChannel.channelUrl);
+        const updatedChannels = [...channels];
+        updatedChannels[indexToReplace] = updatedChannel;
+        updateState({ ...state, channels: updatedChannels, currentlyUpdatingChannel: null });
     }
 
     const toggleChannelDetails = (channel) => {
@@ -88,7 +110,6 @@ const BasicOpenChannelSample = (props) => {
             updateState({ ...state, currentlyUpdatingChannel: channel });
         } else {
             updateState({ ...state, currentlyUpdatingChannel: null });
-
         }
     }
 
@@ -109,8 +130,6 @@ const BasicOpenChannelSample = (props) => {
 
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
-
-
 
         if (messageToUpdate) {
             const userMessageUpdateParams = new UserMessageUpdateParams();
@@ -178,37 +197,19 @@ const BasicOpenChannelSample = (props) => {
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
-        const channels = await loadChannels();
+        const [channels, error] = await loadChannels();
+        if (error) {
+            return onError(error);
+        }
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
-
-
     }
-
-    // useEffect(() => {
-    //     const setup = async () => {
-    //         const sendbirdChat = await SendbirdChat.init({
-    //             appId: SENDBIRD_USER_INFO.appId,
-    //             localCacheEnabled: false,
-    //             modules: [new OpenChannelModule()]
-    //         });
-    //         const queryString = window.location.search;
-    //         const urlParams = new URLSearchParams(queryString);
-    //         const user = urlParams.get('user');
-    //         const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
-    //         userUpdateParams.nickname = user || SENDBIRD_USER_INFO.nickname;
-    //         await sendbirdChat.connect(user || SENDBIRD_USER_INFO.userId);
-    //         await sendbirdChat.setChannelInvitationPreference(true);
-
-    //         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
-    //         sb = sendbirdChat;
-
-    //         loadChannels();
-    //     }
-    //     setup();
-    // }, []);
 
     if (state.loading) {
         return <div>Loading...</div>
+    }
+
+    if (state.error) {
+        return <div>{state.error} check console for more information.</div>
     }
 
     console.log('- - - - State object very useful for debugging - - - -');
@@ -389,44 +390,68 @@ const CreateUserForm = ({
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
-    const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
-    const channels = await openChannelQuery.next();
-    return channels;
+    try {
+        const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
+        const channels = await openChannelQuery.next();
+        return [channels, null];
+
+    } catch (error) {
+        return [null, error];
+    }
+
 }
 
 const joinChannel = async (channel) => {
-    await channel.enter();
-
-    //list all messages
-    const messageListParams = new MessageListParams();
-    messageListParams.nextResultSize = 20;
-    const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-    return { channel, messages };
+    try {
+        await channel.enter();
+        //list all messages
+        const messageListParams = new MessageListParams();
+        messageListParams.nextResultSize = 20;
+        const messages = await channel.getMessagesByTimestamp(0, messageListParams);
+        return [channel, messages, null];
+    } catch (error) {
+        return [null, null, error]
+    }
 }
 
 
 const createChannel = async (channelName) => {
-    const openChannelParams = new OpenChannelCreateParams();
-    openChannelParams.name = channelName;
-    openChannelParams.operatorUserIds = [sb.currentUser.userId];
-    const openChannel = await sb.openChannel.createChannel(openChannelParams);
-    return openChannel;
+    try {
+        const openChannelParams = new OpenChannelCreateParams();
+        openChannelParams.name = channelName;
+        openChannelParams.operatorUserIds = [sb.currentUser.userId];
+        const openChannel = await sb.openChannel.createChannel(openChannelParams);
+        return [openChannel, null];
+    } catch (error) {
+        return [null, error];
+    }
+
 }
 
 const deleteChannel = async (channelUrl) => {
-    const channel = await sb.openChannel.getChannel(channelUrl);
-    await channel.delete();
-    return channel;
+    try {
+        const channel = await sb.openChannel.getChannel(channelUrl);
+        await channel.delete();
+        return [channel, null];
+    } catch (error) {
+        return [null, error];
+    }
+
 }
 
 const updateChannel = async (currentlyUpdatingChannel, channelNameUpdateValue) => {
-    const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
-    const openChannelParams = new OpenChannelUpdateParams();
-    openChannelParams.name = channelNameUpdateValue;
+    try {
+        const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
+        const openChannelParams = new OpenChannelUpdateParams();
+        openChannelParams.name = channelNameUpdateValue;
 
-    openChannelParams.operatorUserIds = [sb.currentUser.userId];
+        openChannelParams.operatorUserIds = [sb.currentUser.userId];
 
-    await channel.updateChannel(openChannelParams);
+        const updatedChannel = await channel.updateChannel(openChannelParams);
+        return [updatedChannel, null];
+    } catch (error) {
+        return [null, error];
+    }
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
