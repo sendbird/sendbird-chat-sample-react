@@ -119,7 +119,7 @@ const BasicGroupChannelSample = (props) => {
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
-            onError(error);
+            return onError(error);
         }
         updateState({ ...state, applicationUsers: users });
 
@@ -207,7 +207,7 @@ const BasicGroupChannelSample = (props) => {
     const handleGetAllApplicationUsers = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
-            onError(error);
+            return onError(error);
         }
         updateState({ ...state, applicationUsers: users, groupChannelMembers: [sb.currentUser.userId] });
     }
@@ -234,12 +234,19 @@ const BasicGroupChannelSample = (props) => {
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
-        const channels = await loadChannels();
+        const [channels, error] = await loadChannels();
+        if (error) {
+            return onError(error);
+        }
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
     if (state.loading) {
         return <div>Loading...</div>
+    }
+
+    if (state.error) {
+        return <div>{state.error} check console for more information.</div>
     }
 
     console.log('- - - - State object very useful for debugging - - - -');
@@ -486,9 +493,15 @@ const CreateUserForm = ({
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
-    const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
-    const channels = await groupChannelQuery.next();
-    return channels;
+    try {
+        const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
+        const channels = await groupChannelQuery.next();
+        return [channels, null];
+    } catch (error) {
+        return [null, error];
+    }
+
+
 }
 
 const joinChannel = async (channel) => {
@@ -513,7 +526,7 @@ const createChannel = async (channelName, userIdsToInvite) => {
         const groupChannelParams = new GroupChannelCreateParams();
         groupChannelParams.addUserIds(userIdsToInvite);
         groupChannelParams.name = channelName;
-        groupChannelParams.operatorUserIds = [SENDBIRD_USER_INFO.userId];
+        groupChannelParams.operatorUserIds = [sb.currentUser.userId];
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
         return [groupChannel, null];
     } catch (error) {

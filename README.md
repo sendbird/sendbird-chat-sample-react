@@ -32,11 +32,12 @@ Pull in Sendbird from npm
 
 
 ## Todo
-p1 user creation (gc)
-p1 error handling
+ - p1 user creation (gc)
+ - p1 error handling
 p1 open chanel set name before creation
-p1 generate open channnel thumbanils
+
 p2 update vs create channel button issue
+p2 generate open channnel thumbanils
 p2 cant delete channel
 p2 highlight user select
 p2 what should update do for group channel (check main)
