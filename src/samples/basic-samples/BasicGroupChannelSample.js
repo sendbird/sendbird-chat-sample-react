@@ -3,6 +3,8 @@ import { useEffect, useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
+import { timestampToTime } from '../../utils/messageUtils';
+
 import SendbirdChat from '../../out/sendbird.js';
 import { GroupChannelModule, GroupChannelHandler } from '../../out/module/groupChannel.js';
 import { UserMessageParams } from '../../out/module/message.js';
@@ -27,20 +29,16 @@ const BasicGroupChannelSample = (props) => {
         channels: [],
         messageInputValue: "",
         channelNameUpdateValue: "",
+        settingUpUser: true,
+        channelNameUpdateValue: "",
         file: null,
         messageToUpdate: null,
-        loading: true,
+        loading: false,
     });
 
     //need to access state in message received callback
     const stateRef = useRef();
     stateRef.current = state;
-
-    const loadChannels = async () => {
-        const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
-        const channels = await groupChannelQuery.next();
-        updateState({ ...state, channels: channels, loading: false })
-    }
 
     const handleJoinChannel = async (channelUrl) => {
         const { channels } = state;
@@ -116,6 +114,11 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, channelNameUpdateValue });
     }
 
+    const onUserNameInputChange = (e) => {
+        const userNameInputValue = e.currentTarget.value;
+        updateState({ ...state, userNameInputValue });
+    }
+
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
         updateState({ ...state, messageInputValue });
@@ -187,28 +190,48 @@ const BasicGroupChannelSample = (props) => {
 
     }
 
-    useEffect(() => {
-        const setup = async () => {
-            const sendbirdChat = await SendbirdChat.init({
-                appId: SENDBIRD_USER_INFO.appId,
-                localCacheEnabled: false,
-                modules: [new GroupChannelModule()]
-            });
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-            const user = urlParams.get('user');
-            const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
-            userUpdateParams.nickname = user || SENDBIRD_USER_INFO.nickname;
-            await sendbirdChat.connect(user || SENDBIRD_USER_INFO.userId);
-            await sendbirdChat.setChannelInvitationPreference(true);
+    const setupUser = async () => {
+        const { userNameInputValue } = state;
+        const sendbirdChat = await SendbirdChat.init({
+            appId: SENDBIRD_USER_INFO.appId,
+            localCacheEnabled: false,
+            modules: [new GroupChannelModule()]
+        });
 
-            const sendbirdUser2 = await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
-            sb = sendbirdChat;
+        const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
+        userUpdateParams.nickname = userNameInputValue;
+        await sendbirdChat.connect(userNameInputValue);
+        await sendbirdChat.setChannelInvitationPreference(true);
 
-            loadChannels();
-        }
-        setup();
-    }, []);
+        await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+        sb = sendbirdChat;
+        updateState({ ...state, loading: true });
+        const channels = await loadChannels();
+        updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
+    }
+
+    // useEffect(() => {
+    //     const setup = async () => {
+    //         const sendbirdChat = await SendbirdChat.init({
+    //             appId: SENDBIRD_USER_INFO.appId,
+    //             localCacheEnabled: false,
+    //             modules: [new GroupChannelModule()]
+    //         });
+    //         const queryString = window.location.search;
+    //         const urlParams = new URLSearchParams(queryString);
+    //         const user = urlParams.get('user');
+    //         const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
+    //         userUpdateParams.nickname = user || SENDBIRD_USER_INFO.nickname;
+    //         await sendbirdChat.connect(user || SENDBIRD_USER_INFO.userId);
+    //         await sendbirdChat.setChannelInvitationPreference(true);
+
+    //         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+    //         sb = sendbirdChat;
+
+    //         loadChannels();
+    //     }
+    //     setup();
+    // }, []);
 
     if (state.loading) {
         return <div>Loading...</div>
@@ -219,7 +242,11 @@ const BasicGroupChannelSample = (props) => {
 
     return (
         <>
-
+            <CreateUserForm
+                setupUser={setupUser}
+                userNameInputValue={state.userNameInputValue}
+                settingUpUser={state.settingUpUser}
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
                 toggleChannelDetails={toggleChannelDetails}
@@ -240,10 +267,6 @@ const BasicGroupChannelSample = (props) => {
                 handleUpdateChannel={handleUpdateChannel}
                 onChannelNamenputChange={onChannelNamenputChange}
                 toggleChannelDetails={toggleChannelDetails} />
-            <MembersList
-                channel={state.currentlyJoinedChannel}
-                handleMemberInvite={handleMemberInvite}
-            />
 
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
                 <MessagesList
@@ -260,6 +283,10 @@ const BasicGroupChannelSample = (props) => {
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange} />
             </Channel>
+            <MembersList
+                channel={state.currentlyJoinedChannel}
+                handleMemberInvite={handleMemberInvite}
+            />
         </>
     );
 };
@@ -322,7 +349,7 @@ const ChannelHeader = ({ children }) => {
 
 const MembersList = ({ channel, handleMemberInvite }) => {
     if (channel) {
-        return <div>
+        return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
             {channel.members.map((member) =>
                 <div key={member.userId}>{member.nickname}</div>
@@ -351,11 +378,13 @@ const Message = (message) => {
     if (message.message.url) {
         return (
             <div className="message">
+                <div>{timestampToTime(message.message.createdAt)}</div>
                 <img src={message.message.url} />
             </div >)
     }
     return (
         <div className="message">
+            <div>{timestampToTime(message.message.createdAt)}</div>
             <div className="message-sender-name">{message.message.sender?.userId}</div>
             <div>{message.message.message}</div>
         </div >
@@ -430,7 +459,33 @@ const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handle
     return null;
 }
 
+const CreateUserForm = ({
+    setupUser,
+    settingUpUser,
+    userNameInputValue,
+    onUserNameInputChange
+}) => {
+    if (settingUpUser) {
+        return <div className="overlay">
+            <div className="overlay-content">
+                <button onClick={setupUser}>create</button>
+                <div>input user name</div>
+                <input onChange={onUserNameInputChange} type="text" value={userNameInputValue} />
+            </div>
+        </div>
+    } else {
+        return null;
+    }
+
+}
+
 // Helpful functions that call Sendbird
+const loadChannels = async () => {
+    const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
+    const channels = await groupChannelQuery.next();
+    return channels;
+}
+
 const joinChannel = async (channel) => {
     const messageListParams = new MessageListParams();
     messageListParams.nextResultSize = 20;
@@ -440,7 +495,6 @@ const joinChannel = async (channel) => {
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
-
 }
 
 
@@ -474,7 +528,7 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
 }
 
 const getAllApplicationUsers = async () => {
-    const userQuery = sb.createApplicationUserListQuery({ limit: 30 });
+    const userQuery = sb.createApplicationUserListQuery({ limit: 100 });
     return await userQuery.next();
 }
 

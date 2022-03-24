@@ -26,7 +26,18 @@ Display thumbnail verion of images. Auto thumbnailing is available with Sendbird
 Error handling SDK requests
 Chat is based around user generated input so consider mitigations against XSS attacks
 Users should always pass an access token when connection to group channels 
-User creation
+User creation done through platofrm API or dashboard
 Pagination of channel and message lists
 Pull in Sendbird from npm
+
+
+## Todo
+p1 user creation
+p1 error handling
+p1 create name on creation
+p1 generate open channnel thumbanils
+p2 dont load all messages every time
+p2 mark as read
+p2 send file on upload
+p2 hot reload metnion in slack
 

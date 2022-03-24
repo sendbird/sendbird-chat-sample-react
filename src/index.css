@@ -16,7 +16,7 @@ img{
 }
 
 input{
-  width: 50%;
+  width: 30%;
   padding: 6px;
   border: 1px solid #f2f2f2;
 }
@@ -101,12 +101,17 @@ code {
   font-weight: 800;
 }
 
+.members-list{
+  border-left: 1px solid #f2f2f2;
+    padding: 12px;
+}
+
 .message-input{
   position: fixed;
   bottom: 0px;
   display: flex;
   border-top: 1px solid #f2f2f2;
-  width: 50%;
+  width: 100%;
   padding: 12px;
   background: white;
 }
