@@ -28,6 +28,7 @@ const BasicGroupChannelSample = (props) => {
         messages: [],
         channels: [],
         messageInputValue: "",
+        userNameInputValue: "",
         channelNameUpdateValue: "",
         settingUpUser: true,
         channelNameUpdateValue: "",
@@ -482,7 +483,7 @@ const CreateUserForm = ({
             <div className="overlay-content">
                 <button onClick={setupUser}>create</button>
                 <div>input user name</div>
-                <input onChange={onUserNameInputChange} type="text" value={userNameInputValue} />
+                <input onChange={onUserNameInputChange} value={userNameInputValue} />
             </div>
         </div>
     } else {
