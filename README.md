@@ -38,6 +38,7 @@ p1 open chanel set name before creation
 
 p2 highlight user select
 
+p2 github access
 p2 update vs create channel button issue
 p2 generate open channnel thumbanils
 p2 what should update do for group channel (check main)
@@ -48,6 +49,8 @@ p2 send file on upload
 p2 hot reload metnion in slack
 p2 show currentl value in update inputs
 p2 hide button if cant be clicked
+p2 on delete message handler when
+p2 check why empty event handlers needed in v4
  - p2 cant delete channel
 
 

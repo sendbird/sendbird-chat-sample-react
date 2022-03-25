@@ -24,9 +24,10 @@ const BasicOpenChannelSample = (props) => {
         currentlyUpdatingChannel: null,
         messages: [],
         channels: [],
+        showChannelCreate: false,
         messageInputValue: "",
         userNameInputValue: "",
-        channelNameUpdateValue: "",
+        channelNameInputValue: "",
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
@@ -73,13 +74,14 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
-    const handleCreateChannel = async (channelName = "testChannel") => {
-        const [openChannel, error] = await createChannel(channelName);
+    const handleCreateChannel = async () => {
+        const { channelNameInputValue } = state;
+        const [openChannel, error] = await createChannel(channelNameInputValue);
         if (error) {
             return onError(error);
         }
         const updatedChannels = [openChannel, ...state.channels];
-        updateState({ ...state, channels: updatedChannels });
+        updateState({ ...state, channels: updatedChannels, showChannelCreate: false, currentlyJoinedChannel: openChannel });
     }
 
     const handleDeleteChannel = async (channelUrl) => {
@@ -94,8 +96,8 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const handleUpdateChannel = async () => {
-        const { currentlyUpdatingChannel, channelNameUpdateValue, channels } = state;
-        const [updatedChannel, error] = await updateChannel(currentlyUpdatingChannel, channelNameUpdateValue);
+        const { currentlyUpdatingChannel, channelNameInputValue, channels } = state;
+        const [updatedChannel, error] = await updateChannel(currentlyUpdatingChannel, channelNameInputValue);
         if (error) {
             return onError(error);
         }
@@ -113,9 +115,13 @@ const BasicOpenChannelSample = (props) => {
         }
     }
 
+    const toggleShowCreateChannel = () => {
+        updateState({ ...state, showChannelCreate: !state.channelCreate });
+    }
+
     const onChannelNamenputChange = (e) => {
-        const channelNameUpdateValue = e.currentTarget.value;
-        updateState({ ...state, channelNameUpdateValue });
+        const channelNameInputValue = e.currentTarget.value;
+        updateState({ ...state, channelNameInputValue });
     }
 
     const onUserNameInputChange = (e) => {
@@ -226,13 +232,18 @@ const BasicOpenChannelSample = (props) => {
                 channels={state.channels}
                 toggleChannelDetails={toggleChannelDetails}
                 handleJoinChannel={handleJoinChannel}
-                handleCreateChannel={handleCreateChannel}
+                toggleShowCreateChannel={toggleShowCreateChannel}
                 handleDeleteChannel={handleDeleteChannel} />
             <ChannelDetails
                 currentlyUpdatingChannel={state.currentlyUpdatingChannel}
                 handleUpdateChannel={handleUpdateChannel}
                 onChannelNamenputChange={onChannelNamenputChange}
                 toggleChannelDetails={toggleChannelDetails} />
+            <ChannelCreate
+                showChannelCreate={state.showChannelCreate}
+                toggleShowCreateChannel={toggleShowCreateChannel}
+                onChannelNamenputChange={onChannelNamenputChange}
+                handleCreateChannel={handleCreateChannel} />
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
                 <MessagesList
                     messages={state.messages}
@@ -252,26 +263,28 @@ const BasicOpenChannelSample = (props) => {
 };
 
 // Chat UI Components
-const ChannelList = ({ channels, handleJoinChannel, handleCreateChannel, handleDeleteChannel, toggleChannelDetails }) => {
+const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, handleDeleteChannel, toggleChannelDetails }) => {
     return (
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Open Channels</h1>
-                <button onClick={() => handleCreateChannel("new open channel")}>Create</button>
+                <button onClick={toggleShowCreateChannel}>Create</button>
             </div>
-            {channels.map(channel => {
-                return (
-                    <div key={channel.url} className="channel-list-item" >
-                        <div className="channel-list-item-name"
-                            onClick={() => { handleJoinChannel(channel.url) }}>
-                            {channel.name}
-                        </div>
-                        <div>
-                            <button onClick={() => toggleChannelDetails(channel)}>update</button>
-                            <button onClick={() => handleDeleteChannel(channel.url)}>delete</button>
-                        </div>
-                    </div>);
-            })}
+            {
+                channels.map(channel => {
+                    return (
+                        <div key={channel.url} className="channel-list-item" >
+                            <div className="channel-list-item-name"
+                                onClick={() => { handleJoinChannel(channel.url) }}>
+                                {channel.name}
+                            </div>
+                            <div>
+                                <button onClick={() => toggleChannelDetails(false, channel)}>update</button>
+                                <button onClick={() => handleDeleteChannel(channel.url)}>delete</button>
+                            </div>
+                        </div>);
+                })
+            }
         </div >);
 }
 
@@ -367,6 +380,28 @@ const ChannelDetails = ({
     return null;
 }
 
+const ChannelCreate = ({
+    showChannelCreate,
+    toggleShowCreateChannel,
+    handleCreateChannel,
+    onChannelNamenputChange
+}) => {
+    if (showChannelCreate) {
+        return <div className="overlay">
+            <div className="overlay-content">
+                <div>
+                    <h3>Create Channel</h3>
+                    <button onClick={toggleShowCreateChannel}>Close</button>
+                </div>
+                Name
+                <input onChange={onChannelNamenputChange} />
+                <button onClick={handleCreateChannel}>Create</button>
+            </div>
+        </div >;
+    }
+    return null;
+}
+
 const CreateUserForm = ({
     setupUser,
     settingUpUser,
@@ -439,11 +474,11 @@ const deleteChannel = async (channelUrl) => {
 
 }
 
-const updateChannel = async (currentlyUpdatingChannel, channelNameUpdateValue) => {
+const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) => {
     try {
         const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
         const openChannelParams = new OpenChannelUpdateParams();
-        openChannelParams.name = channelNameUpdateValue;
+        openChannelParams.name = channelNameInputValue;
 
         openChannelParams.operatorUserIds = [sb.currentUser.userId];
 
