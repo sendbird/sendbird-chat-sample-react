@@ -126,6 +126,7 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const sendMessage = async () => {
+        debugger;
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = new UserMessageUpdateParams();
@@ -376,15 +377,17 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                 onChange={onChange} />
 
             <div className="message-input-buttons">
-                <button
-                    className="send-message-button"
-                    onClick={sendMessage}>Send Message</button>
+                <button className="send-message-button" onClick={sendMessage}>Send Message</button>
+                <label className="file-upload-label" htmlFor="upload" >Select File</label>
+
                 <input
+                    id="upload"
+                    className="file-upload-button"
                     type='file'
+                    hidden={true}
                     onChange={onFileInputChange}
                     onClick={() => { }}
                 />
-
             </div>
 
         </div>);

@@ -200,8 +200,17 @@ code {
   margin-right:1px;
 }
 .error{
-  background:red;
+  background:rgb(249, 56, 56);
   display:flex;
   padding:24px;
   width:100%;
+}
+
+.file-upload-label{
+  cursor:pointer;
+}
+
+.file-upload-label img{
+  width: 46px;
+  vertical-align: middle;
 }

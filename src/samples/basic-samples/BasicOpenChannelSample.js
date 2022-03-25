@@ -136,6 +136,7 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const sendMessage = async () => {
+        debugger;
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
 
         if (messageToUpdate) {
@@ -344,8 +345,13 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
 
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
+                <label className="file-upload-label" htmlFor="upload" >Select File</label>
+
                 <input
+                    id="upload"
+                    className="file-upload-button"
                     type='file'
+                    hidden={true}
                     onChange={onFileInputChange}
                     onClick={() => { }}
                 />
