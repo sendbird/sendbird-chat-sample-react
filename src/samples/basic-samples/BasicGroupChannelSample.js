@@ -164,6 +164,7 @@ const BasicGroupChannelSample = (props) => {
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             updateState({ ...state, file: e.currentTarget.files[0] });
+            await sendFileMessage();
         }
     }
 
@@ -262,7 +263,6 @@ const BasicGroupChannelSample = (props) => {
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
-                    sendFileMessage={sendFileMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange} />
             </Channel>
@@ -285,11 +285,10 @@ const ChannelList = ({
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Group Channels</h1>
-                <button onClick={() => handleGetAllApplicationUsers()}>Create</button>
+                <button className="channel-create-button" onClick={() => handleGetAllApplicationUsers()}>Create Channel</button>
             </div>
             {channels.map(channel => {
-                // debugger;
-                // const userIsChannelOperator = channel.operators.some((operator) => operator.id === "1234");
+
                 return (
                     <div key={channel.url} className="channel-list-item" >
                         <div
@@ -299,7 +298,7 @@ const ChannelList = ({
                             <div className="last-message">{channel.lastMessage?.message}</div>
                         </div>
                         <div>
-                            {true && < button onClick={() => handleDeleteChannel(channel.url)}>delete</button>}
+                            < button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>delete</button>
                         </div>
                     </div>);
             })}
@@ -375,7 +374,7 @@ const Message = (message) => {
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInputChange, fileSelected }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
     return (
         <div className="message-input">
             <input
@@ -390,7 +389,6 @@ const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInp
                     onChange={onFileInputChange}
                     onClick={() => { }}
                 />
-                <button onClick={sendFileMessage} disabled={!fileSelected}>Send File</button>
 
             </div>
 
@@ -434,10 +432,18 @@ const CreateUserForm = ({
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
-                <button onClick={setupUser}>create</button>
-                <div>input user name</div>
-                <input onChange={onUserNameInputChange} value={userNameInputValue} />
+                <div>Name</div>
+                <input
+                    onChange={onUserNameInputChange}
+                    className="form-input"
+                    type="text" value={userNameInputValue} />
+                <div>
+                    <button
+                        className="user-submit-button"
+                        onClick={setupUser}>Submit</button>
+                </div>
             </div>
+
         </div>
     } else {
         return null;

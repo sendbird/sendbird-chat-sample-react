@@ -157,7 +157,7 @@ const BasicOpenChannelSample = (props) => {
 
     const sendFileMessage = async () => {
         const { currentlyJoinedChannel, file, messages } = state;
-
+        debugger;
         const fileMessageParams = new FileMessageParams();
         fileMessageParams.file = file;
         const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
@@ -170,6 +170,7 @@ const BasicOpenChannelSample = (props) => {
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             updateState({ ...state, file: e.currentTarget.files[0] });
+            await sendFileMessage();
         }
     }
 
@@ -254,7 +255,6 @@ const BasicOpenChannelSample = (props) => {
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
-                    sendFileMessage={sendFileMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange} />
             </Channel>
@@ -268,7 +268,7 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Open Channels</h1>
-                <button onClick={toggleShowCreateChannel}>Create</button>
+                <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
             </div>
             {
                 channels.map(channel => {
@@ -281,8 +281,8 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                             </div>
                             {userIsOperator &&
                                 <div>
-                                    <button onClick={() => toggleChannelDetails(false, channel)}>update</button>
-                                    <button onClick={() => handleDeleteChannel(channel.url)}>delete</button>
+                                    <button className="control-button" onClick={() => toggleChannelDetails(false, channel)}>update</button>
+                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>delete</button>
                                 </div>}
                         </div>);
                 })
@@ -314,8 +314,8 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
             <div key={message.messageId} className="message-item">
                 {message.messageId}
                 <Message message={message} />
-                <button onClick={() => updateMessage(message)}>update</button>
-                <button onClick={() => handleDeleteMessage(message)}>delete</button>
+                <button className="control-button" onClick={() => updateMessage(message)}>update</button>
+                <button className="control-button" onClick={() => handleDeleteMessage(message)}>delete</button>
             </div>);
     })
 }
@@ -338,7 +338,7 @@ const Message = (message) => {
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInputChange, fileSelected }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
     return (
         <div className="message-input">
             <input
@@ -353,8 +353,6 @@ const MessageInput = ({ value, onChange, sendMessage, sendFileMessage, onFileInp
                     onChange={onFileInputChange}
                     onClick={() => { }}
                 />
-                <button onClick={sendFileMessage} disabled={!fileSelected}>Send File</button>
-
             </div>
 
         </div>);
@@ -393,11 +391,14 @@ const ChannelCreate = ({
             <div className="overlay-content">
                 <div>
                     <h3>Create Channel</h3>
-                    <button onClick={toggleShowCreateChannel}>Close</button>
                 </div>
-                Name
-                <input onChange={onChannelNamenputChange} />
-                <button onClick={handleCreateChannel}>Create</button>
+                <div>Name</div>
+                <input className="form-input" onChange={onChannelNamenputChange} />
+                <div>
+                    <button className="form-button" onClick={handleCreateChannel}>Create</button>
+                    <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
+                </div>
+
             </div>
         </div >;
     }
@@ -413,10 +414,18 @@ const CreateUserForm = ({
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
-                <button onClick={setupUser}>create</button>
-                <div>input user name</div>
-                <input onChange={onUserNameInputChange} type="text" value={userNameInputValue} />
+                <div>Name</div>
+                <input
+                    onChange={onUserNameInputChange}
+                    className="form-input"
+                    type="text" value={userNameInputValue} />
+                <div>
+                    <button
+                        className="user-submit-button"
+                        onClick={setupUser}>Submit</button>
+                </div>
             </div>
+
         </div>
     } else {
         return null;

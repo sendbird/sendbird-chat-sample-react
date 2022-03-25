@@ -35,24 +35,30 @@ Pull in Sendbird from npm
  - p1 user creation (gc)
  - p1 error handling
  - p1 open chanel set name before creation
+p1 style whole app better
+p1 group channel create update broken
+p1 update not working
 
 p2 highlight user select
-
 p2 github access
 p2 update vs create channel button issue
+p2 hot reload metnion in slack
+p2 on delete message handler incoming message
+
+
 p2 generate open channnel thumbanils
 p2 dont load all messages every time
 p2 mark as read
 p2 update channel list with event when second users create channel
 p2 send file on upload
-p2 hot reload metnion in slack
 p2 show currentl value in update inputs
-p2 hide button if cant be clicked
-p2 on delete message handler when
 p2 check why empty event handlers needed in v4
 p2 auto load channel on create
+
  - p2 cant delete channel
-- p2 what should update do for group channel (check main)
+ - p2 what should update do for group channel (check main)
+ - p2 hide button if cant be clicked
+
 
 
 

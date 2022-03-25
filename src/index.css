@@ -15,10 +15,24 @@ img{
   width:300px;
 }
 
+button{
+  border: none;
+  color: white;
+  padding: 14px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius:2px;
+  cursor: pointer;
+  background-color: #424242;
+}
+
 input{
   width: 30%;
   padding: 6px;
-  border: 1px solid #f2f2f2;
+  border: 1px solid #cbcbcb;
+  outline:none;
 }
 
 
@@ -44,14 +58,14 @@ code {
 .channel-list {
   background: white;
   flex:2;
-  border-right: 1px solid #f2f2f2;
+  border-right: 1px solid #cbcbcb;
   overflow-y: scroll;
 }
 
 .channel-list-item{
   background: #fcfcfc;
   padding:12px;
-  border-top: 1px solid #f2f2f2;
+  border-top: 1px solid #ececec;
   display:flex;
   justify-content: space-between;
 }
@@ -82,9 +96,9 @@ code {
 
 .message-item{
   background: #f6f6f6;
-  padding: 12px;
+  padding: 24px;
   margin: 12px;
-  border-radius: 18px;
+  border-radius: 8px;
 }
 
 .message{
@@ -102,15 +116,15 @@ code {
 }
 
 .members-list{
-  border-left: 1px solid #f2f2f2;
-    padding: 12px;
+  border-left: 1px solid #cbcbcb;
+  padding: 12px;
 }
 
 .message-input{
   position: fixed;
   bottom: 0px;
   display: flex;
-  border-top: 1px solid #f2f2f2;
+  border-top: 1px solid #cbcbcb;
   width: 100%;
   padding: 12px;
   background: white;
@@ -130,10 +144,36 @@ code {
 .overlay-content{
   overflow-y: scroll;
 
-  padding:24px;
+  padding:80px;
   opacity: 1;
   background: white;
-  border: 1px solid grey;
+  border: 1px solid #cbcbcb;
   width: 40%;
   height: 400px;
+}
+
+.form-input{
+  margin-top: 12px;
+  margin-bottom: 12px;
+  padding:18px;
+  width:100%;
+  border-radius: 2px;
+}
+
+.form-button{
+  margin-right:4px;
+}
+
+.user-submit-button{
+  background-color: #6210CC;
+}
+
+.channel-create-button{
+  background-color: #62EEAB;
+}
+
+.control-button{
+  background-color: #242459;
+  padding:4px;
+  margin-right:1px;
 }
