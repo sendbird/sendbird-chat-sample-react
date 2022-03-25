@@ -1,0 +1,1 @@
+{"version":3,"file":"type.js","sourceRoot":"","sources":["../../../../lib/nestdb/src/type.ts"],"names":[],"mappings":";;;AAEO,MAAM,eAAe,GAAG,CAAC,GAAY,EAAW,EAAE;IACvD,MAAM,CAAC,GAAG,OAAO,GAAG,CAAC;IACrB,OAAO,GAAG,KAAK,IAAI;WACd,CAAC,KAAK,WAAW;WACjB,CAAC,KAAK,SAAS;WACf,CAAC,KAAK,QAAQ;WACd,CAAC,KAAK,QAAQ,CAAC;AACtB,CAAC,CAAC;AAPW,QAAA,eAAe,mBAO1B"}

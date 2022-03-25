@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NESTDB_MESSAGE_COLLECTION_KEY = exports.NESTDB_MESSAGE_COLLECTION_NAME = exports.DEFAULT_MESSAGE_LIMIT = exports.NESTDB_GROUPCHANNEL_COLLECTION_KEY = exports.NESTDB_GROUPCHANNEL_COLLECTION_NAME = exports.DEFAULT_GROUPCHANNEL_LIMIT = void 0;
+exports.DEFAULT_GROUPCHANNEL_LIMIT = 100;
+exports.NESTDB_GROUPCHANNEL_COLLECTION_NAME = 'GroupChannel';
+exports.NESTDB_GROUPCHANNEL_COLLECTION_KEY = 'url';
+exports.DEFAULT_MESSAGE_LIMIT = 100;
+exports.NESTDB_MESSAGE_COLLECTION_NAME = 'Message';
+exports.NESTDB_MESSAGE_COLLECTION_KEY = 'messageId';
+//# sourceMappingURL=const.js.map
