@@ -55,10 +55,10 @@ const BasicGroupChannelSample = (props) => {
         }
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
-        channelHandler.onUserEntered = () => { };
-        channelHandler.onChannelParticipantCountChanged = () => { };
-        channelHandler.onChannelChanged = () => { };
-        channelHandler.onUserReceivedInvitation = () => { };
+        // channelHandler.onUserEntered = () => { };
+        // channelHandler.onChannelParticipantCountChanged = () => { };
+        // channelHandler.onChannelChanged = () => { };
+        // channelHandler.onUserReceivedInvitation = () => { };
         channelHandler.onUserJoined = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
@@ -357,8 +357,10 @@ const Message = (message) => {
     }
     return (
         <div className="message">
-            <div>{timestampToTime(message.message.createdAt)}</div>
-            <div className="message-sender-name">{message.message.sender?.userId}</div>
+            <div className="message-info">
+                <div className="message-sender-name">{message.message.sender.userId}{' '}</div>
+                <div>{timestampToTime(message.message.createdAt)}</div>
+            </div>
             <div>{message.message.message}</div>
         </div >
     );

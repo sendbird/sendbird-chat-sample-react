@@ -17,6 +17,6 @@ export const timestampToTime = (timestamp) => {
         date = '';
     }
     return nowDate === date
-        ? moment.unix(timestamp.toString().length === 13 ? timestamp / 1000 : timestamp).format('HH:mm:ss')
+        ? moment.unix(timestamp.toString().length === 13 ? timestamp / 1000 : timestamp).format('HH:mm')
         : date;
 };

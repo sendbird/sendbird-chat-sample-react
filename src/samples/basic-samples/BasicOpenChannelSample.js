@@ -56,9 +56,9 @@ const BasicOpenChannelSample = (props) => {
 
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
-        channelHandler.onUserEntered = () => { };
-        channelHandler.onOperatorUpdated = () => { };
-        channelHandler.onChannelParticipantCountChanged = () => { };
+        // channelHandler.onUserEntered = () => { };
+        // channelHandler.onOperatorUpdated = () => { };
+        // channelHandler.onChannelParticipantCountChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
             messages[messageIndex] = message;
@@ -211,7 +211,7 @@ const BasicOpenChannelSample = (props) => {
     }
 
     if (state.error) {
-        return <div>{state.error} check console for more information.</div>
+        return <div class="error">{state.error} check console for more information.</div>
     }
 
     console.log('- - - - State object very useful for debugging - - - -');
@@ -324,8 +324,10 @@ const Message = (message) => {
     }
     return (
         <div className="message">
-            <div>{timestampToTime(message.message.createdAt)}</div>
-            <div className="message-sender-name">{message.message.sender.userId}</div>
+            <div className="message-info">
+                <div className="message-sender-name">{message.message.sender.userId}{' '}</div>
+                <div>{timestampToTime(message.message.createdAt)}</div>
+            </div>
             <div>{message.message.message}</div>
         </div >
     );
