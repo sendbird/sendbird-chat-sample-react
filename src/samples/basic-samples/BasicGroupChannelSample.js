@@ -10,7 +10,6 @@ import { GroupChannelModule, GroupChannelHandler } from '../../out/module/groupC
 import { UserMessageParams } from '../../out/module/message.js';
 import UserMessageUpdateParams from '../../out/model/params/userMessageUpdateParams.js';
 import GroupChannelCreateParams from '../../out/model/params/groupChannelCreateParams.js';
-import GroupChannelUpdateParams from '../../out/model/params/groupChannelUpdateParams.js';
 import FileMessageParams from '../../out/model/params/fileMessageParams.js';
 
 import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
@@ -175,11 +174,12 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const handleGetAllApplicationUsers = async () => {
+        updateState({ ...state, currentlyJoinedChannel: null });
         const [users, error] = await getAllApplicationUsers();
         if (error) {
             return onError(error);
         }
-        updateState({ ...state, applicationUsers: users, groupChannelMembers: [sb.currentUser.userId] });
+        updateState({ ...state, currentlyJoinedChannel: null, applicationUsers: users, groupChannelMembers: [sb.currentUser.userId] });
     }
 
     const addToChannelMembersList = (userId) => {
@@ -281,7 +281,6 @@ const ChannelList = ({
                 <button className="channel-create-button" onClick={() => handleGetAllApplicationUsers()}>Create Channel</button>
             </div>
             {channels.map(channel => {
-
                 return (
                     <div key={channel.url} className="channel-list-item" >
                         <div

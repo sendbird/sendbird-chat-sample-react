@@ -40,7 +40,7 @@ p1 update not working
 p1 group channel create update broken
 
 p2 highlight user select
-p2 github access
+p2 format JS nicely
 p2 update vs create channel button issue
 p2 hot reload metnion in slack
 p2 on delete message handler incoming message
@@ -58,6 +58,7 @@ p2 auto load channel on create
  - p2 cant delete channel
  - p2 what should update do for group channel (check main)
  - p2 hide button if cant be clicked
+ - p2 github access
 
 
 
