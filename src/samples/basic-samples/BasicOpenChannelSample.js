@@ -272,16 +272,18 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
             </div>
             {
                 channels.map(channel => {
+                    const userIsOperator = channel.operators.some((operator) => operator.userId === "bob2")
                     return (
                         <div key={channel.url} className="channel-list-item" >
                             <div className="channel-list-item-name"
                                 onClick={() => { handleJoinChannel(channel.url) }}>
                                 {channel.name}
                             </div>
-                            <div>
-                                <button onClick={() => toggleChannelDetails(false, channel)}>update</button>
-                                <button onClick={() => handleDeleteChannel(channel.url)}>delete</button>
-                            </div>
+                            {userIsOperator &&
+                                <div>
+                                    <button onClick={() => toggleChannelDetails(false, channel)}>update</button>
+                                    <button onClick={() => handleDeleteChannel(channel.url)}>delete</button>
+                                </div>}
                         </div>);
                 })
             }

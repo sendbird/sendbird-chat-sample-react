@@ -480,7 +480,8 @@ const createChannel = async (channelName, userIdsToInvite) => {
         const groupChannelParams = new GroupChannelCreateParams();
         groupChannelParams.addUserIds(userIdsToInvite);
         groupChannelParams.name = channelName;
-        groupChannelParams.operators = [sb.currentUser.userId];
+        groupChannelParams.operatorUserIds = userIdsToInvite;
+        debugger;
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
         return [groupChannel, null];
     } catch (error) {
