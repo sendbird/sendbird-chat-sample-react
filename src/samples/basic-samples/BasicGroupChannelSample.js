@@ -24,7 +24,6 @@ const BasicGroupChannelSample = (props) => {
         applicationUsers: [],
         groupChannelMembers: [],
         currentlyJoinedChannel: null,
-        currentlyUpdatingChannel: null,
         messages: [],
         channels: [],
         messageInputValue: "",
@@ -105,17 +104,6 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
-    const handleUpdateChannel = async () => {
-        const { currentlyUpdatingChannel, channelNameUpdateValue, channels } = state;
-        const [updatedChannel, error] = await updateChannel(currentlyUpdatingChannel, channelNameUpdateValue);
-        if (error) {
-            return onError(error);
-        }
-        const indexToReplace = channels.findIndex((channel) => channel.url === currentlyUpdatingChannel.channelUrl);
-        const updatedChannels = [...channels];
-        updatedChannels[indexToReplace] = updatedChannel;
-        updateState({ ...state, channels: updatedChannels, currentlyUpdatingChannel: null });
-    }
 
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
@@ -126,19 +114,7 @@ const BasicGroupChannelSample = (props) => {
 
     }
 
-    const toggleChannelDetails = (channel) => {
-        if (channel) {
-            updateState({ ...state, currentlyUpdatingChannel: channel });
-        } else {
-            updateState({ ...state, currentlyUpdatingChannel: null });
 
-        }
-    }
-
-    const onChannelNamenputChange = (e) => {
-        const channelNameUpdateValue = e.currentTarget.value;
-        updateState({ ...state, channelNameUpdateValue });
-    }
 
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
@@ -239,6 +215,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+        console.log(sb.currentUser.userId);
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
@@ -262,7 +239,6 @@ const BasicGroupChannelSample = (props) => {
                 onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
-                toggleChannelDetails={toggleChannelDetails}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleGetAllApplicationUsers}
                 handleDeleteChannel={handleDeleteChannel}
@@ -274,12 +250,6 @@ const BasicGroupChannelSample = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
-
-            <ChannelDetails
-                currentlyUpdatingChannel={state.currentlyUpdatingChannel}
-                handleUpdateChannel={handleUpdateChannel}
-                onChannelNamenputChange={onChannelNamenputChange}
-                toggleChannelDetails={toggleChannelDetails} />
 
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
                 <MessagesList
@@ -309,7 +279,6 @@ const ChannelList = ({
     channels,
     handleJoinChannel,
     handleDeleteChannel,
-    toggleChannelDetails,
     handleGetAllApplicationUsers
 }) => {
     return (
@@ -319,6 +288,8 @@ const ChannelList = ({
                 <button onClick={() => handleGetAllApplicationUsers()}>Create</button>
             </div>
             {channels.map(channel => {
+                // debugger;
+                // const userIsChannelOperator = channel.operators.some((operator) => operator.id === "1234");
                 return (
                     <div key={channel.url} className="channel-list-item" >
                         <div
@@ -328,8 +299,7 @@ const ChannelList = ({
                             <div className="last-message">{channel.lastMessage?.message}</div>
                         </div>
                         <div>
-                            <button onClick={() => toggleChannelDetails(channel)}>update</button>
-                            <button onClick={() => handleDeleteChannel(channel.url)}>delete</button>
+                            {true && < button onClick={() => handleDeleteChannel(channel.url)}>delete</button>}
                         </div>
                     </div>);
             })}
@@ -455,23 +425,6 @@ const MembersSelect = ({
     return null;
 }
 
-const ChannelDetails = ({ currentlyUpdatingChannel, toggleChannelDetails, handleUpdateChannel, onChannelNamenputChange }) => {
-    if (currentlyUpdatingChannel) {
-        return <div className="overlay">
-            <div className="overlay-content">
-                <div>
-                    <h3>Channel Details</h3>
-                    <button onClick={() => toggleChannelDetails(null)}>Close</button>
-                </div>
-                Name
-                <input onChange={onChannelNamenputChange} />
-                <button onClick={() => handleUpdateChannel()}>Update channel name</button>
-            </div>
-        </div >;
-    }
-    return null;
-}
-
 const CreateUserForm = ({
     setupUser,
     settingUpUser,
@@ -527,7 +480,7 @@ const createChannel = async (channelName, userIdsToInvite) => {
         const groupChannelParams = new GroupChannelCreateParams();
         groupChannelParams.addUserIds(userIdsToInvite);
         groupChannelParams.name = channelName;
-        groupChannelParams.operatorUserIds = [sb.currentUser.userId];
+        groupChannelParams.operators = [sb.currentUser.userId];
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
         return [groupChannel, null];
     } catch (error) {
@@ -545,21 +498,6 @@ const deleteChannel = async (channelUrl) => {
         return [null, error];
     }
 
-}
-
-const updateChannel = async (currentlyUpdatingChannel, channelNameUpdateValue) => {
-    try {
-        const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
-        const openChannelParams = new GroupChannelUpdateParams();
-        openChannelParams.name = channelNameUpdateValue;
-
-        openChannelParams.operatorUserIds = [sb.currentUser.userId];
-
-        const updatedChannel = await channel.updateChannel(openChannelParams);
-        return [updatedChannel, null];
-    } catch (error) {
-        return [null, error];
-    }
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
