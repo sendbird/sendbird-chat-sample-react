@@ -173,7 +173,7 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
     }
 
-    const handleGetAllApplicationUsers = async () => {
+    const handleLoadMemberSelectionList = async () => {
         updateState({ ...state, currentlyJoinedChannel: null });
         const [users, error] = await getAllApplicationUsers();
         if (error) {
@@ -233,9 +233,9 @@ const BasicGroupChannelSample = (props) => {
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
-                handleCreateChannel={handleGetAllApplicationUsers}
+                handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleGetAllApplicationUsers={handleGetAllApplicationUsers} />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -272,13 +272,13 @@ const ChannelList = ({
     channels,
     handleJoinChannel,
     handleDeleteChannel,
-    handleGetAllApplicationUsers
+    handleLoadMemberSelectionList
 }) => {
     return (
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Group Channels</h1>
-                <button className="channel-create-button" onClick={() => handleGetAllApplicationUsers()}>Create Channel</button>
+                <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
             </div>
             {channels.map(channel => {
                 return (
