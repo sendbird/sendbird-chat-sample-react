@@ -147,24 +147,16 @@ const BasicGroupChannelSample = (props) => {
         }
     }
 
-    const sendFileMessage = async () => {
-        const { currentlyJoinedChannel, file, messages } = state;
-
-        const fileMessageParams = new FileMessageParams();
-        fileMessageParams.file = file;
-        // fileMessageParams.thumbnailSizes = [{ maxWidth: 100, maxHeight: 100 }, { maxWidth: 200, maxHeight: 200 }];
-        const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
-
-        message.onSucceeded((message) => {
-            const updatedMessages = [...messages, message];
-            updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-        });
-    }
-
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            updateState({ ...state, file: e.currentTarget.files[0] });
-            await sendFileMessage();
+            const { currentlyJoinedChannel, messages } = state;
+            const fileMessageParams = new FileMessageParams();
+            fileMessageParams.file = e.currentTarget.files[0];
+            const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
+            message.onSucceeded((message) => {
+                const updatedMessages = [...messages, message];
+                updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
+            });
         }
     }
 

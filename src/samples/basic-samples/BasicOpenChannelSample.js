@@ -155,22 +155,16 @@ const BasicOpenChannelSample = (props) => {
         }
     }
 
-    const sendFileMessage = async () => {
-        const { currentlyJoinedChannel, file, messages } = state;
-        debugger;
-        const fileMessageParams = new FileMessageParams();
-        fileMessageParams.file = file;
-        const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
-        message.onSucceeded((message) => {
-            const updatedMessages = [...messages, message];
-            updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-        });
-    }
-
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            updateState({ ...state, file: e.currentTarget.files[0] });
-            await sendFileMessage();
+            const { currentlyJoinedChannel, messages } = state;
+            const fileMessageParams = new FileMessageParams();
+            fileMessageParams.file = e.currentTarget.files[0];
+            const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
+            message.onSucceeded((message) => {
+                const updatedMessages = [...messages, message];
+                updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
+            });
         }
     }
 
@@ -272,7 +266,7 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
             </div>
             {
                 channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === "bob2")
+                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
                     return (
                         <div key={channel.url} className="channel-list-item" >
                             <div className="channel-list-item-name"
