@@ -1,0 +1,1 @@
+{"version":3,"file":"pingCommand.js","sourceRoot":"","sources":["../../../../core/command/websocket/pingCommand.ts"],"names":[],"mappings":";;AACA,uEAAgE;AAEhE,MAAqB,WAAY,SAAQ,iCAAuB;IAC9D;QACE,KAAK,CAAC;YACJ,IAAI,EAAE,MAAM;YACZ,OAAO,EAAE;gBACP,EAAE,EAAE,IAAI,CAAC,GAAG,EAAE;gBACd,MAAM,EAAE,CAAC;aACV;YACD,WAAW,EAAE,KAAK;SACnB,CAAC,CAAC;IACL,CAAC;CACF;AAXD,8BAWC"}
