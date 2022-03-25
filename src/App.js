@@ -12,7 +12,6 @@ const App = () => {
         <Route path='/' element={<Home />} />
         <Route path='/basic-samples/open-channel' element={<BasicOpenChannelSample />} />
         <Route path='/basic-samples/group-channel' element={<BasicGroupChannelSample />} />
-
       </Routes>
     </div>
   );
