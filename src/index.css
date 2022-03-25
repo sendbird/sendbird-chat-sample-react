@@ -120,6 +120,11 @@ code {
   padding: 12px;
 }
 
+.member-item{
+  padding:8px 0px 0px 0px;
+  cursor: pointer;
+}
+
 .message-input{
   position: fixed;
   bottom: 0px;
@@ -143,7 +148,6 @@ code {
 
 .overlay-content{
   overflow-y: scroll;
-
   padding:80px;
   opacity: 1;
   background: white;

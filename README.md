@@ -36,8 +36,8 @@ Pull in Sendbird from npm
  - p1 error handling
  - p1 open chanel set name before creation
 p1 style whole app better
-p1 group channel create update broken
 p1 update not working
+p1 group channel create update broken
 
 p2 highlight user select
 p2 github access

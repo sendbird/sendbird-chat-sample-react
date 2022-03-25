@@ -290,7 +290,7 @@ const ChannelList = ({
                             <div className="last-message">{channel.lastMessage?.message}</div>
                         </div>
                         <div>
-                            < button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>delete</button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>delete</button>
                         </div>
                     </div>);
             })}
@@ -326,7 +326,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
             {channel.members.map((member) =>
-                <div key={member.userId}>{member.nickname}</div>
+                <div className="member-item" key={member.userId}>{member.nickname}</div>
             )}
         </div>;
     } else {
@@ -342,8 +342,8 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
             <div key={message.messageId} className="message-item">
                 {message.messageId}
                 <Message message={message} />
-                <button onClick={() => updateMessage(message)}>update</button>
-                <button onClick={() => handleDeleteMessage(message)}>delete</button>
+                <button className="control-button" onClick={() => updateMessage(message)}>update</button>
+                <button className="control-button" onClick={() => handleDeleteMessage(message)}>delete</button>
             </div>);
     })
 }
@@ -375,7 +375,9 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                 onChange={onChange} />
 
             <div className="message-input-buttons">
-                <button onClick={sendMessage}>Send Message</button>
+                <button
+                    className="send-message-button"
+                    onClick={sendMessage}>Send Message</button>
                 <input
                     type='file'
                     onChange={onFileInputChange}
@@ -398,18 +400,22 @@ const MembersSelect = ({
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
-                {applicationUsers.map((user) => {
-                    return <div key={user.userId} onClick={() => addToChannelMembersList(user.userId)}>{user.nickname}</div>
-                })}
-            </div>
-            <button onClick={() => {
-                if (currentlyJoinedChannel) {
-                    handleUpdateChannelMembersList();
-                } else {
-                    handleCreateChannel();
+                <button onClick={() => {
+                    if (currentlyJoinedChannel) {
+                        handleUpdateChannelMembersList();
+                    } else {
+                        handleCreateChannel();
 
-                }
-            }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
+                    }
+                }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
+                {applicationUsers.map((user) => {
+                    return <div
+                        key={user.userId}
+                        className="member-item"
+                        onClick={() => addToChannelMembersList(user.userId)}>{user.nickname}</div>
+                })}
+
+            </div>
         </div >;
     }
     return null;
