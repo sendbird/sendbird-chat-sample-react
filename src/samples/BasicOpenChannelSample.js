@@ -1,19 +1,19 @@
 import SendBird from 'sendbird';
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
-import { SENDBIRD_USER_INFO } from '../../constants/constants';
-import { timestampToTime } from '../../utils/messageUtils';
+import { SENDBIRD_USER_INFO } from '../constants/constants';
+import { timestampToTime } from '../utils/messageUtils';
 
-import SendbirdChat from '../../out/sendbird.js';
-import { OpenChannelModule, OpenChannelHandler } from '../../out/module/openChannel.js';
-import { UserMessageParams } from '../../out/module/message.js';
-import UserMessageUpdateParams from '../../out/model/params/userMessageUpdateParams.js';
-import OpenChannelCreateParams from '../../out/model/params/openChannelCreateParams.js';
-import OpenChannelUpdateParams from '../../out/model/params/openChannelUpdateParams.js';
-import FileMessageParams from '../../out/model/params/fileMessageParams.js';
+import SendbirdChat from '../out/sendbird.js';
+import { OpenChannelModule, OpenChannelHandler } from '../out/module/openChannel.js';
+import { UserMessageParams } from '../out/module/message.js';
+import UserMessageUpdateParams from '../out/model/params/userMessageUpdateParams.js';
+import OpenChannelCreateParams from '../out/model/params/openChannelCreateParams.js';
+import OpenChannelUpdateParams from '../out/model/params/openChannelUpdateParams.js';
+import FileMessageParams from '../out/model/params/fileMessageParams.js';
 
-import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
-import MessageListParams from '../../out/model/params/messageListParams.js';
+import UserUpdateParams from '../out/model/params/userUpdateParams.js';
+import MessageListParams from '../out/model/params/messageListParams.js';
 
 let sb;
 

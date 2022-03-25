@@ -17,7 +17,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 ## Create a new sample
 1. Make a copy of your chosen basic channel sample, either BasicOpenChannelSample or BasicGroupChannelSample.
 2. Update the routes in App.js js to include your newly created component.
-`<Route path='/group-channel-feature-one' element={<BasicGroupChannelFeatureOne />} />`
+`<Route path='/group-channel-feature-one' element={<GroupChannelFeatureOne />} />`
 3. Update Home.js component link list with`<li><Link to="/group-channel-feature1">Group Channel Feature One</Link></li>`
 
 ## Considerations in real world app

@@ -2,18 +2,18 @@ import SendBird from 'sendbird';
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 
-import { SENDBIRD_USER_INFO } from '../../constants/constants';
-import { timestampToTime } from '../../utils/messageUtils';
+import { SENDBIRD_USER_INFO } from '../constants/constants';
+import { timestampToTime } from '../utils/messageUtils';
 
-import SendbirdChat from '../../out/sendbird.js';
-import { GroupChannelModule, GroupChannelHandler } from '../../out/module/groupChannel.js';
-import { UserMessageParams } from '../../out/module/message.js';
-import UserMessageUpdateParams from '../../out/model/params/userMessageUpdateParams.js';
-import GroupChannelCreateParams from '../../out/model/params/groupChannelCreateParams.js';
-import FileMessageParams from '../../out/model/params/fileMessageParams.js';
+import SendbirdChat from '../out/sendbird.js';
+import { GroupChannelModule, GroupChannelHandler } from '../out/module/groupChannel.js';
+import { UserMessageParams } from '../out/module/message.js';
+import UserMessageUpdateParams from '../out/model/params/userMessageUpdateParams.js';
+import GroupChannelCreateParams from '../out/model/params/groupChannelCreateParams.js';
+import FileMessageParams from '../out/model/params/fileMessageParams.js';
 
-import UserUpdateParams from '../../out/model/params/userUpdateParams.js';
-import MessageListParams from '../../out/model/params/messageListParams.js';
+import UserUpdateParams from '../out/model/params/userUpdateParams.js';
+import MessageListParams from '../out/model/params/messageListParams.js';
 
 let sb;
 

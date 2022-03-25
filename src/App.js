@@ -1,8 +1,8 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from './Home';
-import BasicOpenChannelSample from './samples/basic-samples/BasicOpenChannelSample';
-import BasicGroupChannelSample from './samples/basic-samples/BasicGroupChannelSample';
+import BasicOpenChannelSample from './samples/BasicOpenChannelSample';
+import BasicGroupChannelSample from './samples/BasicGroupChannelSample';
 
 
 const App = () => {
@@ -10,8 +10,8 @@ const App = () => {
     <div className="container">
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/basic-samples/open-channel' element={<BasicOpenChannelSample />} />
-        <Route path='/basic-samples/group-channel' element={<BasicGroupChannelSample />} />
+        <Route path='/open-channel' element={<BasicOpenChannelSample />} />
+        <Route path='/group-channel' element={<BasicGroupChannelSample />} />
       </Routes>
     </div>
   );

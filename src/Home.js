@@ -6,8 +6,8 @@ const Home = () => {
     <div className="home">
       <h1>Code Samples</h1>
       <ul>
-        <li><Link to="/basic-samples/open-channel">Basic Open Channel</Link></li>
-        <li><Link to="/basic-samples/group-channel">Basic Group Channel</Link></li>
+        <li><Link to="/open-channel">Basic Open Channel</Link></li>
+        <li><Link to="/group-channel">Basic Group Channel</Link></li>
       </ul>
 
     </div>
