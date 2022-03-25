@@ -340,7 +340,6 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return messages.map(message => {
         return (
             <div key={message.messageId} className="message-item">
-                {message.messageId}
                 <Message message={message} />
                 <button className="control-button" onClick={() => updateMessage(message)}>update</button>
                 <button className="control-button" onClick={() => handleDeleteMessage(message)}>delete</button>
