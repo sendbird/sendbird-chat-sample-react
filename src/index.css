@@ -108,6 +108,13 @@ code {
 .message-info{
   display:flex;
   margin-bottom:4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.message-user-info{
+  display:flex;
 }
 
 .message-sender-name{
@@ -199,6 +206,7 @@ code {
   padding:4px;
   margin-right:1px;
 }
+
 .error{
   background:rgb(249, 56, 56);
   display:flex;

@@ -136,7 +136,6 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const sendMessage = async () => {
-        debugger;
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
 
         if (messageToUpdate) {
@@ -308,28 +307,36 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return messages.map(message => {
         return (
             <div key={message.messageId} className="message-item">
-                <Message message={message} />
-                <button className="control-button" onClick={() => updateMessage(message)}>update</button>
-                <button className="control-button" onClick={() => handleDeleteMessage(message)}>delete</button>
+                <Message
+                    handleDeleteMessage={handleDeleteMessage}
+                    updateMessage={updateMessage}
+                    message={message}
+                />
             </div>);
     })
 }
 
-const Message = (message) => {
-    if (message.message.url) {
+const Message = ({ message, updateMessage, handleDeleteMessage }) => {
+    if (message.url) {
         return (
             <div className="message">
-                <div>{timestampToTime(message.message.createdAt)}</div>
-                <img src={message.message.url} />
-            </div >)
+                <div>{timestampToTime(message.createdAt)}</div>
+                <img src={message.url} />
+            </div >);
     }
     return (
         <div className="message">
             <div className="message-info">
-                <div className="message-sender-name">{message.message.sender.userId}{' '}</div>
-                <div>{timestampToTime(message.message.createdAt)}</div>
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.userId}{' '}</div>
+                    <div>{timestampToTime(message.createdAt)}</div>
+                </div>
+                <div>
+                    <button className="control-button" onClick={() => updateMessage(message)}>update</button>
+                    <button className="control-button" onClick={() => handleDeleteMessage(message)}>delete</button>
+                </div>
             </div>
-            <div>{message.message.message}</div>
+            <div>{message.message}</div>
         </div >
     );
 
