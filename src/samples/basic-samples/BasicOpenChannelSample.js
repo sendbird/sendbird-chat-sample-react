@@ -1,5 +1,5 @@
 import SendBird from 'sendbird';
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 import { SENDBIRD_USER_INFO } from '../../constants/constants';
 import { timestampToTime } from '../../utils/messageUtils';
