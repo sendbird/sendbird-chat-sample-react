@@ -276,7 +276,7 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                             </div>
                             {userIsOperator &&
                                 <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(false, channel)}>update</button>
+                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>update</button>
                                     <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>delete</button>
                                 </div>}
                         </div>);
@@ -362,12 +362,13 @@ const ChannelDetails = ({
     if (currentlyUpdatingChannel) {
         return <div className="overlay">
             <div className="overlay-content">
-                <div>
-                    <h3>Channel Details</h3>
-                    <button onClick={() => toggleChannelDetails(null)}>Close</button>
-                </div>
-                Name
-                <input onChange={onChannelNamenputChange} />
+
+                <h3>Update Channel Details</h3>
+                <div> Channel name</div>
+                <input className="form-input" onChange={onChannelNamenputChange} />
+
+                <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
+
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
         </div >;
