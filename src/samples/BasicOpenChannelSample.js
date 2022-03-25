@@ -56,9 +56,6 @@ const BasicOpenChannelSample = (props) => {
 
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
-        // channelHandler.onUserEntered = () => { };
-        // channelHandler.onOperatorUpdated = () => { };
-        // channelHandler.onChannelParticipantCountChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
             messages[messageIndex] = message;

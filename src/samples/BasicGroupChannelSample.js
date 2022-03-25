@@ -55,10 +55,6 @@ const BasicGroupChannelSample = (props) => {
         }
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
-        // channelHandler.onUserEntered = () => { };
-        // channelHandler.onChannelParticipantCountChanged = () => { };
-        // channelHandler.onChannelChanged = () => { };
-        // channelHandler.onUserReceivedInvitation = () => { };
         channelHandler.onUserJoined = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
