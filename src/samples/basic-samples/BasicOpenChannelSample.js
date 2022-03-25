@@ -53,6 +53,7 @@ const BasicOpenChannelSample = (props) => {
             return onError(error);
 
         }
+
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
         channelHandler.onUserEntered = () => { };

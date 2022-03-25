@@ -45,7 +45,7 @@ p2 update vs create channel button issue
 p2 hot reload metnion in slack
 p2 on delete message handler incoming message
 
-
+p2 cant update file message
 p2 generate open channnel thumbanils
 p2 dont load all messages every time
 p2 mark as read

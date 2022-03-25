@@ -238,6 +238,7 @@ const BasicGroupChannelSample = (props) => {
                 handleGetAllApplicationUsers={handleGetAllApplicationUsers} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
+                groupChannelMembers={state.groupChannelMembers}
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
                 addToChannelMembersList={addToChannelMembersList}
                 handleCreateChannel={handleCreateChannel}
@@ -391,12 +392,14 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
 
 const MembersSelect = ({
     applicationUsers,
+    groupChannelMembers,
     currentlyJoinedChannel,
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
 
 }) => {
+
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -409,9 +412,10 @@ const MembersSelect = ({
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
+                    const userSelected = groupChannelMembers.some((member) => member === user.userId);
                     return <div
                         key={user.userId}
-                        className="member-item"
+                        className={`member-item ${userSelected ? 'member-selected' : ''}`}
                         onClick={() => addToChannelMembersList(user.userId)}>{user.nickname}</div>
                 })}
 
@@ -485,7 +489,6 @@ const createChannel = async (channelName, userIdsToInvite) => {
         groupChannelParams.addUserIds(userIdsToInvite);
         groupChannelParams.name = channelName;
         groupChannelParams.operatorUserIds = userIdsToInvite;
-        debugger;
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
         return [groupChannel, null];
     } catch (error) {

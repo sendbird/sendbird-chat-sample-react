@@ -125,6 +125,10 @@ code {
   cursor: pointer;
 }
 
+.member-selected{
+  color: #62EEAB;
+}
+
 .message-input{
   position: fixed;
   bottom: 0px;
