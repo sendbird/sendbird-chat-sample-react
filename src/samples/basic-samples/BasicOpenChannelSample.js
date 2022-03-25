@@ -81,7 +81,7 @@ const BasicOpenChannelSample = (props) => {
             return onError(error);
         }
         const updatedChannels = [openChannel, ...state.channels];
-        updateState({ ...state, channels: updatedChannels, showChannelCreate: false, currentlyJoinedChannel: openChannel });
+        updateState({ ...state, channels: updatedChannels, showChannelCreate: false });
     }
 
     const handleDeleteChannel = async (channelUrl) => {
