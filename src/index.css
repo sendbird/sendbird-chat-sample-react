@@ -91,7 +91,7 @@ code {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
-  margin-bottom: 60px;
+  margin-bottom: 72px;
 }
 
 .message-item{
@@ -170,6 +170,11 @@ code {
 
 .channel-create-button{
   background-color: #62EEAB;
+}
+
+.send-message-button{
+  border-radius: 0px 4px 4px 0px;
+  margin-right:8px;
 }
 
 .control-button{

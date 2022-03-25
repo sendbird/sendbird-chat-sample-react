@@ -341,7 +341,7 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                 onChange={onChange} />
 
             <div className="message-input-buttons">
-                <button onClick={sendMessage}>Send Message</button>
+                <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <input
                     type='file'
                     onChange={onFileInputChange}
