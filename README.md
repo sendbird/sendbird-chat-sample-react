@@ -1,12 +1,10 @@
-# Sendbird Chat SDK sample for React
+# SendBird Chat SDK sample for React
 
-This repository provides feature-level Chat samples with React.
+## Requirement
 
-## 🚀 Get started
+Node version >16 is required. Download [here](https://nodejs.org/en/).
 
-You must use [NodeJS](https://nodejs.org/en/) to build these sample apps. Node version >16 is required.
-
-### Running the App
+## Running the App
 
 In the project directory, 
 
@@ -16,52 +14,21 @@ run `npm start` to run the app in the development mode.
 
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-## 🏗 Project structure
+## Create a new sample
+1. Make a copy of your chosen basic channel sample, either BasicOpenChannelSample or BasicGroupChannelSample.
+2. Update the routes in App.js js to include your newly created component.
+`<Route path='/group-channel-feature-one' element={<GroupChannelFeatureOne />} />`
+3. Update Home.js component link list with`<li><Link to="/group-channel-feature1">Group Channel Feature One</Link></li>`
 
-```bash
-.
-├── package.json
-├── src
-│   ├── App.tsx
-│   ├── components
-│   │   ├── ...
-│   │   ├── group-chat
-│   │   └── open-chat
-│   ├── constants
-│   │   └── ...
-│   ├── index.tsx
-│   ├── reducers
-│   │   └── ...
-│   ├── samples
-│   │   ├── basic-samples
-│   │   │   ├── BasicGroupChannelSample.tsx
-│   │   │   └── BasicOpenChannelSample.tsx
-│   │   └── feature-samples
-│   ├── sendbird-actions
-│   │   ├── ...
-│   │   ├── channel-actions
-│   │   └── message-actions
-│   ├── styles
-│   │   └── ...
-│   └── utils
-│       └── ...
-└── tsconfig.json
-```
+## Considerations in real world app
+ - Typescript types are avaiable if you are building your app in that language.
+ - Chat is based around user generated input so consider mitigations against XSS attacks
+ - Users should always pass an access token when connection to group channels 
+ - User creation done through platofrm API or dashboard
+ - Pagination of channel and message lists
+ - Sendbird should be installed via npm
 
-### Directory descriptions
 
-- **components**: Contains functional components being used in samples.
-- **constants**: Contains shared constants and enums.
-- **reducers**: Contains reducers, actions, and their definitions.
-- **basic-samples**: Contains basic chat samples.
-- **feature-samples**: Contains feature chat samples.
-- **sendbird-actions**: Contains functions that call sendbird apis.
-- **styles**: Contains styles being used in components.
-- **utils**: Contains utility functions.
 
-## Project Specifications
 
-- Language: TypeScript
-- Data management: React Hook (functional component)
-- Data storage: Redux
-- Style library: [Emotion](https://emotion.sh/docs/introduction)
+

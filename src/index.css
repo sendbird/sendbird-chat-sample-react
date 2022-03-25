@@ -1,3 +1,7 @@
+html, body, #root, #root>div {
+  height: 100%
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -7,6 +11,31 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+img{
+  width:300px;
+}
+
+button{
+  border: none;
+  color: white;
+  padding: 14px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius:2px;
+  cursor: pointer;
+  background-color: #424242;
+}
+
+input{
+  width: 30%;
+  padding: 6px;
+  border: 1px solid #cbcbcb;
+  outline:none;
+}
+
+
 p {
   margin: 0;
 }
@@ -14,4 +43,182 @@ p {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+.container{
+  height:100%;
+  background:white;
+  display: flex;
+}
+
+.channel-type{
+  padding: 12px;
+  color: #6210CC;
+}
+
+.channel-list {
+  background: white;
+  flex:2;
+  border-right: 1px solid #cbcbcb;
+  overflow-y: scroll;
+}
+
+.channel-list-item{
+  background: #fcfcfc;
+  padding:12px;
+  border-top: 1px solid #ececec;
+  display:flex;
+  justify-content: space-between;
+}
+
+.last-message{
+  font-weight:300;
+}
+
+.channel-list-item-name{
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  max-width: 75ch;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex:1;
+
+}
+
+.channel{
+  background: white;
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  margin-bottom: 72px;
+}
+
+.message-item{
+  background: #f6f6f6;
+  padding: 24px;
+  margin: 12px;
+  border-radius: 8px;
+}
+
+.message{
+  padding:12px 0px;
+}
+
+.message-info{
+  display:flex;
+  margin-bottom:4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.message-user-info{
+  display:flex;
+}
+
+.message-sender-name{
+  font-weight: 600;
+  margin-right:4px;
+}
+
+.channel-header{
+  padding: 12px;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.members-list{
+  border-left: 1px solid #cbcbcb;
+  padding: 12px;
+}
+
+.member-item{
+  padding: 8px 0px 0px 0px;
+  cursor: pointer;
+  font-weight: 600;
+  border-bottom: 1px solid #cfcfcf;
+  padding-bottom: 4px;
+}
+
+.member-selected{
+  color: #62EEAB;
+}
+
+.message-input{
+  position: fixed;
+  bottom: 0px;
+  display: flex;
+  border-top: 1px solid #cbcbcb;
+  width: 100%;
+  padding: 12px;
+  background: white;
+}
+
+.overlay{
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: #ecececb0;
+  z-index: 1;
+}
+
+.overlay-content{
+  overflow-y: scroll;
+  max-height: 400px;
+  padding:80px;
+  opacity: 1;
+  background: white;
+  border: 1px solid #cbcbcb;
+  width: 40%;
+}
+
+.form-input{
+  margin-top: 12px;
+  margin-bottom: 12px;
+  padding:18px;
+  width:100%;
+  border-radius: 2px;
+}
+
+.form-button{
+  margin-right:4px;
+}
+
+.user-submit-button{
+  background-color: #6210CC;
+}
+
+.channel-create-button{
+  background-color: #62EEAB;
+}
+
+.send-message-button{
+  border-radius: 0px 4px 4px 0px;
+  margin-right:8px;
+}
+
+.control-button{
+  background-color: #242459;
+  padding:4px;
+  margin-right:1px;
+}
+
+.error{
+  background:rgb(249, 56, 56);
+  display:flex;
+  padding:24px;
+  width:100%;
+}
+
+.file-upload-label{
+  cursor:pointer;
+}
+
+.file-upload-label img{
+  width: 46px;
+  vertical-align: middle;
 }
