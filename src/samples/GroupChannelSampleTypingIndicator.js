@@ -17,7 +17,7 @@ import MessageListParams from '../out/model/params/messageListParams.js';
 
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelSampleTypingIndicator = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -53,14 +53,10 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
-        channelHandler.onTypingStatusUpdated = function (groupChannel) {
-            console.log("users is typing");
-            // Refresh typing status of members within channel.
-        };
-
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
             messages[messageIndex] = message;
@@ -68,20 +64,15 @@ const BasicGroupChannelSample = (props) => {
 
         }
 
+        channelHandler.onTypingStatusUpdated = (groupChannel) => {
+            const members = groupChannel.getTypingMembers();
+            console.log(members);
+        };
+
         channelHandler.onMessageReceived = (channel, message) => {
             const updatedMessages = [...messages, message];
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
-        alert("here")
-        setInterval(() => {
-            const startTyping = async () => {
-                debugger;
-                await channel.startTyping();
-
-            }
-
-            startTyping();
-        }, 1000)
 
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
@@ -129,8 +120,14 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, userNameInputValue });
     }
 
-    const onMessageInputChange = async (e) => {
+    const onMessageInputChange = (e) => {
         const { currentlyJoinedChannel } = state;
+
+        const startTyping = async () => {
+            await currentlyJoinedChannel.startTyping();
+        }
+
+        startTyping();
 
         const messageInputValue = e.currentTarget.value;
         updateState({ ...state, messageInputValue });
@@ -154,6 +151,8 @@ const BasicGroupChannelSample = (props) => {
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
             });
         }
+        currentlyJoinedChannel.endTyping();
+
     }
 
     const onFileInputChange = async (e) => {
@@ -540,4 +539,4 @@ const getAllApplicationUsers = async () => {
 
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelSampleTypingIndicator;
