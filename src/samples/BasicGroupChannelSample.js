@@ -106,9 +106,7 @@ const BasicGroupChannelSample = (props) => {
             return onError(error);
         }
         updateState({ ...state, applicationUsers: users });
-
     }
-
 
 
     const onUserNameInputChange = (e) => {
@@ -122,6 +120,7 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const sendMessage = async () => {
+        debugger;
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = new UserMessageUpdateParams();
@@ -134,7 +133,7 @@ const BasicGroupChannelSample = (props) => {
             const userMessageParams = new UserMessageParams();
             userMessageParams.message = state.messageInputValue;
             const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
-            message.onSucceeded((message) => {
+            message.onPending((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
             });
