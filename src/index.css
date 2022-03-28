@@ -57,7 +57,7 @@ code {
 
 .channel-list {
   background: white;
-  flex:2;
+  flex:1;
   border-right: 1px solid #cbcbcb;
   overflow-y: scroll;
 }
