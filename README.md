@@ -6,6 +6,10 @@ Node version >16 is required. Download [here](https://nodejs.org/en/).
 
 ## Running the App
 
+Create a Sendbird applicationa nd a senbird user within that application.
+
+update /src/constants.js to include your own Sendbird app ID.
+
 In the project directory, 
 
 run `npm install` to install dependencies and then

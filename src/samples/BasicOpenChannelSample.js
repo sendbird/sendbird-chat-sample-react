@@ -27,6 +27,7 @@ const BasicOpenChannelSample = (props) => {
         showChannelCreate: false,
         messageInputValue: "",
         userNameInputValue: "",
+        userIdInputValue: "",
         channelNameInputValue: "",
         settingUpUser: true,
         file: null,
@@ -127,6 +128,11 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, userNameInputValue });
     }
 
+    const onUserIdInputChange = (e) => {
+        const userIdInputValue = e.currentTarget.value;
+        updateState({ ...state, userIdInputValue });
+    }
+
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
         updateState({ ...state, messageInputValue });
@@ -181,15 +187,17 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const setupUser = async () => {
-        const { userNameInputValue } = state;
+        const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
             appId: SENDBIRD_USER_INFO.appId,
             localCacheEnabled: false,
             modules: [new OpenChannelModule()]
         });
 
-        const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
+        const userUpdateParams = new UserUpdateParams();
         userUpdateParams.nickname = userNameInputValue;
+        userUpdateParams.userId = userIdInputValue;
+
         await sendbirdChat.connect(userNameInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
@@ -219,7 +227,9 @@ const BasicOpenChannelSample = (props) => {
             <CreateUserForm
                 setupUser={setupUser}
                 userNameInputValue={state.userNameInputValue}
+                userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
+                onUserIdInputChange={onUserIdInputChange}
                 onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
@@ -416,17 +426,27 @@ const CreateUserForm = ({
     setupUser,
     settingUpUser,
     userNameInputValue,
-    onUserNameInputChange
+    userIdInputValue,
+    onUserNameInputChange,
+    onUserIdInputChange
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
-                <div>Name</div>
+                <div>User Name</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
                     type="text" value={userNameInputValue} />
+                <div>User ID</div>
+
+                <input
+                    onChange={onUserIdInputChange}
+                    className="form-input"
+                    type="text" value={userIdInputValue} />
+                <div></div>
                 <div>
+
                     <button
                         className="user-submit-button"
                         onClick={setupUser}>Submit</button>
