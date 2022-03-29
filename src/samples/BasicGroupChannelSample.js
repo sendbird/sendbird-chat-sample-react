@@ -190,15 +190,17 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const setupUser = async () => {
-        const { userNameInputValue } = state;
+        const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
             appId: SENDBIRD_USER_INFO.appId,
             localCacheEnabled: false,
             modules: [new GroupChannelModule()]
         });
 
-        const userUpdateParams = new UserUpdateParams(SENDBIRD_USER_INFO.nickname);
+        const userUpdateParams = new UserUpdateParams();
         userUpdateParams.nickname = userNameInputValue;
+        userUpdateParams.userId = userIdInputValue;
+
         await sendbirdChat.connect(userNameInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
