@@ -198,7 +198,7 @@ const BasicOpenChannelSample = (props) => {
         userUpdateParams.nickname = userNameInputValue;
         userUpdateParams.userId = userIdInputValue;
 
-        await sendbirdChat.connect(userNameInputValue);
+        await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
@@ -433,7 +433,7 @@ const CreateUserForm = ({
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
-                <div>User Name</div>
+                <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
