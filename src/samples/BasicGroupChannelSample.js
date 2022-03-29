@@ -139,6 +139,9 @@ const BasicGroupChannelSample = (props) => {
             const userMessageParams = new UserMessageParams();
             userMessageParams.message = state.messageInputValue;
             const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
+            message.onPending((message) => {
+                console.log("pending");
+            });
             message.onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
