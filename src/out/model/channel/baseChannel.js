@@ -602,8 +602,6 @@ class BaseChannel extends instancedObject_1.default {
                     messages: [message],
                     source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_SUCCESS,
                 }));
-                debugger;
-                console.log('message-sent')
                 requestHandler.trigger(null, message);
             })
             .catch((err) => {

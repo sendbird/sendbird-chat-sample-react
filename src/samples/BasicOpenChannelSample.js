@@ -433,23 +433,24 @@ const CreateUserForm = ({
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
-                <div>User Nickname</div>
-                <input
-                    onChange={onUserNameInputChange}
-                    className="form-input"
-                    type="text" value={userNameInputValue} />
                 <div>User ID</div>
 
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-                <div></div>
+
+                <div>User Nickname</div>
+                <input
+                    onChange={onUserNameInputChange}
+                    className="form-input"
+                    type="text" value={userNameInputValue} />
+
                 <div>
 
                     <button
                         className="user-submit-button"
-                        onClick={setupUser}>Submit</button>
+                        onClick={setupUser}>Connect</button>
                 </div>
             </div>
 

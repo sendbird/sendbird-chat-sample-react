@@ -344,18 +344,25 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
+
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
-                    <Message message={message} handleDeleteMessage={handleDeleteMessage} updateMessage={updateMessage} />
+                    <Message
+                        message={message}
+                        handleDeleteMessage={handleDeleteMessage}
+                        updateMessage={updateMessage}
+                        messageSentByYou={messageSentByYou} />
+                    <ProfileImage user={message.sender} />
+
                 </div>);
         })}
     </div>
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
     if (message.url) {
         return (
-            <div className="message">
+            <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
                 <div className="message-user-info">
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
@@ -364,7 +371,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
             </div >);
     }
     return (
-        <div className="message">
+        <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
             <div className="message-info">
                 <div className="message-user-info">
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
@@ -378,6 +385,16 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
             <div>{message.message}</div>
         </div >
     );
+
+}
+
+const ProfileImage = ({ user }) => {
+    if (user.plainProfileUrl) {
+        return <img className="profile-image" src={user.plainProfileUrl} />
+    } else {
+        return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
+
+    }
 
 }
 
@@ -432,7 +449,10 @@ const MembersSelect = ({
                     return <div
                         key={user.userId}
                         className={`member-item ${userSelected ? 'member-selected' : ''}`}
-                        onClick={() => addToChannelMembersList(user.userId)}>{user.nickname}</div>
+                        onClick={() => addToChannelMembersList(user.userId)}>
+                        <ProfileImage user={user} />
+                        <div className="member-item-name">{user.nickname}</div>
+                    </div>
                 })}
 
             </div>
@@ -452,27 +472,27 @@ const CreateUserForm = ({
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
-                <div>User Nickname</div>
-                <input
-                    onChange={onUserNameInputChange}
-                    className="form-input"
-                    type="text" value={userNameInputValue} />
                 <div>User ID</div>
 
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-                <div></div>
-                <div>
 
-                    <button
-                        className="user-submit-button"
-                        onClick={setupUser}>Submit</button>
-                </div>
+
+                <div>User Nickname</div>
+                <input
+                    onChange={onUserNameInputChange}
+                    className="form-input"
+                    type="text" value={userNameInputValue} />
+
+                <button
+                    className="user-submit-button"
+                    onClick={setupUser}>Connect</button>
             </div>
-
         </div>
+
+
     } else {
         return null;
     }
