@@ -27,6 +27,7 @@ const BasicGroupChannelSample = (props) => {
         channels: [],
         messageInputValue: "",
         userNameInputValue: "",
+        userIdInputValue: "",
         channelNameUpdateValue: "",
         settingUpUser: true,
         channelNameUpdateValue: "",
@@ -113,6 +114,12 @@ const BasicGroupChannelSample = (props) => {
         const userNameInputValue = e.currentTarget.value;
         updateState({ ...state, userNameInputValue });
     }
+
+    const onUserIdInputChange = (e) => {
+        const userIdInputValue = e.currentTarget.value;
+        updateState({ ...state, userIdInputValue });
+    }
+
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -222,7 +229,9 @@ const BasicGroupChannelSample = (props) => {
             <CreateUserForm
                 setupUser={setupUser}
                 userNameInputValue={state.userNameInputValue}
+                userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
+                onUserIdInputChange={onUserIdInputChange}
                 onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
@@ -429,17 +438,27 @@ const CreateUserForm = ({
     setupUser,
     settingUpUser,
     userNameInputValue,
-    onUserNameInputChange
+    userIdInputValue,
+    onUserNameInputChange,
+    onUserIdInputChange
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
-                <div>Name</div>
+                <div>User Name</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
                     type="text" value={userNameInputValue} />
+                <div>User ID</div>
+
+                <input
+                    onChange={onUserIdInputChange}
+                    className="form-input"
+                    type="text" value={userIdInputValue} />
+                <div></div>
                 <div>
+
                     <button
                         className="user-submit-button"
                         onClick={setupUser}>Submit</button>
