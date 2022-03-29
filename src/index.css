@@ -68,6 +68,11 @@ code {
   border-top: 1px solid #ececec;
   display:flex;
   justify-content: space-between;
+  min-height: 42px;
+}
+
+.channel-list-item:hover{
+  background:#f0f0f0;
 }
 
 .channel-list-item:hover .channel-icon{
