@@ -568,7 +568,8 @@ class BaseChannel extends instancedObject_1.default {
         return new userMessage_1.default(this._iid, payload);
     }
     _createPendingFileMessage(params, requestId) {
-        const payload = (0, deundefined_1.deundefined)(Object.assign(Object.assign({}, this._createPendingSendableMessagePayload(params, requestId)), { 'type': types_2.MessageType.FILE, 'url': typeof params.file === 'string' ? params.file : '', 'file': {
+        const payload = (0, deundefined_1.deundefined)(Object.assign(Object.assign({}, this._createPendingSendableMessagePayload(params, requestId)), {
+            'type': types_2.MessageType.FILE, 'url': typeof params.file === 'string' ? params.file : '', 'file': {
                 'name': params.fileName,
                 'size': params.fileSize,
                 'type': params.mimeType,
@@ -579,7 +580,8 @@ class BaseChannel extends instancedObject_1.default {
                     'width': thumbnailSize.maxWidth,
                     'height': thumbnailSize.maxHeight,
                 };
-            }) }));
+            })
+        }));
         return new fileMessage_1.default(this._iid, payload);
     }
     _markMessageAsFailed(message, err) {
@@ -595,31 +597,33 @@ class BaseChannel extends instancedObject_1.default {
         const request = new userMessageCommand_1.SendUserMessageRequestCommand(Object.assign({ channelUrl: this.url, channelType: this.channelType, requestId }, params));
         requestQueue.send(request)
             .then((response) => {
-            const { message } = response.as(userMessageCommand_1.UserMessageEventCommand);
-            dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
-                messages: [message],
-                source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_SUCCESS,
-            }));
-            requestHandler.trigger(null, message);
-        })
+                const { message } = response.as(userMessageCommand_1.UserMessageEventCommand);
+                dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
+                    messages: [message],
+                    source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_SUCCESS,
+                }));
+                debugger;
+                console.log('message-sent')
+                requestHandler.trigger(null, message);
+            })
             .catch((err) => {
-            const failedMessage = this._createPendingUserMessage(params, requestId);
-            this._markMessageAsFailed(failedMessage, err);
-            dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
-                messages: [failedMessage],
-                source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_FAILED,
-            }));
-            requestHandler.trigger(err, failedMessage);
-        });
+                const failedMessage = this._createPendingUserMessage(params, requestId);
+                this._markMessageAsFailed(failedMessage, err);
+                dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
+                    messages: [failedMessage],
+                    source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_FAILED,
+                }));
+                requestHandler.trigger(err, failedMessage);
+            });
         (0, sleep_1.sleep)(PENDING_MESSAGE_DELAY)
             .then(() => {
-            const pendingMessage = this._createPendingUserMessage(params, requestId);
-            dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
-                messages: [pendingMessage],
-                source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_PENDING,
-            }));
-            requestHandler.trigger(null, pendingMessage);
-        });
+                const pendingMessage = this._createPendingUserMessage(params, requestId);
+                dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
+                    messages: [pendingMessage],
+                    source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_PENDING,
+                }));
+                requestHandler.trigger(null, pendingMessage);
+            });
         return requestHandler;
     }
     resendUserMessage(failedMessage) {
@@ -686,30 +690,30 @@ class BaseChannel extends instancedObject_1.default {
         const requestHandler = new messageRequestHandler_1.default();
         fileMessageQueue.request(this, requestId, params)
             .then((message) => {
-            dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
-                messages: [message],
-                source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_SUCCESS,
-            }));
-            requestHandler.trigger(null, message);
-        })
+                dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
+                    messages: [message],
+                    source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_SUCCESS,
+                }));
+                requestHandler.trigger(null, message);
+            })
             .catch((err) => {
-            const failedMessage = this._createPendingFileMessage(params, requestId);
-            this._markMessageAsFailed(failedMessage, err);
-            dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
-                messages: [failedMessage],
-                source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_FAILED,
-            }));
-            requestHandler.trigger(err, failedMessage);
-        });
+                const failedMessage = this._createPendingFileMessage(params, requestId);
+                this._markMessageAsFailed(failedMessage, err);
+                dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
+                    messages: [failedMessage],
+                    source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_FAILED,
+                }));
+                requestHandler.trigger(err, failedMessage);
+            });
         (0, sleep_1.sleep)(PENDING_MESSAGE_DELAY)
             .then(() => {
-            const pendingMessage = this._createPendingFileMessage(params, requestId);
-            dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
-                messages: [pendingMessage],
-                source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_PENDING,
-            }));
-            requestHandler.trigger(null, pendingMessage);
-        });
+                const pendingMessage = this._createPendingFileMessage(params, requestId);
+                dispatcher.dispatch(new messageEventCommand_1.MessageUpdateEventCommand({
+                    messages: [pendingMessage],
+                    source: messageEventCommand_1.MessageEventSource.EVENT_MESSAGE_SENT_PENDING,
+                }));
+                requestHandler.trigger(null, pendingMessage);
+            });
         return requestHandler;
     }
     sendFileMessages(paramsList) {
@@ -765,12 +769,14 @@ class BaseChannel extends instancedObject_1.default {
             (0, unless_1.unless)(targetChannel instanceof BaseChannel && message instanceof fileMessage_1.default && targetChannel.url === message.channelUrl)
                 .throw(error_1.default.invalidParameters);
             const deferred = new deferred_1.Deferred();
-            const params = new fileMessageParams_1.default(Object.assign(Object.assign({}, message), { file: message.url, fileName: message.name, fileSize: message.size, mimeType: message.type, mentionType: message.mentionType, mentionedUserIds: message.mentionedUsers.map((user) => user.userId), pushNotificationDeliveryOption: types_2.PushNotificationDeliveryOption.DEFAULT, parentMessageId: null, isReplyToChannel: false, thumbnailSizes: message.thumbnails.map((thumbnail) => {
+            const params = new fileMessageParams_1.default(Object.assign(Object.assign({}, message), {
+                file: message.url, fileName: message.name, fileSize: message.size, mimeType: message.type, mentionType: message.mentionType, mentionedUserIds: message.mentionedUsers.map((user) => user.userId), pushNotificationDeliveryOption: types_2.PushNotificationDeliveryOption.DEFAULT, parentMessageId: null, isReplyToChannel: false, thumbnailSizes: message.thumbnails.map((thumbnail) => {
                     return {
                         maxWidth: thumbnail.width,
                         maxHeight: thumbnail.height,
                     };
-                }) }));
+                })
+            }));
             targetChannel.sendFileMessage(params)
                 .onSucceeded((message) => deferred.resolve(message))
                 .onFailed((err) => deferred.reject(err));

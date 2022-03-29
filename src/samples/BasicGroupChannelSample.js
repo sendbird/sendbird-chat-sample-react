@@ -140,14 +140,9 @@ const BasicGroupChannelSample = (props) => {
             userMessageParams.message = state.messageInputValue;
             const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
             message.onSucceeded((message) => {
-                debugger;
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
             });
-            // message.onPending((message) => {
-            //     const updatedMessages = [...messages, message];
-            //     updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-            // });
         }
     }
 
@@ -373,8 +368,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <div>
-                    <button className="control-button" onClick={() => updateMessage(message)}>update</button>
-                    <button className="control-button" onClick={() => handleDeleteMessage(message)}>delete</button>
+                    <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
+                    <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
                 </div>
             </div>
             <div>{message.message}</div>
