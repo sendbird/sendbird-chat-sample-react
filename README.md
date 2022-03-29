@@ -29,6 +29,9 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
  - Sendbird should be installed via npm
 
 
+# Gotchas
+ - Hot reload can cause issues with the Sendbird Websocket connection while developing. Work around here https://github.com/facebook/create-react-app/issues/2519#issuecomment-318867289
+
 
 
 
