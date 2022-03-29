@@ -313,7 +313,7 @@ const ChannelHeader = ({ children }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return messages.map(message => {
         return (
-            <div key={message.messageId} className="message-item">
+            <div key={message.messageId} className="oc-message-item">
                 <Message
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
@@ -326,24 +326,24 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
     if (message.url) {
         return (
-            <div className="message">
+            <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
+                <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
+
                 <img src={message.url} />
             </div >);
     }
     return (
-        <div className="message">
-            <div className="message-info">
-                <div className="message-user-info">
-                    <div className="message-sender-name">{message.sender.userId}{' '}</div>
-                    <div>{timestampToTime(message.createdAt)}</div>
-                </div>
-                <div>
-                    <button className="control-button" onClick={() => updateMessage(message)}>update</button>
-                    <button className="control-button" onClick={() => handleDeleteMessage(message)}>delete</button>
-                </div>
-            </div>
+        <div className="oc-message">
+            <div>{timestampToTime(message.createdAt)}</div>
+
+            <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
             <div>{message.message}</div>
+
+            <button className="control-button" onClick={() => updateMessage(message)}><img className="oc-message-icon" src='/icon_edit.png' /></button>
+            <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="oc-message-icon" src='/icon_delete.png' /></button>
+
+
         </div >
     );
 

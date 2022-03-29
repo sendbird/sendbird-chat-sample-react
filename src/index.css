@@ -117,8 +117,18 @@ code {
 
 }
 
+.oc-message{
+  padding:12px 0px;
+  display:flex;
+}
+
+
 .message{
   padding:12px 0px;
+}
+
+.oc-message{
+  padding:12px;
 }
 
 .message-info{
@@ -133,12 +143,29 @@ code {
   width: 20px;
   filter: brightness(0) invert(1);
 }
+
+.oc-message-icon{
+  visibility:hidden;
+  width: 14px;
+}
+
 .message:hover .message-icon{
-  visibility:visible;
+  visibility: visible;
+}
+
+.oc-message:hover .oc-message-icon{
+  visibility: visible;
 }
 
 .message-user-info{
   display:flex;
+}
+
+.oc-message-sender-name{
+  color:#6210CC;
+  margin-left:4px;
+  font-weight: 600;
+  margin-right:4px;
 }
 
 .message-sender-name{
