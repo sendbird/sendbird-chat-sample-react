@@ -102,19 +102,21 @@ code {
 }
 
 .message-item{
-  background: #4c4c4c;
-  color:white;
-  padding: 24px;
   margin: 12px;
-  border-radius: 8px;
-  width:70%;
+  display:flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
-.message-from-you{
+.message.message-from-you{
   margin-left: auto;
-  background: grey;
   background: #39a9ff;
+  flex-direction: row;
+  margin-right: 12px;
+}
 
+.message-item.message-from-you{
+  flex-direction: row;
 }
 
 .oc-message{
@@ -124,7 +126,12 @@ code {
 
 
 .message{
-  padding:12px 0px;
+  border-radius: 8px;
+  width:70%;
+  background: #4c4c4c;
+  color:white;
+  padding: 24px;
+  margin-left: 12px;
 }
 
 .oc-message{
@@ -190,6 +197,16 @@ code {
   font-weight: 600;
   border-bottom: 1px solid #cfcfcf;
   padding-bottom: 4px;
+  display:flex;
+  align-items: center;
+}
+
+.member-item:hover{
+  background:#f0f0f0;
+}
+
+.member-item-name{
+  margin-left:12px;
 }
 
 .member-selected{
@@ -272,4 +289,20 @@ code {
 .file-upload-label img{
   width: 46px;
   vertical-align: middle;
+}
+
+.profile-image-fallback{
+    width: 50px;
+    background: #e9e9e9;
+    height: 50px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-image{
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
 }
