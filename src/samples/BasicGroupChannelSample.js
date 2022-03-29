@@ -139,10 +139,15 @@ const BasicGroupChannelSample = (props) => {
             const userMessageParams = new UserMessageParams();
             userMessageParams.message = state.messageInputValue;
             const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
-            message.onPending((message) => {
+            message.onSucceeded((message) => {
+                debugger;
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
             });
+            // message.onPending((message) => {
+            //     const updatedMessages = [...messages, message];
+            //     updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
+            // });
         }
     }
 
@@ -219,7 +224,7 @@ const BasicGroupChannelSample = (props) => {
     }
 
     if (state.error) {
-        return <div>{state.error} check console for more information.</div>
+        return <div className="error">{state.error} check console for more information.</div>
     }
 
     console.log('- - - - State object very useful for debugging - - - -');
@@ -341,7 +346,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
-    return <div class="message-list">
+    return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
             return (
