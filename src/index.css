@@ -70,6 +70,10 @@ code {
   justify-content: space-between;
 }
 
+.channel-list-item:hover .channel-icon{
+  visibility: visible;
+}
+
 .last-message{
   font-weight:300;
 }
@@ -82,7 +86,11 @@ code {
   text-overflow: ellipsis;
   white-space: nowrap;
   flex:1;
+}
 
+.channel-icon{
+  visibility:hidden;
+  width: 20px;
 }
 
 .channel{

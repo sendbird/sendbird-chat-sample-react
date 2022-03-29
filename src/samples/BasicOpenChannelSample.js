@@ -115,7 +115,7 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const toggleShowCreateChannel = () => {
-        updateState({ ...state, showChannelCreate: !state.channelCreate });
+        updateState({ ...state, showChannelCreate: !state.showChannelCreate });
     }
 
     const onChannelNamenIputChange = (e) => {
@@ -283,8 +283,14 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                             </div>
                             {userIsOperator &&
                                 <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>update</button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>delete</button>
+                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                        <img className="channel-icon" src='/icon_edit.png' />
+
+                                    </button>
+                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                        <img className="channel-icon" src='/icon_delete.png' />
+
+                                    </button>
                                 </div>}
                         </div>);
                 })
