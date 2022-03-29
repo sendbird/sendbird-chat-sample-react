@@ -356,7 +356,10 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
     if (message.url) {
         return (
             <div className="message">
-                <div>{timestampToTime(message.createdAt)}</div>
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div>{timestampToTime(message.createdAt)}</div>
+                </div>
                 <img src={message.url} />
             </div >);
     }
