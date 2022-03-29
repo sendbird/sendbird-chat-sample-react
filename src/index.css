@@ -94,11 +94,27 @@ code {
   margin-bottom: 72px;
 }
 
+.message-list{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+}
+
 .message-item{
-  background: #f6f6f6;
+  background: #4c4c4c;
+  color:white;
   padding: 24px;
   margin: 12px;
   border-radius: 8px;
+  width:70%;
+}
+
+.message-from-you{
+  margin-left: auto;
+  background: grey;
+  background: #39a9ff;
+
 }
 
 .message{

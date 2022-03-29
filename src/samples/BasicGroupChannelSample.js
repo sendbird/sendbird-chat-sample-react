@@ -127,7 +127,6 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const sendMessage = async () => {
-        debugger;
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = new UserMessageUpdateParams();
@@ -201,7 +200,7 @@ const BasicGroupChannelSample = (props) => {
         userUpdateParams.nickname = userNameInputValue;
         userUpdateParams.userId = userIdInputValue;
 
-        await sendbirdChat.connect(userNameInputValue);
+        await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
@@ -342,12 +341,15 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
-    return messages.map(message => {
-        return (
-            <div key={message.messageId} className="message-item">
-                <Message message={message} handleDeleteMessage={handleDeleteMessage} updateMessage={updateMessage} />
-            </div>);
-    })
+    return <div class="message-list">
+        {messages.map(message => {
+            const messageSentByYou = message.sender.userId === sb.currentUser.userId;
+            return (
+                <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
+                    <Message message={message} handleDeleteMessage={handleDeleteMessage} updateMessage={updateMessage} />
+                </div>);
+        })}
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
@@ -362,7 +364,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
         <div className="message">
             <div className="message-info">
                 <div className="message-user-info">
-                    <div className="message-sender-name">{message.sender.userId}{' '}</div>
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <div>
@@ -447,7 +449,7 @@ const CreateUserForm = ({
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
-                <div>User Name</div>
+                <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
