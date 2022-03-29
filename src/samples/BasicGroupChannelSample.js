@@ -294,7 +294,9 @@ const ChannelList = ({
                             <div className="last-message">{channel.lastMessage?.message}</div>
                         </div>
                         <div>
-                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>delete</button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
                         </div>
                     </div>);
             })}
