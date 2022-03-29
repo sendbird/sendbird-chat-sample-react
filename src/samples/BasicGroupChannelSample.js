@@ -74,6 +74,13 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
+    const handleLeaveChannel = async () => {
+        const { currentlyJoinedChannel } = state;
+        await currentlyJoinedChannel.leave();
+
+        updateState({ ...state, currentlyJoinedChannel: null })
+    }
+
     const handleCreateChannel = async (channelName = "testChannel",) => {
         const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers);
         if (error) {
@@ -262,7 +269,7 @@ const BasicGroupChannelSample = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
 
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
+            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -329,10 +336,13 @@ const ChannelName = ({ members }) => {
 }
 
 
-const Channel = ({ currentlyJoinedChannel, children }) => {
+const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel">
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
+            <div>
+                <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
+            </div>
             <div>{children}</div>
         </div>;
 

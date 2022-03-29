@@ -319,7 +319,7 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
         return <div className="channel">
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
-                <button className="oc-leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
+                <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
             </div>
             <div>{children}</div>
         </div>;
