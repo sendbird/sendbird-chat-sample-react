@@ -128,6 +128,14 @@ code {
   justify-content: space-between;
 }
 
+.message-icon{
+  visibility:hidden;
+  width: 20px;
+  filter: brightness(0) invert(1);
+}
+.message:hover .message-icon{
+  visibility:visible;
+}
 
 .message-user-info{
   display:flex;
@@ -218,13 +226,13 @@ code {
 }
 
 .control-button{
-  background-color: #242459;
+  background: inherit;
   padding:4px;
   margin-right:1px;
 }
 
 .error{
-  background:rgb(249, 56, 56);
+  background:rgb(26, 22, 22);
   display:flex;
   padding:24px;
   width:100%;

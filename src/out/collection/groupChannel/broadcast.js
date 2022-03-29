@@ -53,6 +53,7 @@ class GroupChannelBroadcast {
         }
     }
     subscribe(key, observer) {
+        debugger;
         this._observers.set(key, observer);
     }
     unsubscribe(key) {
