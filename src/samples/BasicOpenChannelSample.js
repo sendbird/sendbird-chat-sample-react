@@ -333,6 +333,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                 <img src={message.url} />
             </div >);
     }
+
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
@@ -340,8 +342,14 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
             <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
             <div>{message.message}</div>
 
-            <button className="control-button" onClick={() => updateMessage(message)}><img className="oc-message-icon" src='/icon_edit.png' /></button>
-            <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="oc-message-icon" src='/icon_delete.png' /></button>
+            {messageSentByCurrentUser && <>
+                <button className="control-button" onClick={() => updateMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_edit.png' />
+                </button>
+                <button className="control-button" onClick={() => handleDeleteMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_delete.png' />
+                </button>
+            </>}
 
 
         </div >

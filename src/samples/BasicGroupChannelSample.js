@@ -376,6 +376,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 <img src={message.url} />
             </div >);
     }
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+
     return (
         <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
             <div className="message-info">
@@ -383,10 +385,11 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                <div>
-                    <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                    <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                </div>
+                {messageSentByCurrentUser &&
+                    <div>
+                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
+                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                    </div>}
             </div>
             <div>{message.message}</div>
         </div >
