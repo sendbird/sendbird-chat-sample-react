@@ -57,6 +57,7 @@ const BasicGroupChannelSample = (props) => {
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
+        channelHandler.onChannelChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
             messages[messageIndex] = message;
@@ -138,14 +139,17 @@ const BasicGroupChannelSample = (props) => {
         } else {
             const userMessageParams = new UserMessageParams();
             userMessageParams.message = state.messageInputValue;
-            const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
-            message.onPending((message) => {
-                console.log("pending");
-            });
-            message.onSucceeded((message) => {
-                const updatedMessages = [...messages, message];
-                updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-            });
+            currentlyJoinedChannel.sendUserMessage(userMessageParams)
+                .onSucceeded((message) => {
+                    const updatedMessages = [...messages, message];
+
+                    updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
+
+                })
+                .onFailed((error) => {
+                    console.log(error)
+                    console.log("failed")
+                });
         }
     }
 
@@ -154,11 +158,17 @@ const BasicGroupChannelSample = (props) => {
             const { currentlyJoinedChannel, messages } = state;
             const fileMessageParams = new FileMessageParams();
             fileMessageParams.file = e.currentTarget.files[0];
-            const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
-            message.onSucceeded((message) => {
-                const updatedMessages = [...messages, message];
-                updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-            });
+            currentlyJoinedChannel.sendFileMessage(fileMessageParams)
+                .onSucceeded((message) => {
+                    const updatedMessages = [...messages, message];
+                    updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
+
+                })
+                .onFailed((error) => {
+                    console.log(error)
+                    console.log("failed")
+                });
+
         }
     }
 

@@ -73,6 +73,14 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
+    const handleLeaveChannel = async () => {
+        const { currentlyJoinedChannel } = state;
+        await currentlyJoinedChannel.exit();
+
+        updateState({ ...state, currentlyJoinedChannel: null })
+
+    }
+
     const handleCreateChannel = async () => {
         const { channelNameInputValue } = state;
         const [openChannel, error] = await createChannel(channelNameInputValue);
@@ -151,11 +159,15 @@ const BasicOpenChannelSample = (props) => {
         } else {
             const userMessageParams = new UserMessageParams();
             userMessageParams.message = state.messageInputValue;
-            const message = await currentlyJoinedChannel.sendUserMessage(userMessageParams);
-            message.onSucceeded((message) => {
+            currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
+
+            }).onFailed((error) => {
+                console.log(error)
+                console.log("failed")
             });
+
         }
     }
 
@@ -164,10 +176,13 @@ const BasicOpenChannelSample = (props) => {
             const { currentlyJoinedChannel, messages } = state;
             const fileMessageParams = new FileMessageParams();
             fileMessageParams.file = e.currentTarget.files[0];
-            const message = await currentlyJoinedChannel.sendFileMessage(fileMessageParams);
-            message.onSucceeded((message) => {
+            currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
+
+            }).onFailed((error) => {
+                console.log(error)
+                console.log("failed")
             });
         }
     }
@@ -247,7 +262,7 @@ const BasicOpenChannelSample = (props) => {
                 toggleShowCreateChannel={toggleShowCreateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
+            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -299,10 +314,13 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
 }
 
 
-const Channel = ({ currentlyJoinedChannel, children }) => {
+const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel">
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
+            <div>
+                <button className="oc-leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
+            </div>
             <div>{children}</div>
         </div>;
 
@@ -334,6 +352,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
+
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
 
                 <img src={message.url} />

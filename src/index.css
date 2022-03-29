@@ -107,6 +107,10 @@ code {
   margin-bottom: 72px;
 }
 
+.oc-leave-channel{
+  margin-left:12px;
+}
+
 .message-list{
   height: 100%;
   display: flex;
