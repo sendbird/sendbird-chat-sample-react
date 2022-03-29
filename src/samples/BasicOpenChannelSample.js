@@ -216,7 +216,7 @@ const BasicOpenChannelSample = (props) => {
     }
 
     if (state.error) {
-        return <div class="error">{state.error} check console for more information.</div>
+        return <div className="error">{state.error} check console for more information.</div>
     }
 
     console.log('- - - - State object very useful for debugging - - - -');
