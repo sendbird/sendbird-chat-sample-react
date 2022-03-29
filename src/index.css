@@ -107,8 +107,9 @@ code {
   margin-bottom: 72px;
 }
 
-.oc-leave-channel{
-  margin-left:12px;
+.leave-channel{
+  margin-left: 12px;
+  padding: 8px;
 }
 
 .message-list{
