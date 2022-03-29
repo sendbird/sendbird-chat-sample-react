@@ -117,7 +117,7 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, showChannelCreate: !state.channelCreate });
     }
 
-    const onChannelNamenputChange = (e) => {
+    const onChannelNamenIputChange = (e) => {
         const channelNameInputValue = e.currentTarget.value;
         updateState({ ...state, channelNameInputValue });
     }
@@ -230,12 +230,12 @@ const BasicOpenChannelSample = (props) => {
             <ChannelDetails
                 currentlyUpdatingChannel={state.currentlyUpdatingChannel}
                 handleUpdateChannel={handleUpdateChannel}
-                onChannelNamenputChange={onChannelNamenputChange}
+                onChannelNamenIputChange={onChannelNamenIputChange}
                 toggleChannelDetails={toggleChannelDetails} />
             <ChannelCreate
                 showChannelCreate={state.showChannelCreate}
                 toggleShowCreateChannel={toggleShowCreateChannel}
-                onChannelNamenputChange={onChannelNamenputChange}
+                onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel}>
                 <MessagesList
@@ -368,7 +368,7 @@ const ChannelDetails = ({
     currentlyUpdatingChannel,
     toggleChannelDetails,
     handleUpdateChannel,
-    onChannelNamenputChange
+    onChannelNamenIputChange
 }) => {
     if (currentlyUpdatingChannel) {
         return <div className="overlay">
@@ -376,7 +376,7 @@ const ChannelDetails = ({
 
                 <h3>Update Channel Details</h3>
                 <div> Channel name</div>
-                <input className="form-input" onChange={onChannelNamenputChange} />
+                <input className="form-input" onChange={onChannelNamenIputChange} />
 
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
 
@@ -391,7 +391,7 @@ const ChannelCreate = ({
     showChannelCreate,
     toggleShowCreateChannel,
     handleCreateChannel,
-    onChannelNamenputChange
+    onChannelNamenIputChange
 }) => {
     if (showChannelCreate) {
         return <div className="overlay">
@@ -400,7 +400,7 @@ const ChannelCreate = ({
                     <h3>Create Channel</h3>
                 </div>
                 <div>Name</div>
-                <input className="form-input" onChange={onChannelNamenputChange} />
+                <input className="form-input" onChange={onChannelNamenIputChange} />
                 <div>
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
