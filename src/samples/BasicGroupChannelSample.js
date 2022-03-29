@@ -302,9 +302,15 @@ const ChannelList = ({
 }
 
 const ChannelName = ({ members }) => {
-    return members.map((member) => {
-        return <span key={member.userId}>{member.nickname} </span>
-    })
+    const membersToDisplay = members.slice(0, 2);
+    const membersNotToDisplay = members.slice(2);
+
+    return <>
+        {membersToDisplay.map((member) => {
+            return <span key={member.userId}>{member.nickname} </span>
+        })}
+        {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
+    </>
 }
 
 
@@ -356,7 +362,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 
                 </div>);
         })}
-    </div>
+    </div >
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
