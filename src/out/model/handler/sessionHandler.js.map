@@ -1,1 +1,0 @@
-{"version":3,"file":"sessionHandler.js","sourceRoot":"","sources":["../../../model/handler/sessionHandler.ts"],"names":[],"mappings":";;AAAA,2CAAwC;AAKxC,MAAqB,cAAc;IAAnC;QACE,qBAAgB,GAAe,WAAI,CAAC;QACpC,2BAAsB,GAAqF,OAAO,CAAC,EAAE,CAAC,OAAO,CAAC,IAAI,CAAC,CAAC;QACpI,mBAAc,GAAyB,WAAI,CAAC;QAC5C,uBAAkB,GAAe,WAAI,CAAC;QACtC,oBAAe,GAAe,WAAI,CAAC;IACrC,CAAC;CAAA;AAND,iCAMC"}
