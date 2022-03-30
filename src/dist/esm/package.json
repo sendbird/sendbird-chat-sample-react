@@ -1,0 +1,30 @@
+{
+  "name": "@sendbird/chat",
+  "author": "Sendbird <support@sendbird.com>",
+  "keywords": [
+    "sendbird",
+    "sendbird.com",
+    "messaging",
+    "chat",
+    "js"
+  ],
+  "license": "SEE LICENSE IN LICENSE.md",
+  "homepage": "https://sendbird.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sendbird/Sendbird-SDK-JavaScript"
+  },
+  "bugs": {
+    "url": "https://github.com/sendbird/Sendbird-SDK-JavaScript/issues"
+  },
+  "sideEffects": false,
+  "version": "4.0.0",
+  "description": "Sendbird SDK for JavaScript",
+  "dependencies": {
+    "form-data": "^3.0.0",
+    "ws": "^7.3.1"
+  },
+  "type": "module",
+  "module": "sendbird.js",
+  "types": "sendbird.d.ts"
+}

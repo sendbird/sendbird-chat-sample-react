@@ -1,20 +1,21 @@
-import SendBird from 'sendbird';
+
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
+import SendbirdChat from '../dist/esm/sendbird.js';
+import {
+    GroupChannelHandler,
+    GroupChannelModule,
+    GroupChannelCreateParams,
+} from '../dist/esm/groupChannel.js';
+import {
+    UserMessageParams,
+    MessageListParams,
+    UserMessageUpdateParams,
+    FileMessageParams
+} from '../dist/esm/message.js';
 
-import { SENDBIRD_USER_INFO } from '../constants/constants';
+import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
-
-import SendbirdChat from '../out/sendbird.js';
-import { GroupChannelModule, GroupChannelHandler } from '../out/module/groupChannel.js';
-import { UserMessageParams } from '../out/module/message.js';
-import UserMessageUpdateParams from '../out/model/params/userMessageUpdateParams.js';
-import GroupChannelCreateParams from '../out/model/params/groupChannelCreateParams.js';
-import FileMessageParams from '../out/model/params/fileMessageParams.js';
-
-import UserUpdateParams from '../out/model/params/userUpdateParams.js';
-import MessageListParams from '../out/model/params/messageListParams.js';
-
 let sb;
 
 const BasicGroupChannelSample = (props) => {
@@ -211,19 +212,20 @@ const BasicGroupChannelSample = (props) => {
     const setupUser = async () => {
         const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
-            appId: SENDBIRD_USER_INFO.appId,
+            appId: SENDBIRD_INFO.appId,
             localCacheEnabled: false,
             modules: [new GroupChannelModule()]
         });
 
-        const userUpdateParams = new UserUpdateParams();
-        userUpdateParams.nickname = userNameInputValue;
-        userUpdateParams.userId = userIdInputValue;
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
-        await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+        // const userUpdateParams = new UserUpdateParams();
+        // userUpdateParams.nickname = userNameInputValue;
+        // userUpdateParams.userId = userIdInputValue;
+        // await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
         const [channels, error] = await loadChannels();

@@ -157,15 +157,15 @@ code {
 }
 
 .message-info{
-  display:flex;
   margin-bottom:4px;
   display: flex;
   justify-content: space-between;
+  line-height: 24px;
 }
 
 .message-icon{
   visibility:hidden;
-  width: 20px;
+  width: 14px;
   filter: brightness(0) invert(1);
 }
 

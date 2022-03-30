@@ -1,1 +1,0 @@
-{"version":3,"file":"apiRequestCancelCommand.js","sourceRoot":"","sources":["../../../../core/command/api/apiRequestCancelCommand.ts"],"names":[],"mappings":";;AACA,gDAAyC;AAEzC,MAAqB,uBAAwB,SAAQ,qBAAW;IAG9D,YAAY,SAAiB;QAC3B,KAAK,EAAE,CAAC;QACR,IAAI,CAAC,SAAS,GAAG,SAAS,CAAC;IAC7B,CAAC;CACF;AAPD,0CAOC"}

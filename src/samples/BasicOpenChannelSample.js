@@ -1,19 +1,23 @@
-import SendBird from 'sendbird';
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
-import { SENDBIRD_USER_INFO } from '../constants/constants';
+
+import SendbirdChat from '../dist/esm/sendbird.js';
+import {
+    OpenChannelModule,
+    OpenChannelHandler,
+    OpenChannelCreateParams,
+    OpenChannelUpdateParams
+} from '../dist/esm/openChannel.js';
+
+import {
+    UserMessageUpdateParams,
+    UserMessageParams,
+    MessageListParams,
+    FileMessageParams
+} from '../dist/esm/message.js';
+
+import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
-
-import SendbirdChat from '../out/sendbird.js';
-import { OpenChannelModule, OpenChannelHandler } from '../out/module/openChannel.js';
-import { UserMessageParams } from '../out/module/message.js';
-import UserMessageUpdateParams from '../out/model/params/userMessageUpdateParams.js';
-import OpenChannelCreateParams from '../out/model/params/openChannelCreateParams.js';
-import OpenChannelUpdateParams from '../out/model/params/openChannelUpdateParams.js';
-import FileMessageParams from '../out/model/params/fileMessageParams.js';
-
-import UserUpdateParams from '../out/model/params/userUpdateParams.js';
-import MessageListParams from '../out/model/params/messageListParams.js';
 
 let sb;
 
@@ -204,19 +208,21 @@ const BasicOpenChannelSample = (props) => {
     const setupUser = async () => {
         const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
-            appId: SENDBIRD_USER_INFO.appId,
+            appId: SENDBIRD_INFO.appId,
             localCacheEnabled: false,
             modules: [new OpenChannelModule()]
         });
 
-        const userUpdateParams = new UserUpdateParams();
-        userUpdateParams.nickname = userNameInputValue;
-        userUpdateParams.userId = userIdInputValue;
+
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
-        await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+        // const userUpdateParams = new UserUpdateParams();
+        // userUpdateParams.nickname = userNameInputValue;
+        // userUpdateParams.userId = userIdInputValue;
+        // await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
         const [channels, error] = await loadChannels();

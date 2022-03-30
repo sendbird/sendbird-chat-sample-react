@@ -1,1 +1,0 @@
-{"version":3,"file":"compat.js","sourceRoot":"","sources":["../../utils/compat.ts"],"names":[],"mappings":";;;AACO,MAAM,aAAa,GAAG,GAAG,EAAE;IAChC,OAAO,OAAO,QAAQ,KAAK,WAAW;QACpC,OAAO,SAAS,IAAI,WAAW;QAC/B,SAAS,CAAC,OAAO,IAAI,aAAa,CAAC;AACvC,CAAC,CAAA;AAJY,QAAA,aAAa,iBAIzB"}

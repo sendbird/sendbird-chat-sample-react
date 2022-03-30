@@ -1,1 +1,0 @@
-{"version":3,"file":"databaseOpenCommand.js","sourceRoot":"","sources":["../../../../comm/command/internal/databaseOpenCommand.ts"],"names":[],"mappings":";;AACA,mEAA4D;AAE5D,MAAqB,mBAAoB,SAAQ,qBAAW;IAI1D,YAAY,IAAY,EAAE,EAAE,MAAM,EAAE;QAClC,KAAK,EAAE,CAAC;QACR,IAAI,CAAC,IAAI,GAAG,IAAI,CAAC;QACjB,IAAI,CAAC,MAAM,GAAG,MAAM,CAAC;IACvB,CAAC;CACF;AATD,sCASC"}
