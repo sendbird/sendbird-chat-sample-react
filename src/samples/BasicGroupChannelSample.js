@@ -31,7 +31,6 @@ const BasicGroupChannelSample = (props) => {
         userIdInputValue: "",
         channelNameUpdateValue: "",
         settingUpUser: true,
-        channelNameUpdateValue: "",
         file: null,
         messageToUpdate: null,
         loading: false,
@@ -60,7 +59,7 @@ const BasicGroupChannelSample = (props) => {
         channelHandler.onUserJoined = () => { };
         channelHandler.onChannelChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
-            const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
+            const messageIndex = messages.findIndex((item => item.messageId === message.messageId));
             messages[messageIndex] = message;
             updateState({ ...stateRef.current, messages });
 
