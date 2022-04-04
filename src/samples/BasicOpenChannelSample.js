@@ -62,14 +62,16 @@ const BasicOpenChannelSample = (props) => {
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
         channelHandler.onMessageUpdated = (channel, message) => {
-            const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
-            messages[messageIndex] = message;
-            updateState({ ...stateRef.current, messages });
+            const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
+            const updatedMessages = [...stateRef.current.messages];
+            updatedMessages[messageIndex] = message;
+            updateState({ ...stateRef.current, messages: updatedMessages });
 
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
-            const updatedMessages = [...messages, message];
+            debugger;
+            const updatedMessages = [...stateRef.current.messages, message];
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
 
