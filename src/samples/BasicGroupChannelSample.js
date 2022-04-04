@@ -59,14 +59,15 @@ const BasicGroupChannelSample = (props) => {
         channelHandler.onUserJoined = () => { };
         channelHandler.onChannelChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
-            const messageIndex = messages.findIndex((item => item.messageId === message.messageId));
-            messages[messageIndex] = message;
-            updateState({ ...stateRef.current, messages });
+            const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
+            const updatedMessages = [...stateRef.current.messages];
+            updatedMessages[messageIndex] = message;
+            updateState({ ...stateRef.current, messages: updatedMessages });
 
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
-            const updatedMessages = [...messages, message];
+            const updatedMessages = [...stateRef.current.messages, message];
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
 
