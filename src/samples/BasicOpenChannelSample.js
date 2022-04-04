@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 
-import SendbirdChat from '../dist/esm/sendbird.js';
+import SendbirdChat, { UserUpdateParams } from '../dist/esm/sendbird.js';
 import {
     OpenChannelModule,
     OpenChannelHandler,
@@ -218,10 +218,10 @@ const BasicOpenChannelSample = (props) => {
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
-        // const userUpdateParams = new UserUpdateParams();
-        // userUpdateParams.nickname = userNameInputValue;
-        // userUpdateParams.userId = userIdInputValue;
-        // await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+        const userUpdateParams = new UserUpdateParams();
+        userUpdateParams.nickname = userNameInputValue;
+        userUpdateParams.userId = userIdInputValue;
+        await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
 
         sb = sendbirdChat;
         updateState({ ...state, loading: true });

@@ -1,0 +1,57 @@
+import { CollectionMetadata, CollectionQueryParams, CollectionState, CollectionUpdateParams } from './interface';
+import Query from '../query';
+import { QueryCondition } from '../query/interface';
+import { BlockKeyHash } from '../../type';
+import BaseStore from '../../store/baseStore';
+interface CollectionParams {
+    dbname: string;
+    collectionName: string;
+    keyName: string;
+    keyHash?: BlockKeyHash;
+    indexes: string[][];
+    store: BaseStore;
+}
+export default class Collection {
+    readonly dbname: string;
+    readonly name: string;
+    readonly keyName: string;
+    readonly indexes: string[][];
+    private _state;
+    private _metadata;
+    private _keyHash;
+    private _mutex;
+    private _store;
+    private _transaction;
+    private _blobContainer;
+    private _blockManager;
+    private _indexers;
+    constructor({ dbname, collectionName, keyName, keyHash, indexes, store, }: CollectionParams);
+    static metadataOf(dbname: string, collectionName: string, store: BaseStore): Promise<CollectionMetadata>;
+    get state(): CollectionState;
+    init(): Promise<void>;
+    close(): void;
+    private _hasPropertyOfKeyName;
+    private _getIndexerBy;
+    private _upgradeBlockLevel;
+    private _requestInsert;
+    private _requestUpsert;
+    private _requestUpdate;
+    private _requestRemove;
+    private _requestClear;
+    getByKey(key: string): Promise<object>;
+    query(params?: CollectionQueryParams): Query;
+    insertOne(item: object): Promise<object>;
+    insertMany(items: object[]): Promise<object[]>;
+    upsertOne(item: object): Promise<object>;
+    upsertMany(items: object[]): Promise<object[]>;
+    update(item: object): Promise<object>;
+    updateIf(where: QueryCondition, update: CollectionUpdateParams): Promise<object[]>;
+    remove(key: string): Promise<void>;
+    removeIf(where: QueryCondition): Promise<string[]>;
+    clear(): Promise<void>;
+    getBlob(blobId: string): Promise<Blob>;
+    saveBlob(blob: Blob, key?: string): Promise<string>;
+    removeBlob(blobId: string): Promise<void>;
+    removeAllBlobs(): Promise<void>;
+}
+export {};
