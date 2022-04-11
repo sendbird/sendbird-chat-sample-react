@@ -1,28 +1,27 @@
-# SendBird Chat SDK sample for React
+# SendBird Chat SDK React Sample
+
+![React sample](/react-sample.gif?raw=true "react sample")
+
+
+## Overview
+A simple react app that demonstrates how to use the Sendbird [Chat SDK](https://sendbird.com/docs/chat).
 
 ## Requirement
-
+A Sendbird [account](https://dashboard.sendbird.com/auth/signup).
 Node version >16 is required. Download [here](https://nodejs.org/en/).
 
-## Running the App
+## Setup
+Replace {YOUR_SENDBIRD_APP_ID} in constants.js with yout Sendbird app ID. 
+To get the ID  of your Sendbird application, sign in to your dashboard, select the application, go to the Settings > Application > General, and then check the Application ID.
 
-Create a Sendbird application.
+## Install
+run `npm install`
 
-update /src/constants.js to include your own Sendbird app ID.
+## Running the app
 
-In the project directory, 
-
-run `npm install` to install dependencies and then
-
-run `npm start` to run the app in the development mode.
+run `npm start`
 
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-## Create a new sample
-1. Make a copy of your chosen basic channel sample, either BasicOpenChannelSample or BasicGroupChannelSample.
-2. Update the routes in App.js js to include your newly created component.
-`<Route path='/group-channel-feature-one' element={<GroupChannelFeatureOne />} />`
-3. Update Home.js component link list with`<li><Link to="/group-channel-feature1">Group Channel Feature One</Link></li>`
 
 ## Considerations in real world app
  - Typescript types are avaiable if you are building your app in that language.
