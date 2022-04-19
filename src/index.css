@@ -178,7 +178,7 @@ code {
   visibility: visible;
 }
 
-.oc-message:hover .oc-message-icon{
+.oc-message:hover .oc-message-icon, .message-input .oc-message-icon{
   visibility: visible;
 }
 
