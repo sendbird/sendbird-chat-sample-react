@@ -33,8 +33,6 @@ const BasicOpenChannelSample = (props) => {
         userNameInputValue: "",
         userIdInputValue: "",
         channelNameInputValue: "",
-        copiedMessage: "",
-        isVisibleInsertButton: false,
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
@@ -206,9 +204,12 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const handleCopyMessage = async (messageToCopy) => {
-        const { currentlyJoinedChannel } = state;
-        await copyMessage(currentlyJoinedChannel, messageToCopy);
-        // updateState({ ...state, copiedMessage: messageToCopy.message, isVisibleInsertButton: true });
+        const { currentlyJoinedChannel, messages } = state;
+        const copyMethod = messageToCopy.messageType === "file" ? "copyFileMessage" : "copyUserMessage";
+
+        await currentlyJoinedChannel[copyMethod](currentlyJoinedChannel, messageToCopy).then(() => {
+          updateState({ ...state, messages: [ ...messages, messageToCopy ]});
+        });
     }
 
     const updateMessage = async (message) => {
@@ -367,6 +368,7 @@ const MessagesList = ({ messages, handleDeleteMessage, handleCopyMessage, update
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessage }) => {
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     if (message.url) {
         return (
             <div className="oc-message">
@@ -376,18 +378,21 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessag
 
                 <img src={message.url} />
 
-                <>
+                {messageSentByCurrentUser && <>
                   <button className="control-button" onClick={() => handleCopyMessage(message)}>
                       <img className="oc-message-icon" src='/icon_copy.png' />
                   </button>
                   <button className="control-button" onClick={() => handleDeleteMessage(message)}>
                       <img className="oc-message-icon" src='/icon_delete.png' />
                   </button>
-                </>
+                </>}
+                {!messageSentByCurrentUser &&
+                <button className="control-button" onClick={() => handleCopyMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_copy.png' />
+                </button>}
             </div >);
     }
 
-    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
@@ -406,6 +411,10 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessag
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
+            {!messageSentByCurrentUser &&
+                <button className="control-button" onClick={() => handleCopyMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_copy.png' />
+                </button>}
 
 
         </div >
@@ -413,12 +422,9 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessag
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isVisibleInsertButton }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
     return (
         <div className="message-input">
-            {isVisibleInsertButton && <button className="control-button" onClick={() => {}}>
-                    <img className="oc-message-icon" src='/icon_insert.png' />
-                 </button>}
             <input
                 placeholder="write a message"
                 value={value}
@@ -597,14 +603,6 @@ const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) =>
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
-}
-
-const copyMessage = async (currentlyJoinedChannel, messageToCopy) => {
-  if(messageToCopy.messageType === "file") {
-    await currentlyJoinedChannel.copyFileMessage(currentlyJoinedChannel, messageToCopy);
-  } else {
-    await currentlyJoinedChannel.copyUserMessage(currentlyJoinedChannel, messageToCopy);
-  }
 }
 
 export default BasicOpenChannelSample;
