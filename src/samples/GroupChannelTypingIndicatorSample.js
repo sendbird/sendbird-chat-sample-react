@@ -268,18 +268,6 @@ const GroupChannelTypingIndicatorSample = (props) => {
         return <div className="error">{state.error} check console for more information.</div>
     }
 
-    const displayTypingIndicator = () => {
-        var typingIndicatorText = ""
-
-        state.typingMembers.length === 1 ? typingIndicatorText = state.typingMembers[0].nickname + " is typing..." : 
-        state.typingMembers.length === 2 ? typingIndicatorText = state.typingMembers[0].nickname + ", " + state.typingMembers[1].nickname + " are typing..." : 
-        typingIndicatorText = state.typingMembers[0].nickname + ", " + state.typingMembers[1].nickname + " and others are typing..."
-
-        return (
-            <div className='typing-indicator'>{typingIndicatorText}</div>
-        )
-    }
-
     console.log('- - - - State object very useful for debugging - - - -');
     console.log(state);
 
@@ -314,7 +302,7 @@ const GroupChannelTypingIndicatorSample = (props) => {
                     updateMessage={updateMessage}
                 />
 
-                {state.typingMembers.length > 0 && displayTypingIndicator()}
+                {state.typingMembers.length > 0 && DisplayTypingIndicator(state.typingMembers)}
 
                 <MessageInput
                     value={state.messageInputValue}
@@ -571,6 +559,18 @@ const CreateUserForm = ({
         return null;
     }
 
+}
+
+const DisplayTypingIndicator = (typingMembers) => {
+    let typingIndicatorText = ""
+
+    typingMembers.length === 1 ? typingIndicatorText = typingMembers[0].nickname + " is typing..." :
+      typingMembers.length === 2 ? typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " are typing..." :
+        typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " and others are typing..."
+
+    return (
+      <div className='typing-indicator'>{typingIndicatorText}</div>
+    )
 }
 
 // Helpful functions that call Sendbird
