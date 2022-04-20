@@ -21,7 +21,7 @@ import { timestampToTime } from '../utils/messageUtils';
 
 let sb;
 
-const BasicOpenChannelSample = (props) => {
+const CopyMessageOpenChannelSample = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
@@ -377,19 +377,14 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessag
                 <div className="oc-message-sender-name">{message.sender.nickname}{': '}</div>
 
                 <img src={message.url} />
-
                 {messageSentByCurrentUser && <>
-                  <button className="control-button" onClick={() => handleCopyMessage(message)}>
-                      <img className="oc-message-icon" src='/icon_copy.png' />
-                  </button>
                   <button className="control-button" onClick={() => handleDeleteMessage(message)}>
                       <img className="oc-message-icon" src='/icon_delete.png' />
                   </button>
                 </>}
-                {!messageSentByCurrentUser &&
                 <button className="control-button" onClick={() => handleCopyMessage(message)}>
                     <img className="oc-message-icon" src='/icon_copy.png' />
-                </button>}
+                </button>
             </div >);
     }
 
@@ -605,4 +600,4 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default BasicOpenChannelSample;
+export default CopyMessageOpenChannelSample;
