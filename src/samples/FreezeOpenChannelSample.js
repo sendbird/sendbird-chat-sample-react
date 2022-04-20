@@ -245,10 +245,6 @@ const FreezeOpenChannelSample = (props) => {
     console.log('- - - - State object very useful for debugging - - - -');
     console.log(state);
 
-    const displayFrozenToastMessage = () => {
-        return  <div className='frozen-toast'>Channel Frozen </div>
-    }
-
     return (
         <>
             <CreateUserForm
@@ -275,7 +271,7 @@ const FreezeOpenChannelSample = (props) => {
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
-                {state.currentlyJoinedChannel?.isFrozen && displayFrozenToastMessage()}
+                {state.currentlyJoinedChannel?.isFrozen && DisplayFreezeMessage()}
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -508,6 +504,9 @@ const CreateUserForm = ({
 
 }
 
+const DisplayFreezeMessage = () => (
+  <div className='frozen-toast'>Channel Frozen </div>
+)
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
