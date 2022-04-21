@@ -207,9 +207,15 @@ const CopyMessageOpenChannelSample = (props) => {
         const { currentlyJoinedChannel, messages } = state;
         const copyMethod = messageToCopy.messageType === "file" ? "copyFileMessage" : "copyUserMessage";
 
-        await currentlyJoinedChannel[copyMethod](currentlyJoinedChannel, messageToCopy).then(() => {
-          updateState({ ...state, messages: [ ...messages, messageToCopy ]});
-        });
+        await currentlyJoinedChannel[copyMethod](currentlyJoinedChannel, messageToCopy)
+          .then((data) => {
+              const updatedMessages = [...messages, data];
+              const preparedMessage = data.messageType === 'user' ? `Copied from User: ${data.sender.nickname}. Message: ${data.message}`: '';
+
+              updateState({ ...state, messages: updatedMessages, messageInputValue: preparedMessage });
+
+          })
+          .catch((error) => console.log("Copy Error:", error));
     }
 
     const updateMessage = async (message) => {
@@ -399,19 +405,13 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessag
                 <button className="control-button" onClick={() => updateMessage(message)}>
                     <img className="oc-message-icon" src='/icon_edit.png' />
                 </button>
-                <button className="control-button" onClick={() => handleCopyMessage(message)}>
-                    <img className="oc-message-icon" src='/icon_copy.png' />
-                </button>
                 <button className="control-button" onClick={() => handleDeleteMessage(message)}>
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-            {!messageSentByCurrentUser &&
-                <button className="control-button" onClick={() => handleCopyMessage(message)}>
-                    <img className="oc-message-icon" src='/icon_copy.png' />
-                </button>}
-
-
+            <button className="control-button" onClick={() => handleCopyMessage(message)}>
+                <img className="oc-message-icon" src='/icon_copy.png' />
+            </button>
         </div >
     );
 
