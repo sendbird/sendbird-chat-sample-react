@@ -210,9 +210,13 @@ const CopyMessageOpenChannelSample = (props) => {
         await currentlyJoinedChannel[copyMethod](currentlyJoinedChannel, messageToCopy)
           .then((data) => {
               const updatedMessages = [...messages, data];
-              const preparedMessage = data.messageType === 'user' ? `Copied from User: ${data.sender.nickname}. Message: ${data.message}`: '';
+              const preparedMessage = `Copied from User: ${messageToCopy.sender.nickname}. Message: ${data.message}`;
 
-              updateState({ ...state, messages: updatedMessages, messageInputValue: preparedMessage });
+              if (data.messageType === "user") {
+                  updateState({ ...state, messageInputValue: preparedMessage });
+              } else {
+                  updateState({ ...state, messages: updatedMessages });
+              }
 
           })
           .catch((error) => console.log("Copy Error:", error));
