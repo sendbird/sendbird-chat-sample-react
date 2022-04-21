@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { v4 as uuid } from 'uuid';
 
 import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
@@ -29,6 +29,7 @@ const CopyMessageOpenChannelSample = (props) => {
         messages: [],
         channels: [],
         showChannelCreate: false,
+        isCopied: false,
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -43,6 +44,17 @@ const CopyMessageOpenChannelSample = (props) => {
     //need to access state in message reeived callback
     const stateRef = useRef();
     stateRef.current = state;
+
+    useEffect(() => {
+        if (state.isCopied) {
+            setTimeout(() => {
+                updateState({
+                    ...state,
+                    isCopied: false
+                });
+            }, 3000);
+        }
+    }, [state.isCopied])
 
     const onError = (error) => {
         updateState({ ...state, error: error.message });
@@ -207,19 +219,18 @@ const CopyMessageOpenChannelSample = (props) => {
         const { currentlyJoinedChannel, messages } = state;
         const copyMethod = messageToCopy.messageType === "file" ? "copyFileMessage" : "copyUserMessage";
 
-        await currentlyJoinedChannel[copyMethod](currentlyJoinedChannel, messageToCopy)
-          .then((data) => {
-              const updatedMessages = [...messages, data];
-              const preparedMessage = `Copied from User: ${messageToCopy.sender.nickname}. Message: ${data.message}`;
-
-              if (data.messageType === "user") {
-                  updateState({ ...state, messageInputValue: preparedMessage });
-              } else {
-                  updateState({ ...state, messages: updatedMessages });
-              }
-
-          })
+        const response = await currentlyJoinedChannel[copyMethod](currentlyJoinedChannel, messageToCopy)
           .catch((error) => console.log("Copy Error:", error));
+
+        if (response) {
+            const updatedMessages = [...messages, response];
+
+            updateState({
+                ...state,
+                messages: updatedMessages,
+                isCopied: true
+            });
+        }
     }
 
     const updateMessage = async (message) => {
@@ -301,6 +312,7 @@ const CopyMessageOpenChannelSample = (props) => {
                     isVisibleInsertButton={state.isVisibleInsertButton}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
+                    isCopied={state.isCopied}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange} />
             </Channel>
@@ -421,9 +433,10 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessag
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isCopied }) => {
     return (
         <div className="message-input">
+            {isCopied && <div className={`user-copied-message ${isCopied ? "copied" : ""}`}>Copied!</div>}
             <input
                 placeholder="write a message"
                 value={value}

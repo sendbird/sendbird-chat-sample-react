@@ -349,3 +349,8 @@ code {
   width: 20px;
   margin-left: 5px;
 }
+
+.user-copied-message {
+  position: fixed;
+  right: 20px;
+}
