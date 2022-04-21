@@ -324,3 +324,13 @@ code {
   height: 50px;
   border-radius: 25px;
 }
+
+.typing-indicator {
+  position: fixed;
+  bottom:80px;
+  background-color: #fff;
+  opacity: 0.8;
+  margin-left: 20px;
+  margin-top:20px;
+  font-weight: 500;
+}

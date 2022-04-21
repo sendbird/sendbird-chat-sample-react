@@ -8,6 +8,7 @@ const Home = () => {
       <ul>
         <li><Link to="/open-channel">Basic Open Channel</Link></li>
         <li><Link to="/group-channel">Basic Group Channel</Link></li>
+        <li><Link to="/group-channel-typing-indicator">Group Channel with Typing Indicator</Link></li>
       </ul>
 
     </div>
