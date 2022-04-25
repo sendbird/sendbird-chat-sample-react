@@ -1,18 +1,18 @@
 
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
-import SendbirdChat, { UserUpdateParams } from '../dist/esm/sendbird.js';
+import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
 import {
     GroupChannelHandler,
     GroupChannelModule,
     GroupChannelCreateParams,
-} from '../dist/esm/groupChannel.js';
+} from '@sendbird/chat/groupChannel';
 import {
-    UserMessageParams,
+    UserMessageCreateParams,
     MessageListParams,
     UserMessageUpdateParams,
-    FileMessageParams
-} from '../dist/esm/message.js';
+    FileMessageCreateParams
+} from '@sendbird/chat/message';
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
@@ -167,7 +167,7 @@ const GroupChannelTypingIndicatorSample = (props) => {
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
-            const userMessageParams = new UserMessageParams();
+            const userMessageParams = new UserMessageCreateParams();
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
@@ -188,7 +188,7 @@ const GroupChannelTypingIndicatorSample = (props) => {
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             const { currentlyJoinedChannel, messages } = state;
-            const fileMessageParams = new FileMessageParams();
+            const fileMessageParams = new FileMessageCreateParams();
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
