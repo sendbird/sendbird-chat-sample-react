@@ -76,7 +76,7 @@ const BasicGroupChannelSample = (props) => {
                 return messageObject.messageId !== message;
             });
             updateState({ ...stateRef.current, messages: updatedMessages });
-        }
+        };
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
@@ -189,8 +189,7 @@ const BasicGroupChannelSample = (props) => {
     const handleDeleteMessage = async (messageToDelete) => {
       const { currentlyJoinedChannel } = state;
       await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
-
-  }
+    }
 
     const updateMessage = async (message) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
