@@ -5,7 +5,6 @@ import BasicOpenChannelSample from './samples/BasicOpenChannelSample';
 import BasicGroupChannelSample from './samples/BasicGroupChannelSample';
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
 import FreezeOpenChannelSample from './samples/FreezeOpenChannelSample';
-import OpenChannelCopyMessageSample from './samples/OpenChannelCopyMessageSample';
 import CopyMessageOpenChannelSample from './samples/CopyMessageOpenChannelSample';
 
 const App = () => {
