@@ -84,6 +84,12 @@ const GroupChannelTypingIndicatorSample = (props) => {
 
         }
 
+        channelHandler.onMessageDeleted = (channel, message) => {
+            const updatedMessages = stateRef.current.messages.filter((messageObject) => {
+                return messageObject.messageId !== message;
+            });
+            updateState({ ...stateRef.current, messages: updatedMessages });
+        };
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
@@ -205,13 +211,8 @@ const GroupChannelTypingIndicatorSample = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-        const { currentlyJoinedChannel, messages } = state;
-        await deleteMessage(currentlyJoinedChannel, messageToDelete);
-        const updatedMessages = messages.filter((message) => {
-            return message.messageId !== messageToDelete.messageId;
-        });
-        updateState({ ...state, messages: updatedMessages });
-
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
