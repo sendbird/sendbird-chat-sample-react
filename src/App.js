@@ -16,7 +16,6 @@ const App = () => {
         <Route path='/group-channel' element={<BasicGroupChannelSample />} />
         <Route path='/group-channel-typing-indicator' element={<GroupChannelTypingIndicatorSample />} />
         <Route path='/freeze-open-channel' element={<FreezeOpenChannelSample />} />
-        <Route path='/open-channel-copy-message' element={<OpenChannelCopyMessageSample />} />
         <Route path='/open-channel-copy-message' element={<CopyMessageOpenChannelSample />} />
       </Routes>
     </div>
