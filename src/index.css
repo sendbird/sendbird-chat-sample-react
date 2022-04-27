@@ -104,7 +104,7 @@ code {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
-  margin-bottom: 72px;
+  margin-bottom: 102px;
 }
 
 .leave-channel{
@@ -333,4 +333,12 @@ code {
   margin-left: 20px;
   margin-top:20px;
   font-weight: 500;
+}
+
+.display-none {
+  display: none;
+}
+
+.message-input-column {
+  flex-direction: column;
 }
