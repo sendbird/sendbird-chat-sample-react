@@ -342,3 +342,18 @@ code {
 .message-input-column {
   flex-direction: column;
 }
+
+.frozen-toast {
+  position: sticky;
+  top:0;
+  width: 100%;
+  line-height: 30px;
+  opacity: 70%; 
+  background-color: rgb(173,201,255);
+  text-align: center;
+}
+
+.frozen-icon {
+  width: 20px;
+  margin-left: 5px;
+}

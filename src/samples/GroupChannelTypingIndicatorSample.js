@@ -1,18 +1,18 @@
 
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
-import SendbirdChat, { UserUpdateParams } from '../dist/esm/sendbird.js';
+import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
 import {
     GroupChannelHandler,
     GroupChannelModule,
     GroupChannelCreateParams,
-} from '../dist/esm/groupChannel.js';
+} from '@sendbird/chat/groupChannel';
 import {
-    UserMessageParams,
+    UserMessageCreateParams,
     MessageListParams,
     UserMessageUpdateParams,
-    FileMessageParams
-} from '../dist/esm/message.js';
+    FileMessageCreateParams
+} from '@sendbird/chat/message';
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
@@ -84,6 +84,12 @@ const GroupChannelTypingIndicatorSample = (props) => {
 
         }
 
+        channelHandler.onMessageDeleted = (channel, message) => {
+            const updatedMessages = stateRef.current.messages.filter((messageObject) => {
+                return messageObject.messageId !== message;
+            });
+            updateState({ ...stateRef.current, messages: updatedMessages });
+        };
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
@@ -167,7 +173,7 @@ const GroupChannelTypingIndicatorSample = (props) => {
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
-            const userMessageParams = new UserMessageParams();
+            const userMessageParams = new UserMessageCreateParams();
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
@@ -188,7 +194,7 @@ const GroupChannelTypingIndicatorSample = (props) => {
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             const { currentlyJoinedChannel, messages } = state;
-            const fileMessageParams = new FileMessageParams();
+            const fileMessageParams = new FileMessageCreateParams();
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
@@ -205,13 +211,8 @@ const GroupChannelTypingIndicatorSample = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-        const { currentlyJoinedChannel, messages } = state;
-        await deleteMessage(currentlyJoinedChannel, messageToDelete);
-        const updatedMessages = messages.filter((message) => {
-            return message.messageId !== messageToDelete.messageId;
-        });
-        updateState({ ...state, messages: updatedMessages });
-
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
