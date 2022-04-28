@@ -28,19 +28,20 @@ const BasicOpenChannelSample = (props) => {
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
         currentlyUpdatingChannel: null,
-        treadsParentsMessage: {},
-        treadsMessages: [],
+        threadsParentsMessage: {},
+        threadsMessages: [],
         messages: [],
         channels: [],
         showChannelCreate: false,
-        treadsMessageInputValue: "",
+        threadsMessageInputValue: "",
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
         channelNameInputValue: "",
-        isOpenTread: false,
+        isOpenThread: false,
         settingUpUser: true,
         file: null,
+        threadFile: null,
         messageToUpdate: null,
         loading: false,
         error: false
@@ -162,9 +163,9 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, messageInputValue });
     }
 
-    const onTreadsMessageInputChange = (e) => {
-      const treadsMessageInputValue = e.currentTarget.value;
-      updateState({ ...state, treadsMessageInputValue });
+    const onThreadsMessageInputChange = (e) => {
+      const threadsMessageInputValue = e.currentTarget.value;
+      updateState({ ...state, threadsMessageInputValue });
     }
 
     const sendMessage = async () => {
@@ -192,14 +193,14 @@ const BasicOpenChannelSample = (props) => {
         }
     }
 
-    const sendTreadMessage = async () => {
-      const { currentlyJoinedChannel, treadsMessages, treadsParentsMessage } = state;
+    const sendThreadMessage = async () => {
+      const { currentlyJoinedChannel, threadsMessages, threadsParentsMessage } = state;
 
-      const userMessageParams = new UserMessageCreateParams({parentMessageId: treadsParentsMessage.messageId});
-      userMessageParams.message = state.treadsMessageInputValue;
+      const userMessageParams = new UserMessageCreateParams({parentMessageId: threadsParentsMessage.messageId});
+      userMessageParams.message = state.threadsMessageInputValue;
       currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
-        const updatedMessages = [...treadsMessages, message];
-        updateState({ ...state, treadsMessages: updatedMessages, treadsMessageInputValue: "" });
+        const updatedMessages = [...threadsMessages, message];
+        updateState({ ...state, threadsMessages: updatedMessages, threadsMessageInputValue: "" });
 
       }).onFailed((error) => {
           console.log(error)
@@ -223,6 +224,22 @@ const BasicOpenChannelSample = (props) => {
         }
     }
 
+    const onFileThreadsInputChange = async (e) => {
+      if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+          const { currentlyJoinedChannel, threadsMessages, threadsParentsMessage } = state;
+          const fileMessageParams = new FileMessageCreateParams({parentMessageId: threadsParentsMessage.messageId});
+          fileMessageParams.file = e.currentTarget.files[0];
+          currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
+              const updatedMessages = [...threadsMessages, message];
+              updateState({ ...state, threadsMessages: updatedMessages, threadsMessageInputValue: "", threadFile: null });
+
+          }).onFailed((error) => {
+              console.log(error)
+              console.log("failed")
+          });
+      }
+  }
+
     const handleDeleteMessage = async (messageToDelete) => {
         const { currentlyJoinedChannel } = state;
         await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
@@ -233,7 +250,7 @@ const BasicOpenChannelSample = (props) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
     }
 
-    const openTreads = async (parentsMessage) => {
+    const openThreads = async (parentsMessage) => {
       const { currentlyJoinedChannel } = state;
 
       const params = new MessageRetrievalParams({
@@ -253,11 +270,11 @@ const BasicOpenChannelSample = (props) => {
       const { parentMessage, threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
 
       const message = await sb.message.getMessage(params);
-      updateState({ ...state, isOpenTread: true, treadsParentsMessage: message, treadsMessages: threadedMessages })
+      updateState({ ...state, isOpenThread: true, threadsParentsMessage: message, threadsMessages: threadedMessages })
     }
 
-    const exitTreads = async () => {
-      updateState({ ...state, isOpenTread: false })
+    const exitThreads = async () => {
+      updateState({ ...state, isOpenThread: false })
     }
 
     const setupUser = async () => {
@@ -328,39 +345,40 @@ const BasicOpenChannelSample = (props) => {
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
-                    openTreads={openTreads}
+                    openThreads={openThreads}
                 />
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
                     fileSelected={state.file}
-                    isOpenTread={state.isOpenTread}
+                    isOpenThread={state.isOpenThread}
                     onFileInputChange={onFileInputChange} />
             </Channel>
-            <Treads
-              isOpenTread={state.isOpenTread}
-              openTreads={openTreads}
-              exitTreads={exitTreads}
+            <Threads
+              isOpenThread={state.isOpenThread}
+              openThreads={openThreads}
+              exitThreads={exitThreads}
               handleDeleteMessage={handleDeleteMessage}
               updateMessage={updateMessage}
-              treadsParentsMessage={state.treadsParentsMessage}
+              threadsParentsMessage={state.threadsParentsMessage}
             >
                 <MessagesList
                     displayNone={"display-none"}
-                    messages={state.treadsMessages}
+                    messages={state.threadsMessages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
                 <MessageInput
-                    treadsInputClass={"treads-input"}
-                    value={state.treadsMessageInputValue}
-                    isOpenTread={state.isOpenTread}
-                    onChange={onTreadsMessageInputChange}
-                    sendMessage={sendTreadMessage}
-                    fileSelected={state.file}
-                    onFileInputChange={onFileInputChange} />
-            </Treads>
+                    threadsInputClass={"threads-input"}
+                    value={state.threadsMessageInputValue}
+                    isOpenThread={state.isOpenThread}
+                    isThread={true}
+                    onChange={onThreadsMessageInputChange}
+                    sendMessage={sendThreadMessage}
+                    fileSelected={state.threadFile}
+                    onFileThreadsInputChange={onFileThreadsInputChange} />
+            </Threads>
         </>
     );
 };
@@ -415,19 +433,19 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
 
 }
 
-const Treads = ({ isOpenTread, exitTreads, children, treadsParentsMessage, handleDeleteMessage, updateMessage}) => {
-  if (isOpenTread) {
-    return <div className="channel treads">
-      <ChannelHeader>Treads</ChannelHeader>
+const Threads = ({ isOpenThread, exitThreads, children, threadsParentsMessage, handleDeleteMessage, updateMessage}) => {
+  if (isOpenThread) {
+    return <div className="channel threads">
+      <ChannelHeader>Threads</ChannelHeader>
       <div>
-        <button className="leave-channel" onClick={() => exitTreads()}>Exit Treads</button>
+        <button className="leave-channel" onClick={() => exitThreads()}>Exit Threads</button>
       </div>
       <Message
         displayNone={"display-none"}
-        isOpenTread={isOpenTread}
+        isOpenThread={isOpenThread}
         handleDeleteMessage={handleDeleteMessage}
         updateMessage={updateMessage}
-        message={treadsParentsMessage}
+        message={threadsParentsMessage}
       />
       <div className="underline" />
       <div>{children}</div>
@@ -442,7 +460,7 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openTreads, displayNone }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThreads, displayNone = "" }) => {
     return messages.map(message => {
         return (
             <div key={message.messageId} className="oc-message-item">
@@ -451,13 +469,13 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openTreads
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                     message={message}
-                    openTreads={openTreads}
+                    openThreads={openThreads}
                 />
             </div>);
     })
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, openTreads, isOpenTread, displayNone = "" }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, openThreads, isOpenThread, displayNone = "" }) => {
     if (message.url) {
         return (
             <div className="oc-message">
@@ -466,7 +484,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, openTreads, isOp
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
 
                 <img src={message.url} />
-                {!isOpenTread && <button className={`control-button ${displayNone}`} onClick={() => openTreads(message)}>
+                {!isOpenThread && <button className={`control-button ${displayNone}`} onClick={() => openThreads(message)}>
                     <img className="oc-message-icon" src='/icon_thread.png' />
                 </button>}
             </div >);
@@ -488,7 +506,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, openTreads, isOp
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-            {!isOpenTread && <button className={`control-button ${displayNone}`} onClick={() => openTreads(message)}>
+            {!isOpenThread && <button className={`control-button ${displayNone}`} onClick={() => openThreads(message)}>
                   <img className="oc-message-icon" src='/icon_thread.png' />
               </button>}
 
@@ -498,17 +516,25 @@ const Message = ({ message, updateMessage, handleDeleteMessage, openTreads, isOp
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenTread, treadsInputClass = "" }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenThread, threadsInputClass = "", onFileThreadsInputChange, isThread = false }) => {
     return (
-        <div className={`message-input ${treadsInputClass} ${isOpenTread ? "message-input-column" : ""}`}>
+        <div className={`message-input ${threadsInputClass} ${isOpenThread ? "message-input-column" : ""}`}>
             <input
                 placeholder="write a message"
                 value={value}
                 onChange={onChange} />
+          <div className="message-input-buttons">
+            <button className="send-message-button" onClick={sendMessage}>Send Message</button>
+            {isThread ? <><label className="file-upload-label" htmlFor="threadUpload" >Select File</label>
 
-            <div className="message-input-buttons">
-                <button className="send-message-button" onClick={sendMessage}>Send Message</button>
-                <label className="file-upload-label" htmlFor="upload" >Select File</label>
+                <input
+                    id="threadUpload"
+                    className="file-upload-button"
+                    type='file'
+                    hidden={true}
+                    onChange={onFileThreadsInputChange}
+                    onClick={() => { }}
+                /></> : <><label className="file-upload-label" htmlFor="upload" >Select File</label>
 
                 <input
                     id="upload"
@@ -517,8 +543,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenT
                     hidden={true}
                     onChange={onFileInputChange}
                     onClick={() => { }}
-                />
-            </div>
+                /></>}
+                </div>
 
         </div>);
 }
