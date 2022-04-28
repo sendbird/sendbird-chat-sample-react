@@ -107,11 +107,11 @@ code {
   margin-bottom: 102px;
 }
 
-.threads {
+.thread {
   max-width: 35vw;
 }
 
-.threads, .threads-input {
+.thread, .thread-input {
   border-left: 1px solid lightgray;
 }
 
