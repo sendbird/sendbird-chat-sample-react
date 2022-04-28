@@ -107,11 +107,11 @@ code {
   margin-bottom: 102px;
 }
 
-.treads {
+.threads {
   max-width: 35vw;
 }
 
-.treads, .treads-input {
+.threads, .threads-input {
   border-left: 1px solid lightgray;
 }
 
@@ -369,4 +369,9 @@ code {
 .frozen-icon {
   width: 20px;
   margin-left: 5px;
+}
+
+.underline {
+  width: 100%;
+  border-bottom: 1px solid lightgray;
 }
