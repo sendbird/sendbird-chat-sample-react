@@ -107,6 +107,19 @@ code {
   margin-bottom: 102px;
 }
 
+.treads {
+  max-width: 35vw;
+}
+
+.treads, .treads-input {
+  border-left: 1px solid lightgray;
+}
+
+.underline {
+  width: 100%;
+  border-bottom: 1px solid lightgray;
+}
+
 .leave-channel{
   margin-left: 12px;
   padding: 8px;

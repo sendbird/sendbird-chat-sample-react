@@ -14,7 +14,8 @@ import {
     UserMessageCreateParams,
     MessageListParams,
     FileMessageCreateParams,
-    MessageRetrievalParams
+    MessageRetrievalParams,
+    ThreadedMessageListParams
 } from '@sendbird/chat/message';
 
 import { SENDBIRD_INFO } from '../constants/constants';
@@ -164,7 +165,7 @@ const BasicOpenChannelSample = (props) => {
     const onTreadsMessageInputChange = (e) => {
       const treadsMessageInputValue = e.currentTarget.value;
       updateState({ ...state, treadsMessageInputValue });
-  }
+    }
 
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
@@ -190,6 +191,21 @@ const BasicOpenChannelSample = (props) => {
 
         }
     }
+
+    const sendTreadMessage = async () => {
+      const { currentlyJoinedChannel, treadsMessages, treadsParentsMessage } = state;
+
+      const userMessageParams = new UserMessageCreateParams({parentMessageId: treadsParentsMessage.messageId});
+      userMessageParams.message = state.treadsMessageInputValue;
+      currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
+        const updatedMessages = [...treadsMessages, message];
+        updateState({ ...state, treadsMessages: updatedMessages, treadsMessageInputValue: "" });
+
+      }).onFailed((error) => {
+          console.log(error)
+          console.log("failed")
+        });
+  }
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
@@ -226,9 +242,18 @@ const BasicOpenChannelSample = (props) => {
         channelUrl: currentlyJoinedChannel.url,
       });
 
-      const message = await sb.message.getMessage(params);
+      const paramsThreadedMessageListParams = new ThreadedMessageListParams({
+        prevResultSize: 10,
+        nextResultSize: 10,
+        isInclusive: true,
+        reverse: false,
+        includeParentMessageInfo: false,
+      })
 
-      updateState({ ...state, isOpenTread: true, treadsParentsMessage: message })
+      const { parentMessage, threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
+
+      const message = await sb.message.getMessage(params);
+      updateState({ ...state, isOpenTread: true, treadsParentsMessage: message, treadsMessages: threadedMessages })
     }
 
     const exitTreads = async () => {
@@ -322,15 +347,17 @@ const BasicOpenChannelSample = (props) => {
               treadsParentsMessage={state.treadsParentsMessage}
             >
                 <MessagesList
+                    displayNone={"display-none"}
                     messages={state.treadsMessages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
                 <MessageInput
+                    treadsInputClass={"treads-input"}
                     value={state.treadsMessageInputValue}
                     isOpenTread={state.isOpenTread}
                     onChange={onTreadsMessageInputChange}
-                    sendMessage={sendMessage}
+                    sendMessage={sendTreadMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange} />
             </Treads>
@@ -390,18 +417,19 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
 
 const Treads = ({ isOpenTread, exitTreads, children, treadsParentsMessage, handleDeleteMessage, updateMessage}) => {
   if (isOpenTread) {
-    return <div className="channel">
+    return <div className="channel treads">
       <ChannelHeader>Treads</ChannelHeader>
       <div>
         <button className="leave-channel" onClick={() => exitTreads()}>Exit Treads</button>
       </div>
       <Message
-        displayNone="display-none"
+        displayNone={"display-none"}
         isOpenTread={isOpenTread}
         handleDeleteMessage={handleDeleteMessage}
         updateMessage={updateMessage}
         message={treadsParentsMessage}
       />
+      <div className="underline" />
       <div>{children}</div>
     </div>
   }
@@ -414,11 +442,12 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openTreads }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openTreads, displayNone }) => {
     return messages.map(message => {
         return (
             <div key={message.messageId} className="oc-message-item">
                 <Message
+                    displayNone={displayNone}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                     message={message}
@@ -469,9 +498,9 @@ const Message = ({ message, updateMessage, handleDeleteMessage, openTreads, isOp
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenTread }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenTread, treadsInputClass = "" }) => {
     return (
-        <div className={`message-input ${isOpenTread ? "message-input-column" : ""}`}>
+        <div className={`message-input ${treadsInputClass} ${isOpenTread ? "message-input-column" : ""}`}>
             <input
                 placeholder="write a message"
                 value={value}
