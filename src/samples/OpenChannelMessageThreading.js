@@ -168,6 +168,31 @@ const OpenChannelMessageThreading = (props) => {
     updateState({ ...state, threadsMessageInputValue });
   }
 
+  const userMessagesHandler = (isThreads, userMessageParams, messages) => {
+    const { currentlyJoinedChannel } = state;
+
+    if (isThreads) {
+      userMessageParams.message = state.threadsMessageInputValue;
+    } else {
+      userMessageParams.message = state.messageInputValue;
+    }
+
+    currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
+      const updatedMessages = [...messages, message];
+      updateState(() => {
+        if (isThreads) {
+          return { ...state, threadsMessages: updatedMessages, threadsMessageInputValue: "" }
+        }
+
+        return { ...state, messages: updatedMessages, messageInputValue: "" }
+      });
+
+    }).onFailed((error) => {
+      console.log(error)
+      console.log("failed")
+    });
+  }
+
   const sendMessage = async () => {
     const { messageToUpdate, currentlyJoinedChannel, messages } = state;
 
@@ -180,35 +205,19 @@ const OpenChannelMessageThreading = (props) => {
       updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
     } else {
       const userMessageParams = new UserMessageCreateParams();
-      userMessageParams.message = state.messageInputValue;
-      currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
-        const updatedMessages = [...messages, message];
-        updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
 
-      }).onFailed((error) => {
-        console.log(error)
-        console.log("failed")
-      });
-
+      userMessagesHandler(false, userMessageParams, messages)
     }
   }
 
-  const sendThreadMessage = async () => {
-    const { currentlyJoinedChannel, threadsMessages, threadsParentsMessage } = state;
+  const sendThreadMessage = () => {
+    const { threadsMessages, threadsParentsMessage } = state;
+    const userMessageParams = new UserMessageCreateParams({ parentMessageId: threadsParentsMessage.messageId });
 
-    const userMessageParams = new UserMessageCreateParams({parentMessageId: threadsParentsMessage.messageId});
-    userMessageParams.message = state.threadsMessageInputValue;
-    currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
-      const updatedMessages = [...threadsMessages, message];
-      updateState({ ...state, threadsMessages: updatedMessages, threadsMessageInputValue: "" });
-
-    }).onFailed((error) => {
-      console.log(error)
-      console.log("failed")
-    });
+    userMessagesHandler(true, userMessageParams, threadsMessages)
   }
 
-  const sendFileMessage = (fileMessageParams, messages, isThreads, event) => {
+  const fileMessagesHandler = (fileMessageParams, messages, isThreads, event) => {
     const { currentlyJoinedChannel } = state;
     fileMessageParams.file = event.currentTarget.files[0];
 
@@ -232,7 +241,8 @@ const OpenChannelMessageThreading = (props) => {
     if (e.currentTarget.files && e.currentTarget.files.length > 0) {
       const { messages } = state;
       const fileMessageParams = new FileMessageCreateParams();
-      sendFileMessage(fileMessageParams, messages, false, e);
+
+      fileMessagesHandler(fileMessageParams, messages, false, e);
     }
   }
 
@@ -241,7 +251,7 @@ const OpenChannelMessageThreading = (props) => {
       const { threadsMessages, threadsParentsMessage } = state;
       const fileMessageParams = new FileMessageCreateParams({parentMessageId: threadsParentsMessage.messageId});
 
-      sendFileMessage(fileMessageParams, threadsMessages, true, e);
+      fileMessagesHandler(fileMessageParams, threadsMessages, true, e);
     }
   }
 
@@ -437,8 +447,8 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
 }
 
 const Threads = ({ isOpenThread, exitThreads, children, threadsParentsMessage, handleDeleteMessage, updateMessage}) => {
-  if (isOpenThread) {
-    return <div className="channel threads">
+  return isOpenThread && (
+    <div className="channel threads">
       <ChannelHeader>Threads</ChannelHeader>
       <div>
         <button className="leave-channel" onClick={() => exitThreads()}>Exit Threads</button>
@@ -453,9 +463,7 @@ const Threads = ({ isOpenThread, exitThreads, children, threadsParentsMessage, h
       <div className="underline" />
       <div>{children}</div>
     </div>
-  }
-
-  return null
+  )
 }
 
 const ChannelHeader = ({ children }) => {
