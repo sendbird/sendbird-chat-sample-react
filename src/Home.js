@@ -10,6 +10,7 @@ const Home = () => {
         <li><Link to="/group-channel">Basic Group Channel</Link></li>
         <li><Link to="/group-channel-typing-indicator">Group Channel with Typing Indicator</Link></li>
         <li><Link to="/freeze-open-channel">Open Channel with Freeze feature</Link></li>
+        <li><Link to="/group-channel-message-threading">Group Channel Message Threading</Link></li>
       </ul>
 
     </div>
