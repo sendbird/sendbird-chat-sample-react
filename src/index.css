@@ -107,6 +107,19 @@ code {
   margin-bottom: 72px;
 }
 
+.threads {
+  max-width: 35vw;
+}
+
+.threads, .threads-input {
+  border-left: 1px solid lightgray;
+}
+
+.underline {
+  width: 100%;
+  border-bottom: 1px solid lightgray;
+}
+
 .leave-channel{
   margin-left: 12px;
   padding: 8px;
@@ -335,6 +348,14 @@ code {
   font-weight: 500;
 }
 
+.display-none {
+  display: none;
+}
+
+.message-input-column {
+  flex-direction: column;
+}
+
 .frozen-toast {
   position: sticky;
   top:0;
@@ -348,4 +369,9 @@ code {
 .frozen-icon {
   width: 20px;
   margin-left: 5px;
+}
+
+.underline {
+  width: 100%;
+  border-bottom: 1px solid lightgray;
 }
