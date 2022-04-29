@@ -28,12 +28,12 @@ const OpenChannelMessageThreading = (props) => {
   const [state, updateState] = useState({
     currentlyJoinedChannel: null,
     currentlyUpdatingChannel: null,
-    threadParentsMessage: {},
-    threadMessages: [],
+    threadsParentsMessage: {},
+    threadsMessages: [],
     messages: [],
     channels: [],
     showChannelCreate: false,
-    threadMessageInputValue: "",
+    threadsMessageInputValue: "",
     messageInputValue: "",
     userNameInputValue: "",
     userIdInputValue: "",
@@ -163,16 +163,16 @@ const OpenChannelMessageThreading = (props) => {
     updateState({ ...state, messageInputValue });
   }
 
-  const onThreadMessageInputChange = (e) => {
-    const threadMessageInputValue = e.currentTarget.value;
-    updateState({ ...state, threadMessageInputValue });
+  const onThreadsMessageInputChange = (e) => {
+    const threadsMessageInputValue = e.currentTarget.value;
+    updateState({ ...state, threadsMessageInputValue });
   }
 
-  const userMessagesHandler = (isThread, userMessageParams, messages) => {
+  const userMessagesHandler = (isThreads, userMessageParams, messages) => {
     const { currentlyJoinedChannel } = state;
 
-    if (isThread) {
-      userMessageParams.message = state.threadMessageInputValue;
+    if (isThreads) {
+      userMessageParams.message = state.threadsMessageInputValue;
     } else {
       userMessageParams.message = state.messageInputValue;
     }
@@ -180,8 +180,8 @@ const OpenChannelMessageThreading = (props) => {
     currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
       const updatedMessages = [...messages, message];
       updateState(() => {
-        if (isThread) {
-          return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "" }
+        if (isThreads) {
+          return { ...state, threadsMessages: updatedMessages, threadsMessageInputValue: "" }
         }
 
         return { ...state, messages: updatedMessages, messageInputValue: "" }
@@ -211,21 +211,21 @@ const OpenChannelMessageThreading = (props) => {
   }
 
   const sendThreadMessage = () => {
-    const { threadMessages, threadParentsMessage } = state;
-    const userMessageParams = new UserMessageCreateParams({ parentMessageId: threadParentsMessage.messageId });
+    const { threadsMessages, threadsParentsMessage } = state;
+    const userMessageParams = new UserMessageCreateParams({ parentMessageId: threadsParentsMessage.messageId });
 
-    userMessagesHandler(true, userMessageParams, threadMessages)
+    userMessagesHandler(true, userMessageParams, threadsMessages)
   }
 
-  const fileMessagesHandler = (fileMessageParams, messages, isThread, event) => {
+  const fileMessagesHandler = (fileMessageParams, messages, isThreads, event) => {
     const { currentlyJoinedChannel } = state;
     fileMessageParams.file = event.currentTarget.files[0];
 
     currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
       const updatedMessages = [...messages, message];
       updateState(() => {
-        if (isThread) {
-          return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "", threadFile: null }
+        if (isThreads) {
+          return { ...state, threadsMessages: updatedMessages, threadsMessageInputValue: "", threadFile: null }
         }
 
         return { ...state, messages: updatedMessages, messageInputValue: "", file: null }
@@ -246,12 +246,12 @@ const OpenChannelMessageThreading = (props) => {
     }
   }
 
-  const onFileThreadInputChange = async (e) => {
+  const onFileThreadsInputChange = async (e) => {
     if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-      const { threadMessages, threadParentsMessage } = state;
-      const fileMessageParams = new FileMessageCreateParams({parentMessageId: threadParentsMessage.messageId});
+      const { threadsMessages, threadsParentsMessage } = state;
+      const fileMessageParams = new FileMessageCreateParams({parentMessageId: threadsParentsMessage.messageId});
 
-      fileMessagesHandler(fileMessageParams, threadMessages, true, e);
+      fileMessagesHandler(fileMessageParams, threadsMessages, true, e);
     }
   }
 
@@ -265,7 +265,7 @@ const OpenChannelMessageThreading = (props) => {
     updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
   }
 
-  const openThread = async (parentsMessage) => {
+  const getParamsForThreading = async (parentsMessage) => {
     const { currentlyJoinedChannel } = state;
 
     const params = new MessageRetrievalParams({
@@ -284,11 +284,17 @@ const OpenChannelMessageThreading = (props) => {
 
     const { threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
 
-    const message = await sb.message.getMessage(params);
-    updateState({ ...state, isOpenThread: true, threadParentsMessage: message, threadMessages: threadedMessages })
+    return {params: params, threadedMessages: threadedMessages}
   }
 
-  const exitThread = async () => {
+  const openThread = async (parentsMessage) => {
+    const { params, threadedMessages} = await getParamsForThreading(parentsMessage)
+    const message = await sb.message.getMessage(params);
+    
+    updateState({ ...state, isOpenThread: true, threadsParentsMessage: message, threadsMessages: threadedMessages })
+  }
+
+  const exitThreads = async () => {
     updateState({ ...state, isOpenThread: false })
   }
 
@@ -368,30 +374,30 @@ const OpenChannelMessageThreading = (props) => {
           isOpenThread={state.isOpenThread}
           onFileInputChange={onFileInputChange} />
       </Channel>
-      <Thread
+      <Threads
         isOpenThread={state.isOpenThread}
         openThread={openThread}
-        exitThread={exitThread}
+        exitThreads={exitThreads}
         handleDeleteMessage={handleDeleteMessage}
         updateMessage={updateMessage}
-        threadParentsMessage={state.threadParentsMessage}
+        threadsParentsMessage={state.threadsParentsMessage}
       >
         <MessagesList
-          displayNone={"display-none"}
-          messages={state.threadMessages}
+          isOpenThread={state.isOpenThread}
+          messages={state.threadsMessages}
           handleDeleteMessage={handleDeleteMessage}
           updateMessage={updateMessage}
         />
         <MessageInput
-          threadInputClass={"thread-input"}
-          value={state.threadMessageInputValue}
+          threadsInputClass={"threads-input"}
+          value={state.threadsMessageInputValue}
           isOpenThread={state.isOpenThread}
           isThread={true}
-          onChange={onThreadMessageInputChange}
+          onChange={onThreadsMessageInputChange}
           sendMessage={sendThreadMessage}
           fileSelected={state.threadFile}
-          onFileThreadInputChange={onFileThreadInputChange} />
-      </Thread>
+          onFileThreadsInputChange={onFileThreadsInputChange} />
+      </Threads>
     </>
   );
 };
@@ -446,19 +452,18 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
 
 }
 
-const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, handleDeleteMessage, updateMessage }) => {
+const Threads = ({ isOpenThread, exitThreads, children, threadsParentsMessage, handleDeleteMessage, updateMessage}) => {
   return isOpenThread && (
-    <div className="channel thread">
-      <ChannelHeader>Thread</ChannelHeader>
+    <div className="channel threads">
+      <ChannelHeader>Threads</ChannelHeader>
       <div>
-        <button className="leave-channel" onClick={() => exitThread()}>Exit Thread</button>
+        <button className="leave-channel" onClick={() => exitThreads()}>Exit Threads</button>
       </div>
       <Message
-        displayNone={"display-none"}
         isOpenThread={isOpenThread}
         handleDeleteMessage={handleDeleteMessage}
         updateMessage={updateMessage}
-        message={threadParentsMessage}
+        message={threadsParentsMessage}
       />
       <div className="underline" />
       <div>{children}</div>
@@ -471,12 +476,12 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread, displayNone = "" }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread, isOpenThread }) => {
   return messages.map(message => {
     return (
       <div key={message.messageId} className="oc-message-item">
         <Message
-          displayNone={displayNone}
+          isOpenThread={isOpenThread}
           handleDeleteMessage={handleDeleteMessage}
           updateMessage={updateMessage}
           message={message}
@@ -486,7 +491,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread
   })
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, openThread, isOpenThread, displayNone = "" }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, openThread, isOpenThread }) => {
   if (message.url) {
     return (
       <div className="oc-message">
@@ -495,7 +500,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, openThread, isOp
         <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
 
         <img src={message.url} />
-        {!isOpenThread && <button className={`control-button ${displayNone}`} onClick={() => openThread(message)}>
+        {!isOpenThread && <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => openThread(message)}>
           <img className="oc-message-icon" src='/icon_thread.png' />
         </button>}
       </div >);
@@ -510,23 +515,23 @@ const Message = ({ message, updateMessage, handleDeleteMessage, openThread, isOp
       <div>{message.message}</div>
 
       {messageSentByCurrentUser && <>
-        <button className={`control-button ${displayNone}`} onClick={() => updateMessage(message)}>
+        <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => updateMessage(message)}>
           <img className="oc-message-icon" src='/icon_edit.png' />
         </button>
-        <button className={`control-button ${displayNone}`} onClick={() => handleDeleteMessage(message)}>
+        <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => handleDeleteMessage(message)}>
           <img className="oc-message-icon" src='/icon_delete.png' />
         </button>
       </>}
-      {!isOpenThread && <button className={`control-button ${displayNone}`} onClick={() => openThread(message)}>
+      {!isOpenThread && <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => openThread(message)}>
         <img className="oc-message-icon" src='/icon_thread.png' />
       </button>}
     </div >
   );
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenThread, threadInputClass = "", onFileThreadInputChange, isThread = false }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenThread, threadsInputClass = "", onFileThreadsInputChange, isThread = false }) => {
   return (
-    <div className={`message-input ${threadInputClass} ${isOpenThread ? "message-input-column" : ""}`}>
+    <div className={`message-input ${threadsInputClass} ${isOpenThread ? "message-input-column" : ""}`}>
       <input
         placeholder="write a message"
         value={value}
@@ -540,7 +545,7 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenT
             className="file-upload-button"
             type='file'
             hidden={true}
-            onChange={onFileThreadInputChange}
+            onChange={onFileThreadsInputChange}
             onClick={() => { }}
           /></> : <><label className="file-upload-label" htmlFor="upload" >Select File</label>
 
