@@ -28,12 +28,12 @@ const OpenChannelMessageThreading = (props) => {
   const [state, updateState] = useState({
     currentlyJoinedChannel: null,
     currentlyUpdatingChannel: null,
-    threadsParentsMessage: {},
-    threadsMessages: [],
+    threadParentsMessage: {},
+    threadMessages: [],
     messages: [],
     channels: [],
     showChannelCreate: false,
-    threadsMessageInputValue: "",
+    threadMessageInputValue: "",
     messageInputValue: "",
     userNameInputValue: "",
     userIdInputValue: "",
@@ -163,16 +163,16 @@ const OpenChannelMessageThreading = (props) => {
     updateState({ ...state, messageInputValue });
   }
 
-  const onThreadsMessageInputChange = (e) => {
-    const threadsMessageInputValue = e.currentTarget.value;
-    updateState({ ...state, threadsMessageInputValue });
+  const onThreadMessageInputChange = (e) => {
+    const threadMessageInputValue = e.currentTarget.value;
+    updateState({ ...state, threadMessageInputValue });
   }
 
-  const userMessagesHandler = (isThreads, userMessageParams, messages) => {
+  const userMessagesHandler = (isThread, userMessageParams, messages) => {
     const { currentlyJoinedChannel } = state;
 
-    if (isThreads) {
-      userMessageParams.message = state.threadsMessageInputValue;
+    if (isThread) {
+      userMessageParams.message = state.threadMessageInputValue;
     } else {
       userMessageParams.message = state.messageInputValue;
     }
@@ -180,8 +180,8 @@ const OpenChannelMessageThreading = (props) => {
     currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
       const updatedMessages = [...messages, message];
       updateState(() => {
-        if (isThreads) {
-          return { ...state, threadsMessages: updatedMessages, threadsMessageInputValue: "" }
+        if (isThread) {
+          return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "" }
         }
 
         return { ...state, messages: updatedMessages, messageInputValue: "" }
@@ -211,21 +211,21 @@ const OpenChannelMessageThreading = (props) => {
   }
 
   const sendThreadMessage = () => {
-    const { threadsMessages, threadsParentsMessage } = state;
-    const userMessageParams = new UserMessageCreateParams({ parentMessageId: threadsParentsMessage.messageId });
+    const { threadMessages, threadParentsMessage } = state;
+    const userMessageParams = new UserMessageCreateParams({ parentMessageId: threadParentsMessage.messageId });
 
-    userMessagesHandler(true, userMessageParams, threadsMessages)
+    userMessagesHandler(true, userMessageParams, threadMessages)
   }
 
-  const fileMessagesHandler = (fileMessageParams, messages, isThreads, event) => {
+  const fileMessagesHandler = (fileMessageParams, messages, isThread, event) => {
     const { currentlyJoinedChannel } = state;
     fileMessageParams.file = event.currentTarget.files[0];
 
     currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
       const updatedMessages = [...messages, message];
       updateState(() => {
-        if (isThreads) {
-          return { ...state, threadsMessages: updatedMessages, threadsMessageInputValue: "", threadFile: null }
+        if (isThread) {
+          return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "", threadFile: null }
         }
 
         return { ...state, messages: updatedMessages, messageInputValue: "", file: null }
@@ -246,12 +246,12 @@ const OpenChannelMessageThreading = (props) => {
     }
   }
 
-  const onFileThreadsInputChange = async (e) => {
+  const onFileThreadInputChange = async (e) => {
     if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-      const { threadsMessages, threadsParentsMessage } = state;
-      const fileMessageParams = new FileMessageCreateParams({parentMessageId: threadsParentsMessage.messageId});
+      const { threadMessages, threadParentsMessage } = state;
+      const fileMessageParams = new FileMessageCreateParams({parentMessageId: threadParentsMessage.messageId});
 
-      fileMessagesHandler(fileMessageParams, threadsMessages, true, e);
+      fileMessagesHandler(fileMessageParams, threadMessages, true, e);
     }
   }
 
@@ -291,10 +291,10 @@ const OpenChannelMessageThreading = (props) => {
     const { params, threadedMessages} = await getParamsForThreading(parentsMessage)
     const message = await sb.message.getMessage(params);
     
-    updateState({ ...state, isOpenThread: true, threadsParentsMessage: message, threadsMessages: threadedMessages })
+    updateState({ ...state, isOpenThread: true, threadParentsMessage: message, threadMessages: threadedMessages })
   }
 
-  const exitThreads = async () => {
+  const exitThread = async () => {
     updateState({ ...state, isOpenThread: false })
   }
 
@@ -374,30 +374,30 @@ const OpenChannelMessageThreading = (props) => {
           isOpenThread={state.isOpenThread}
           onFileInputChange={onFileInputChange} />
       </Channel>
-      <Threads
+      <Thread
         isOpenThread={state.isOpenThread}
         openThread={openThread}
-        exitThreads={exitThreads}
+        exitThread={exitThread}
         handleDeleteMessage={handleDeleteMessage}
         updateMessage={updateMessage}
-        threadsParentsMessage={state.threadsParentsMessage}
+        threadParentsMessage={state.threadParentsMessage}
       >
         <MessagesList
           isOpenThread={state.isOpenThread}
-          messages={state.threadsMessages}
+          messages={state.threadMessages}
           handleDeleteMessage={handleDeleteMessage}
           updateMessage={updateMessage}
         />
         <MessageInput
-          threadsInputClass={"threads-input"}
-          value={state.threadsMessageInputValue}
+          threadInputClass={"thread-input"}
+          value={state.threadMessageInputValue}
           isOpenThread={state.isOpenThread}
           isThread={true}
-          onChange={onThreadsMessageInputChange}
+          onChange={onThreadMessageInputChange}
           sendMessage={sendThreadMessage}
           fileSelected={state.threadFile}
-          onFileThreadsInputChange={onFileThreadsInputChange} />
-      </Threads>
+          onFileThreadInputChange={onFileThreadInputChange} />
+      </Thread>
     </>
   );
 };
@@ -452,18 +452,18 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
 
 }
 
-const Threads = ({ isOpenThread, exitThreads, children, threadsParentsMessage, handleDeleteMessage, updateMessage}) => {
+const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, handleDeleteMessage, updateMessage}) => {
   return isOpenThread && (
-    <div className="channel threads">
-      <ChannelHeader>Threads</ChannelHeader>
+    <div className="channel thread">
+      <ChannelHeader>Thread</ChannelHeader>
       <div>
-        <button className="leave-channel" onClick={() => exitThreads()}>Exit Threads</button>
+        <button className="leave-channel" onClick={() => exitThread()}>Exit Thread</button>
       </div>
       <Message
         isOpenThread={isOpenThread}
         handleDeleteMessage={handleDeleteMessage}
         updateMessage={updateMessage}
-        message={threadsParentsMessage}
+        message={threadParentsMessage}
       />
       <div className="underline" />
       <div>{children}</div>
@@ -529,9 +529,9 @@ const Message = ({ message, updateMessage, handleDeleteMessage, openThread, isOp
   );
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenThread, threadsInputClass = "", onFileThreadsInputChange, isThread = false }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenThread, threadInputClass = "", onFileThreadInputChange, isThread = false }) => {
   return (
-    <div className={`message-input ${threadsInputClass} ${isOpenThread ? "message-input-column" : ""}`}>
+    <div className={`message-input ${threadInputClass} ${isOpenThread ? "message-input-column" : ""}`}>
       <input
         placeholder="write a message"
         value={value}
@@ -545,7 +545,7 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenT
             className="file-upload-button"
             type='file'
             hidden={true}
-            onChange={onFileThreadsInputChange}
+            onChange={onFileThreadInputChange}
             onClick={() => { }}
           /></> : <><label className="file-upload-label" htmlFor="upload" >Select File</label>
 
