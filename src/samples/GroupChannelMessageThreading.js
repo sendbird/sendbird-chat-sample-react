@@ -74,8 +74,13 @@ const GroupChannelMessageThreading = (props) => {
     }
 
     channelHandler.onMessageReceived = (channel, message) => {
-      const updatedMessages = [...stateRef.current.messages, message];
-      updateState({ ...stateRef.current, messages: updatedMessages });
+      if(!message.parentMessageId) {
+        const updatedMessages = [...stateRef.current.messages, message];
+        updateState({ ...stateRef.current, messages: updatedMessages });
+      } else {
+        const updatedMessages = [...stateRef.current.threadMessages, message];
+        updateState({ ...stateRef.current, threadMessages: updatedMessages });
+      }
     };
 
     channelHandler.onMessageDeleted = (channel, message) => {
@@ -187,13 +192,17 @@ const GroupChannelMessageThreading = (props) => {
     } else {
       const userMessageParams = new UserMessageCreateParams();
 
+      userMessageParams.message = state.messageInputValue;
+
       userMessagesHandler(false, userMessageParams, messages)
     }
   }
 
-  const sendThreadMessage = () => {
+  const sendThreadMessage = async () => {
     const { threadMessages, threadParentsMessage } = state;
     const userMessageParams = new UserMessageCreateParams({ parentMessageId: threadParentsMessage.messageId });
+
+    userMessageParams.message = state.threadMessageInputValue;
 
     userMessagesHandler(true, userMessageParams, threadMessages)
   }
@@ -246,8 +255,10 @@ const GroupChannelMessageThreading = (props) => {
   }
 
   const openThread = async (parentsMessage) => {
+    const { currentlyJoinedChannel } = state;
+
     const messageSentByYou = parentsMessage.sender.userId === sb.currentUser.userId;
-    const { params, threadedMessages} = await getParamsForThreading(parentsMessage)
+    const { params, threadedMessages} = await getParamsForThreading(parentsMessage, currentlyJoinedChannel)
     const message = await sb.message.getMessage(params);
 
     updateState({ ...state, isOpenThread: true, threadParentsMessage: message, threadMessages: threadedMessages, messageSentByYou: messageSentByYou })
@@ -711,8 +722,7 @@ const getAllApplicationUsers = async () => {
   }
 }
 
-const getParamsForThreading = async (parentsMessage) => {
-  const { currentlyJoinedChannel } = state;
+const getParamsForThreading = async (parentsMessage, currentlyJoinedChannel) => {
 
   const params = new MessageRetrievalParams({
     messageId: parentsMessage.messageId,
