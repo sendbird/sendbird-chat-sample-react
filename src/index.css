@@ -104,7 +104,20 @@ code {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
-  margin-bottom: 72px;
+  margin-bottom: 102px;
+}
+
+.thread {
+  max-width: 35vw;
+}
+
+.thread, .thread-input {
+  border-left: 1px solid lightgray;
+}
+
+.underline {
+  width: 100%;
+  border-bottom: 1px solid lightgray;
 }
 
 .threads {
