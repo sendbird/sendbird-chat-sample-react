@@ -266,7 +266,8 @@ const OpenChannelMessageThreading = (props) => {
   }
 
   const openThread = async (parentsMessage) => {
-    const { params, threadedMessages} = await getParamsForThreading(parentsMessage)
+    const { currentlyJoinedChannel } = state;
+    const { params, threadedMessages} = await getParamsForThreading(parentsMessage, currentlyJoinedChannel);
     const message = await sb.message.getMessage(params);
     
     updateState({ ...state, isOpenThread: true, threadParentsMessage: message, threadMessages: threadedMessages })
@@ -695,8 +696,7 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
   await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-const getParamsForThreading = async (parentsMessage) => {
-  const { currentlyJoinedChannel } = state;
+const getParamsForThreading = async (parentsMessage, currentlyJoinedChannel) => {
 
   const params = new MessageRetrievalParams({
     messageId: parentsMessage.messageId,
