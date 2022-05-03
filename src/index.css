@@ -104,7 +104,20 @@ code {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
-  margin-bottom: 72px;
+  margin-bottom: 102px;
+}
+
+.thread {
+  max-width: 35vw;
+}
+
+.thread, .thread-input {
+  border-left: 1px solid lightgray;
+}
+
+.underline {
+  width: 100%;
+  border-bottom: 1px solid lightgray;
 }
 
 .leave-channel{
@@ -335,6 +348,14 @@ code {
   font-weight: 500;
 }
 
+.display-none {
+  display: none;
+}
+
+.message-input-column {
+  flex-direction: column;
+}
+
 .frozen-toast {
   position: sticky;
   top:0;
@@ -348,6 +369,11 @@ code {
 .frozen-icon {
   width: 20px;
   margin-left: 5px;
+}
+
+.underline {
+  width: 100%;
+  border-bottom: 1px solid lightgray;
 }
 
 .user-copied-message {
