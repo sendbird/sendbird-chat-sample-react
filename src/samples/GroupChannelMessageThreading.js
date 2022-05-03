@@ -245,28 +245,6 @@ const GroupChannelMessageThreading = (props) => {
     updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
   }
 
-  const getParamsForThreading = async (parentsMessage) => {
-    const { currentlyJoinedChannel } = state;
-
-    const params = new MessageRetrievalParams({
-      messageId: parentsMessage.messageId,
-      channelType: "group", // Acceptable values are open and group.
-      channelUrl: currentlyJoinedChannel.url,
-    });
-
-    const paramsThreadedMessageListParams = new ThreadedMessageListParams({
-      prevResultSize: 10,
-      nextResultSize: 10,
-      isInclusive: true,
-      reverse: false,
-      includeParentMessageInfo: false,
-    })
-
-    const { threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
-
-    return {params: params, threadedMessages: threadedMessages}
-  }
-
   const openThread = async (parentsMessage) => {
     const messageSentByYou = parentsMessage.sender.userId === sb.currentUser.userId;
     const { params, threadedMessages} = await getParamsForThreading(parentsMessage)
@@ -730,6 +708,32 @@ const getAllApplicationUsers = async () => {
     return [users, null];
   } catch (error) {
     return [null, error];
+  }
+}
+
+const getParamsForThreading = async (parentsMessage) => {
+  const { currentlyJoinedChannel } = state;
+
+  const params = new MessageRetrievalParams({
+    messageId: parentsMessage.messageId,
+    channelType: "group", // Acceptable values are open and group.
+    channelUrl: currentlyJoinedChannel.url,
+  });
+
+  const paramsThreadedMessageListParams = new ThreadedMessageListParams({
+    prevResultSize: 10,
+    nextResultSize: 10,
+    isInclusive: true,
+    reverse: false,
+    includeParentMessageInfo: false,
+  })
+
+  try {
+    const { threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
+
+    return {params: params, threadedMessages: threadedMessages}
+  } catch (e) {
+    console.log('Error:', e);
   }
 }
 
