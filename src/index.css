@@ -155,7 +155,7 @@ code {
   display:flex;
 }
 
-.admin-message {
+.oc-admin-message {
   background: rgba(255, 0, 0, 0.05);
 }
 
@@ -166,6 +166,13 @@ code {
   color:white;
   padding: 24px;
   margin-left: 12px;
+}
+
+.admin-message {
+  background: rgba(255, 0, 0, 0.05);
+  width: 100%;
+  color: black;
+  margin-left: 0;
 }
 
 .oc-message{
