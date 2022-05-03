@@ -178,7 +178,7 @@ code {
   visibility: visible;
 }
 
-.oc-message:hover .oc-message-icon{
+.oc-message:hover .oc-message-icon, .message-input .oc-message-icon{
   visibility: visible;
 }
 
@@ -348,4 +348,9 @@ code {
 .frozen-icon {
   width: 20px;
   margin-left: 5px;
+}
+
+.user-copied-message {
+  position: fixed;
+  right: 20px;
 }
