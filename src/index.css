@@ -191,7 +191,7 @@ code {
   visibility: visible;
 }
 
-.oc-message:hover .oc-message-icon{
+.oc-message:hover .oc-message-icon, .message-input .oc-message-icon{
   visibility: visible;
 }
 
@@ -374,4 +374,9 @@ code {
 .underline {
   width: 100%;
   border-bottom: 1px solid lightgray;
+}
+
+.user-copied-message {
+  position: fixed;
+  right: 20px;
 }
