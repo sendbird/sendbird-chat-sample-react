@@ -155,6 +155,10 @@ code {
   display:flex;
 }
 
+.oc-admin-message {
+  background: rgba(255, 0, 0, 0.05);
+}
+
 .message{
   border-radius: 8px;
   width:70%;
