@@ -12,6 +12,7 @@ const Home = () => {
         <li><Link to="/freeze-open-channel">Open Channel with Freeze feature</Link></li>
         <li><Link to="/open-channel-message-threading">Open Channel Message Threading</Link></li>
         <li><Link to="/open-channel-copy-message">Open Channel Copy Message</Link></li>
+        <li><Link to="/group-channel-send-an-admin-message">Group Channel Send An Admin Message</Link></li>
       </ul>
 
     </div>
