@@ -7,6 +7,7 @@ import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndic
 import OpenChannelMessageThreading from './samples/OpenChannelMessageThreading';
 import FreezeOpenChannelSample from './samples/FreezeOpenChannelSample';
 import CopyMessageOpenChannelSample from './samples/CopyMessageOpenChannelSample';
+import GroupChannelSendAnAdminMessage from './samples/GroupChannelSendAnAdminMessage';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path='/freeze-open-channel' element={<FreezeOpenChannelSample />} />
         <Route path='/open-channel-message-threading' element={<OpenChannelMessageThreading />} />
         <Route path='/open-channel-copy-message' element={<CopyMessageOpenChannelSample />} />
+        <Route path='/group-channel-send-an-admin-message' element={<GroupChannelSendAnAdminMessage />} />
       </Routes>
     </div>
   );
