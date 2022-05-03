@@ -6,6 +6,7 @@ import BasicGroupChannelSample from './samples/BasicGroupChannelSample';
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
 import OpenChannelMessageThreading from './samples/OpenChannelMessageThreading';
 import FreezeOpenChannelSample from './samples/FreezeOpenChannelSample';
+import OpenChannelSendAnAdminMessage from './samples/OpenChannelSendAnAdminMessage'
 import CopyMessageOpenChannelSample from './samples/CopyMessageOpenChannelSample';
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
         <Route path='/group-channel' element={<BasicGroupChannelSample />} />
         <Route path='/group-channel-typing-indicator' element={<GroupChannelTypingIndicatorSample />} />
         <Route path='/freeze-open-channel' element={<FreezeOpenChannelSample />} />
+        <Route path='/open-channel-send-an-admin-message' element={<OpenChannelSendAnAdminMessage />} />
         <Route path='/open-channel-message-threading' element={<OpenChannelMessageThreading />} />
         <Route path='/open-channel-copy-message' element={<CopyMessageOpenChannelSample />} />
       </Routes>

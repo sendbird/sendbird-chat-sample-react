@@ -155,6 +155,9 @@ code {
   display:flex;
 }
 
+.admin-message {
+  background: rgba(255, 0, 0, 0.05);
+}
 
 .message{
   border-radius: 8px;
