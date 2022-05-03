@@ -265,28 +265,6 @@ const OpenChannelMessageThreading = (props) => {
     updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
   }
 
-  const getParamsForThreading = async (parentsMessage) => {
-    const { currentlyJoinedChannel } = state;
-
-    const params = new MessageRetrievalParams({
-      messageId: parentsMessage.messageId,
-      channelType: "open", // Acceptable values are open and group.
-      channelUrl: currentlyJoinedChannel.url,
-    });
-
-    const paramsThreadedMessageListParams = new ThreadedMessageListParams({
-      prevResultSize: 10,
-      nextResultSize: 10,
-      isInclusive: true,
-      reverse: false,
-      includeParentMessageInfo: false,
-    })
-
-    const { threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
-
-    return {params: params, threadedMessages: threadedMessages}
-  }
-
   const openThread = async (parentsMessage) => {
     const { params, threadedMessages} = await getParamsForThreading(parentsMessage)
     const message = await sb.message.getMessage(params);
@@ -473,7 +451,6 @@ const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, hand
 
 const ChannelHeader = ({ children }) => {
   return <div className="channel-header">{children}</div>;
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread, isOpenThread }) => {
@@ -660,7 +637,6 @@ const loadChannels = async () => {
   } catch (error) {
     return [null, error];
   }
-
 }
 
 const joinChannel = async (channel) => {
@@ -687,7 +663,6 @@ const createChannel = async (channelName) => {
   } catch (error) {
     return [null, error];
   }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -718,6 +693,32 @@ const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) =>
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
   await currentlyJoinedChannel.deleteMessage(messageToDelete);
+}
+
+const getParamsForThreading = async (parentsMessage) => {
+  const { currentlyJoinedChannel } = state;
+
+  const params = new MessageRetrievalParams({
+    messageId: parentsMessage.messageId,
+    channelType: "open", // Acceptable values are open and group.
+    channelUrl: currentlyJoinedChannel.url,
+  });
+
+  const paramsThreadedMessageListParams = new ThreadedMessageListParams({
+    prevResultSize: 10,
+    nextResultSize: 10,
+    isInclusive: true,
+    reverse: false,
+    includeParentMessageInfo: false,
+  })
+
+  try {
+    const { threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
+
+    return { params: params, threadedMessages: threadedMessages }
+  } catch (e) {
+    console.log('Error:', e);
+  }
 }
 
 export default OpenChannelMessageThreading;
