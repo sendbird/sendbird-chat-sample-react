@@ -246,79 +246,79 @@ const OpenChannelSendAnAdminMessage = (props) => {
     console.log(state);
 
     return (
-        <>
-            <CreateUserForm
-                setupUser={setupUser}
-                userNameInputValue={state.userNameInputValue}
-                userIdInputValue={state.userIdInputValue}
-                settingUpUser={state.settingUpUser}
-                onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange} />
-            <ChannelList
-                channels={state.channels}
-                toggleChannelDetails={toggleChannelDetails}
-                handleJoinChannel={handleJoinChannel}
-                toggleShowCreateChannel={toggleShowCreateChannel}
-                handleDeleteChannel={handleDeleteChannel} />
-            <ChannelDetails
-                currentlyUpdatingChannel={state.currentlyUpdatingChannel}
-                handleUpdateChannel={handleUpdateChannel}
-                onChannelNamenIputChange={onChannelNamenIputChange}
-                toggleChannelDetails={toggleChannelDetails} />
-            <ChannelCreate
-                showChannelCreate={state.showChannelCreate}
-                toggleShowCreateChannel={toggleShowCreateChannel}
-                onChannelNamenIputChange={onChannelNamenIputChange}
-                handleCreateChannel={handleCreateChannel} />
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
-                <MessagesList
-                    messages={state.messages}
-                    handleDeleteMessage={handleDeleteMessage}
-                    updateMessage={updateMessage}
-                />
-                <MessageInput
-                    value={state.messageInputValue}
-                    onChange={onMessageInputChange}
-                    sendMessage={sendMessage}
-                    fileSelected={state.file}
-                    onFileInputChange={onFileInputChange} />
-            </Channel>
-        </>
+      <>
+          <CreateUserForm
+            setupUser={setupUser}
+            userNameInputValue={state.userNameInputValue}
+            userIdInputValue={state.userIdInputValue}
+            settingUpUser={state.settingUpUser}
+            onUserIdInputChange={onUserIdInputChange}
+            onUserNameInputChange={onUserNameInputChange} />
+          <ChannelList
+            channels={state.channels}
+            toggleChannelDetails={toggleChannelDetails}
+            handleJoinChannel={handleJoinChannel}
+            toggleShowCreateChannel={toggleShowCreateChannel}
+            handleDeleteChannel={handleDeleteChannel} />
+          <ChannelDetails
+            currentlyUpdatingChannel={state.currentlyUpdatingChannel}
+            handleUpdateChannel={handleUpdateChannel}
+            onChannelNamenIputChange={onChannelNamenIputChange}
+            toggleChannelDetails={toggleChannelDetails} />
+          <ChannelCreate
+            showChannelCreate={state.showChannelCreate}
+            toggleShowCreateChannel={toggleShowCreateChannel}
+            onChannelNamenIputChange={onChannelNamenIputChange}
+            handleCreateChannel={handleCreateChannel} />
+          <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+              <MessagesList
+                messages={state.messages}
+                handleDeleteMessage={handleDeleteMessage}
+                updateMessage={updateMessage}
+              />
+              <MessageInput
+                value={state.messageInputValue}
+                onChange={onMessageInputChange}
+                sendMessage={sendMessage}
+                fileSelected={state.file}
+                onFileInputChange={onFileInputChange} />
+          </Channel>
+      </>
     );
 };
 
 // Chat UI Components
 const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, handleDeleteChannel, toggleChannelDetails }) => {
     return (
-        <div className='channel-list'>
-            <div className="channel-type">
-                <h1>Open Channels</h1>
-                <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
-            </div>
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}>
-                                {channel.name}
-                            </div>
-                            {userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
+      <div className='channel-list'>
+          <div className="channel-type">
+              <h1>Open Channels</h1>
+              <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
+          </div>
+          {
+              channels.map(channel => {
+                  const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                  return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                             onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
+                        </div>
+                        {userIsOperator &&
+                        <div>
+                            <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                <img className="channel-icon" src='/icon_edit.png' />
 
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
 
-                                    </button>
-                                </div>}
-                        </div>);
-                })
-            }
-        </div >);
+                            </button>
+                        </div>}
+                    </div>);
+              })
+          }
+      </div >);
 }
 
 
@@ -345,93 +345,86 @@ const ChannelHeader = ({ children }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return messages.map(message => {
         return (
-            <div key={message.messageId} className="oc-message-item">
-                <Message
-                    handleDeleteMessage={handleDeleteMessage}
-                    updateMessage={updateMessage}
-                    message={message}
-                />
-            </div>);
+          <div key={message.messageId} className="oc-message-item">
+              <Message
+                handleDeleteMessage={handleDeleteMessage}
+                updateMessage={updateMessage}
+                message={message}
+              />
+          </div>);
     })
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
     if (message.url) {
         return (
-            <div className="oc-message">
-                <div>{timestampToTime(message.createdAt)}</div>
+          <div className="oc-message">
+              <div>{timestampToTime(message.createdAt)}</div>
 
-                <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
+              <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
 
-                <img src={message.url} />
-            </div >);
+              <img src={message.url} />
+          </div >);
     }
 
-    if (message.messageType === "admin") {
-      return (
-        <div className="oc-message admin-message">
-          <div>{timestampToTime(message.createdAt)}</div>
-
-          <div className="oc-message-sender-name">{message.messageType}{':'}</div>
-          <div>{message.message}</div>
-        </div >
-      )
+    if(message.messageType === "admin") {
+        return <AdminMessage message={message} />
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
-        <div className="oc-message">
-            <div>{timestampToTime(message.createdAt)}</div>
+      <div className="oc-message">
+          <div>{timestampToTime(message.createdAt)}</div>
 
-            <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
-            <div>{message.message}</div>
+          <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
+          <div>{message.message}</div>
 
-            {messageSentByCurrentUser && <>
-                <button className="control-button" onClick={() => updateMessage(message)}>
-                    <img className="oc-message-icon" src='/icon_edit.png' />
-                </button>
-                <button className="control-button" onClick={() => handleDeleteMessage(message)}>
-                    <img className="oc-message-icon" src='/icon_delete.png' />
-                </button>
-            </>}
+          {messageSentByCurrentUser && <>
+              <button className="control-button" onClick={() => updateMessage(message)}>
+                  <img className="oc-message-icon" src='/icon_edit.png' />
+              </button>
+              <button className="control-button" onClick={() => handleDeleteMessage(message)}>
+                  <img className="oc-message-icon" src='/icon_delete.png' />
+              </button>
+          </>}
 
 
-        </div >
+      </div >
     );
 
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
     return (
-        <div className="message-input">
-            <input
-                placeholder="write a message"
-                value={value}
-                onChange={onChange} />
+      <div className="message-input">
+          <input
+            placeholder="write a message"
+            value={value}
+            onChange={onChange} />
 
-            <div className="message-input-buttons">
-                <button className="send-message-button" onClick={sendMessage}>Send Message</button>
-                <label className="file-upload-label" htmlFor="upload" >Select File</label>
+          <div className="message-input-buttons">
+              <button className="send-message-button" onClick={sendMessage}>Send Message</button>
+              <label className="file-upload-label" htmlFor="upload" >Select File</label>
 
-                <input
-                    id="upload"
-                    className="file-upload-button"
-                    type='file'
-                    hidden={true}
-                    onChange={onFileInputChange}
-                    onClick={() => { }}
-                />
-            </div>
+              <input
+                id="upload"
+                className="file-upload-button"
+                type='file'
+                hidden={true}
+                onChange={onFileInputChange}
+                onClick={() => { }}
+              />
+          </div>
 
-        </div>);
+      </div>);
 }
 
 const ChannelDetails = ({
-    currentlyUpdatingChannel,
-    toggleChannelDetails,
-    handleUpdateChannel,
-    onChannelNamenIputChange
-}) => {
+                            currentlyUpdatingChannel,
+                            toggleChannelDetails,
+                            handleUpdateChannel,
+                            onChannelNamenIputChange
+                        }) => {
     if (currentlyUpdatingChannel) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -450,11 +443,11 @@ const ChannelDetails = ({
 }
 
 const ChannelCreate = ({
-    showChannelCreate,
-    toggleShowCreateChannel,
-    handleCreateChannel,
-    onChannelNamenIputChange
-}) => {
+                           showChannelCreate,
+                           toggleShowCreateChannel,
+                           handleCreateChannel,
+                           onChannelNamenIputChange
+                       }) => {
     if (showChannelCreate) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -475,34 +468,34 @@ const ChannelCreate = ({
 }
 
 const CreateUserForm = ({
-    setupUser,
-    settingUpUser,
-    userNameInputValue,
-    userIdInputValue,
-    onUserNameInputChange,
-    onUserIdInputChange
-}) => {
+                            setupUser,
+                            settingUpUser,
+                            userNameInputValue,
+                            userIdInputValue,
+                            onUserNameInputChange,
+                            onUserIdInputChange
+                        }) => {
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content">
                 <div>User ID</div>
 
                 <input
-                    onChange={onUserIdInputChange}
-                    className="form-input"
-                    type="text" value={userIdInputValue} />
+                  onChange={onUserIdInputChange}
+                  className="form-input"
+                  type="text" value={userIdInputValue} />
 
                 <div>User Nickname</div>
                 <input
-                    onChange={onUserNameInputChange}
-                    className="form-input"
-                    type="text" value={userNameInputValue} />
+                  onChange={onUserNameInputChange}
+                  className="form-input"
+                  type="text" value={userNameInputValue} />
 
                 <div>
 
                     <button
-                        className="user-submit-button"
-                        onClick={setupUser}>Connect</button>
+                      className="user-submit-button"
+                      onClick={setupUser}>Connect</button>
                 </div>
             </div>
 
@@ -510,8 +503,16 @@ const CreateUserForm = ({
     } else {
         return null;
     }
-
 }
+
+const AdminMessage = ({ message }) => (
+  <div className="oc-message admin-message">
+      <div>{timestampToTime(message.createdAt)}</div>
+
+      <div className="oc-message-sender-name">{message.messageType}{':'}</div>
+      <div>{message.message}</div>
+  </div >
+)
 
 
 // Helpful functions that call Sendbird
