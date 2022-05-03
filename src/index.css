@@ -120,6 +120,19 @@ code {
   border-bottom: 1px solid lightgray;
 }
 
+.threads {
+  max-width: 35vw;
+}
+
+.threads, .threads-input {
+  border-left: 1px solid lightgray;
+}
+
+.underline {
+  width: 100%;
+  border-bottom: 1px solid lightgray;
+}
+
 .leave-channel{
   margin-left: 12px;
   padding: 8px;
