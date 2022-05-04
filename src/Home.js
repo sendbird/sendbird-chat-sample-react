@@ -13,6 +13,7 @@ const Home = () => {
         <li><Link to="/open-channel-send-an-admin-message">Open Channel Send an Admin message</Link></li>
         <li><Link to="/open-channel-message-threading">Open Channel Message Threading</Link></li>
         <li><Link to="/open-channel-copy-message">Open Channel Copy Message</Link></li>
+        <li><Link to="/open-channel-send-and-receive-various-types-of-files">Open Channel Send and Receive Various Types of Files</Link></li>
       </ul>
 
     </div>

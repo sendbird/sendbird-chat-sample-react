@@ -8,6 +8,7 @@ import OpenChannelMessageThreading from './samples/OpenChannelMessageThreading';
 import FreezeOpenChannelSample from './samples/FreezeOpenChannelSample';
 import OpenChannelSendAnAdminMessage from './samples/OpenChannelSendAnAdminMessage'
 import CopyMessageOpenChannelSample from './samples/CopyMessageOpenChannelSample';
+import OpenChannelSendAndReceiveVariousTypesOfFiles from './samples/OpenChannelSendAndReceiveVariousTypesOfFiles'
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path='/open-channel-send-an-admin-message' element={<OpenChannelSendAnAdminMessage />} />
         <Route path='/open-channel-message-threading' element={<OpenChannelMessageThreading />} />
         <Route path='/open-channel-copy-message' element={<CopyMessageOpenChannelSample />} />
+        <Route path='/open-channel-send-and-receive-various-types-of-files' element={<OpenChannelSendAndReceiveVariousTypesOfFiles />} />
       </Routes>
     </div>
   );
