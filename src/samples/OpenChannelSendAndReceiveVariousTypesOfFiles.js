@@ -187,6 +187,7 @@ const OpenChannelSendAndReceiveVariousTypesOfFiles = (props) => {
             const fileMessageParams = new FileMessageCreateParams();
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
+                message.type = fileMessageParams.mimeType;
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
 
@@ -357,13 +358,17 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
     if (message.url) {
+        const isImageMessage = message.type.includes("image");
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
 
                 <div className="oc-message-sender-name">{message.sender.nickname}{': '}</div>
 
-                <img src={message.url} />
+                {isImageMessage ? <img src={message.url} /> : <a className="oc-document-message" href={message.url} download={message.name}>
+                  <img className="oc-document-message-icon" src='/document_icon.png' />
+                  {message.name}
+                </a>}
             </div >);
     }
 
