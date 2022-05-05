@@ -63,13 +63,12 @@ code {
 }
 
 .channel-list-item{
-  display: flex;
-  align-items: center;
   background: #fcfcfc;
   padding:12px;
   border-top: 1px solid #ececec;
   display:flex;
   justify-content: space-between;
+  align-items: center;
   min-height: 42px;
 }
 
@@ -86,9 +85,6 @@ code {
 }
 
 .channel-list-item-name{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   font-weight: 600;
   cursor: pointer;
   overflow: hidden;
