@@ -335,10 +335,10 @@ const ChannelList = ({
                             className="channel-list-item-name"
                             onClick={() => { handleJoinChannel(channel.url) }}
                         >
-                            <div>
-                                <ChannelName members={channel.members} />
-                                <div className="last-message">{channel.lastMessage?.message}</div>
-                            </div>
+                            <ChannelName members={channel.members} />
+                            <div className="last-message">{channel.lastMessage?.message}</div>
+                        </div>
+                        <div>
                             {channel.isFrozen && <img className="frozen-icon" src='/icon_freeze.png' />}
                         </div>
                         <div>
