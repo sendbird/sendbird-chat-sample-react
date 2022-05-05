@@ -24,12 +24,10 @@ run `npm start`
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ## Considerations in real world app
- - Typescript types are avaiable if you are building your app in that language.
- - Chat is based around user generated input so consider mitigations against XSS attacks
- - Users should always pass an access token when connection to group channels 
- - User creation done through platofrm API or dashboard
- - Pagination of channel and message lists
- - Sendbird should be installed via npm
+ - Typescript types are available from the Sendbird Chat SDK if you are building with TS.
+ - Chat is based around user generated input so consider mitigations against XSS attacks.
+ - In this sample repo users are connecting to sendbird using a user ID. This is not secure and you will want to connect with an authorization token in a deployed app.
+ - Pagination of channel and message lists will be a must have in any real world application.
 
 
 # Gotchas
