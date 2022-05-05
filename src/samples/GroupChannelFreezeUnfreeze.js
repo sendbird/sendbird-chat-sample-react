@@ -88,6 +88,21 @@ const GroupChannelFreezeUnfreeze = (props) => {
         updateState({ ...state, currentlyJoinedChannel: null })
     }
 
+    const handleFreezeChannel = async () => {
+        const { currentlyJoinedChannel } = state;
+        if (state.userIdInputValue == currentlyJoinedChannel?.creator.userId) {
+            if (!currentlyJoinedChannel?.isFrozen) {
+                await currentlyJoinedChannel.freeze();
+            } else {
+                await currentlyJoinedChannel.unfreeze();
+            }
+        } else {
+            return null;
+        }
+
+        updateState({ ...state, currentlyJoinedChannel })
+    }
+
     const handleCreateChannel = async (channelName = "testChannel",) => {
         const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers);
         if (error) {
@@ -276,7 +291,7 @@ const GroupChannelFreezeUnfreeze = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
 
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel} userIdInputValue={state.userIdInputValue} handleFreezeChannel={handleFreezeChannel}>
                 {state.currentlyJoinedChannel?.isFrozen && DisplayFreezeMessage()}
 
                 <MessagesList
@@ -318,9 +333,12 @@ const ChannelList = ({
                     <div key={channel.url} className="channel-list-item" >
                         <div
                             className="channel-list-item-name"
-                            onClick={() => { handleJoinChannel(channel.url) }}>
-                            <ChannelName members={channel.members} />
-                            <div className="last-message">{channel.lastMessage?.message}</div>
+                            onClick={() => { handleJoinChannel(channel.url) }}
+                        >
+                            <div>
+                                <ChannelName members={channel.members} />
+                                <div className="last-message">{channel.lastMessage?.message}</div>
+                            </div>
                             {channel.isFrozen && <img className="frozen-icon" src='/icon_freeze.png' />}
                         </div>
                         <div>
@@ -346,12 +364,17 @@ const ChannelName = ({ members }) => {
 }
 
 
-const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel }) => {
+const Channel = ({ userIdInputValue, currentlyJoinedChannel, children, handleLeaveChannel, handleFreezeChannel }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel">
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
-            <div>
+            <div className="channel-controls">
                 <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
+                {currentlyJoinedChannel?.creator.userId == userIdInputValue &&
+                    <div className="freeze-channel">
+                    Freeze channel
+                    <input type="checkbox" onChange={handleFreezeChannel} checked={currentlyJoinedChannel?.isFrozen} />
+                </div>}
             </div>
             <div>{children}</div>
         </div>;
