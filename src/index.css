@@ -210,8 +210,16 @@ code {
   width: 14px;
 }
 
-.message:hover .message-icon{
+.message:hover .message-icon {
   visibility: visible;
+}
+
+.oc-document-message {
+  display: flex;
+}
+
+.oc-document-message-icon {
+  width: 24px;
 }
 
 .oc-message:hover .oc-message-icon, .message-input .oc-message-icon{
