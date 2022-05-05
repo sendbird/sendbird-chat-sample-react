@@ -292,7 +292,7 @@ const GroupChannelFreezeUnfreeze = (props) => {
             />
 
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel} userIdInputValue={state.userIdInputValue} handleFreezeChannel={handleFreezeChannel}>
-                {state.currentlyJoinedChannel?.isFrozen && DisplayFreezeMessage()}
+                {state.currentlyJoinedChannel?.isFrozen && FreezeNotification()}
 
                 <MessagesList
                     messages={state.messages}
@@ -566,8 +566,8 @@ const CreateUserForm = ({
 
 }
 
-const DisplayFreezeMessage = () => (
-  <div className='frozen-toast'>Channel Frozen </div>
+const FreezeNotification = () => (
+  <div className='freeze-notification'>Channel Frozen</div>
 )
 
 // Helpful functions that call Sendbird

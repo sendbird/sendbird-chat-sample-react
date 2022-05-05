@@ -398,7 +398,7 @@ code {
   flex-direction: column;
 }
 
-.frozen-toast {
+.freeze-notification {
   position: sticky;
   top:0;
   width: 100%;
