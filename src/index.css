@@ -193,6 +193,17 @@ code {
   border: 1px solid black;
 }
 
+.oc-message, .message-og-tags {
+  padding:12px 0px;
+  display:flex;
+}
+
+.message-og-tags {
+  flex-direction: column;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
 .og-tags-url {
   margin: 0 0 5px;
 }
