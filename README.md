@@ -24,10 +24,11 @@ run `npm start`
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ## Considerations in real world app
+ - In this sample repo users are connecting to sendbird using a user ID (Sendbird Dashboard --> Security --> Read & Write). Read & Write is not secure and will create a new user automatically from the SDK if none exists. In production be sure to change the Sendbird Dashboard security settings to Deny login, and [authenticate users](https://sendbird.com/docs/chat/v3/javascript/guides/authentication#2-connect-to-sendbird-server-with-a-user-id-and-a-token) with a Sendbird generated Session Token.
  - Typescript types are available from the Sendbird Chat SDK if you are building with TS.
  - Chat is based around user generated input so consider mitigations against XSS attacks.
- - In this sample repo users are connecting to sendbird using a user ID. This is not secure and you will want to connect with an authorization token in a deployed app.
  - Pagination of channel and message lists will be a must have in any real world application.
+
 
 
 # Gotchas
