@@ -68,6 +68,7 @@ code {
   border-top: 1px solid #ececec;
   display:flex;
   justify-content: space-between;
+  align-items: center;
   min-height: 42px;
 }
 
@@ -133,9 +134,23 @@ code {
   border-bottom: 1px solid lightgray;
 }
 
+.channel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .leave-channel{
   margin-left: 12px;
   padding: 8px;
+}
+
+.freeze-channel {
+  margin-right: 12px;
+}
+
+.freeze-channel input {
+  width: auto;
 }
 
 .message-list{
@@ -401,7 +416,7 @@ code {
   flex-direction: column;
 }
 
-.frozen-toast {
+.freeze-notification {
   position: sticky;
   top:0;
   width: 100%;
@@ -413,7 +428,7 @@ code {
 
 .frozen-icon {
   width: 20px;
-  margin-left: 5px;
+  margin-right: 10px;
 }
 
 .underline {
