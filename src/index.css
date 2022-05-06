@@ -163,9 +163,35 @@ code {
   flex-direction: row;
 }
 
-.oc-message{
-  padding:12px 0px;
+.oc-message, .oc-message-og-tags{
+  padding:12px;
   display:flex;
+}
+
+.oc-message-og-tags {
+  flex-direction: column;
+  max-width: 50%;
+  padding: 5px;
+  margin-left: 7vw;
+  margin-top: -10px;
+  box-sizing: border-box;
+  border: 1px solid black;
+}
+
+.og-tags-url {
+  margin: 0 0 5px;
+}
+
+.og-tags-title {
+  margin: 0 0 10px;
+}
+
+.og-tags-description {
+  margin: 0 0 5px;
+}
+
+.og-tags-img {
+  width: 100%;
 }
 
 .oc-admin-message {
@@ -186,10 +212,6 @@ code {
   width: 100%;
   color: black;
   margin-left: 0;
-}
-
-.oc-message{
-  padding:12px;
 }
 
 .message-info{
