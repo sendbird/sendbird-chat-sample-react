@@ -37,7 +37,8 @@ const OpenChannelSendAndReceiveVariousTypesOfFiles = (props) => {
         file: null,
         messageToUpdate: null,
         loading: false,
-        error: false
+        error: false,
+        isImageSizeError: false
     });
 
     //need to access state in message reeived callback
@@ -187,13 +188,14 @@ const OpenChannelSendAndReceiveVariousTypesOfFiles = (props) => {
             const fileMessageParams = new FileMessageCreateParams();
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
-                message.type = fileMessageParams.mimeType;
-                const updatedMessages = [...messages, message];
-                updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
+              message.type = fileMessageParams.mimeType;
+              const updatedMessages = [...messages, message];
+              updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
 
             }).onFailed((error) => {
                 console.log(error)
                 console.log("failed")
+                updateState({ ...state, isImageSizeError: true})
             });
         }
     }
@@ -271,7 +273,11 @@ const OpenChannelSendAndReceiveVariousTypesOfFiles = (props) => {
                 toggleShowCreateChannel={toggleShowCreateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+            <Channel
+              currentlyJoinedChannel={state.currentlyJoinedChannel}
+              handleLeaveChannel={handleLeaveChannel}
+              isImageSizeError={state.isImageSizeError}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -323,10 +329,11 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
 }
 
 
-const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
+const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, isImageSizeError }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel">
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
+            {isImageSizeError && <div className='image-size-error'>You subscription plan doesn't support the file size</div>}
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
             </div>

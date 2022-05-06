@@ -411,3 +411,11 @@ code {
   position: fixed;
   right: 20px;
 }
+
+.image-size-error {
+  width: 100%;
+  background: rgba(255, 0, 0, 0.2);
+  padding: 5px;
+  margin: 5px 0;
+  text-align: center;
+}
