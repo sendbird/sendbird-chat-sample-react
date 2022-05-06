@@ -12,6 +12,7 @@ import CopyMessageOpenChannelSample from './samples/CopyMessageOpenChannelSample
 import GroupChannelSendAnAdminMessage from './samples/GroupChannelSendAnAdminMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import GroupChannelFreezeUnfreeze from './samples/GroupChannelFreezeUnfreeze';
+import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
         <Route path='/group-channel-send-an-admin-message' element={<GroupChannelSendAnAdminMessage />} />
         <Route path='/open-channel-display-og-tags' element={<OpenChannelDisplayOGTags />} />
         <Route path='/group-channel-freeze-unfreeze' element={<GroupChannelFreezeUnfreeze />} />
+        <Route path='/group-channel-display-og-tags' element={<GroupChannelDisplayOGTags />} />
       </Routes>
     </div>
   );
