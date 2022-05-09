@@ -333,7 +333,7 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, isImage
     if (currentlyJoinedChannel) {
         return <div className="channel">
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
-            {isImageSizeError && <div className='image-size-error'>You subscription plan doesn't support the file size</div>}
+            {isImageSizeError && <div className='image-size-error'>There was an error sending the file.</div>}
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
             </div>
