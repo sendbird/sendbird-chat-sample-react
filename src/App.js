@@ -10,6 +10,7 @@ import GroupChannelMessageThreading from './samples/GroupChannelMessageThreading
 import OpenChannelSendAnAdminMessage from './samples/OpenChannelSendAnAdminMessage'
 import CopyMessageOpenChannelSample from './samples/CopyMessageOpenChannelSample';
 import GroupChannelSendAnAdminMessage from './samples/GroupChannelSendAnAdminMessage';
+import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import GroupChannelFreezeUnfreeze from './samples/GroupChannelFreezeUnfreeze';
 
 const App = () => {
@@ -26,6 +27,7 @@ const App = () => {
         <Route path='/open-channel-message-threading' element={<OpenChannelMessageThreading />} />
         <Route path='/open-channel-copy-message' element={<CopyMessageOpenChannelSample />} />
         <Route path='/group-channel-send-an-admin-message' element={<GroupChannelSendAnAdminMessage />} />
+        <Route path='/open-channel-display-og-tags' element={<OpenChannelDisplayOGTags />} />
         <Route path='/group-channel-freeze-unfreeze' element={<GroupChannelFreezeUnfreeze />} />
       </Routes>
     </div>
