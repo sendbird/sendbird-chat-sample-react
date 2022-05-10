@@ -366,6 +366,19 @@ code {
   background-color: #62EEAB;
 }
 
+.select-custom-type {
+  padding: 12px;
+}
+
+.select-custom-type select {
+  width: 100%;
+  font-size: 16px;
+  padding-top: 12px;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
 .send-message-button{
   border-radius: 0px 4px 4px 0px;
   margin-right:8px;

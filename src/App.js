@@ -13,6 +13,7 @@ import GroupChannelSendAnAdminMessage from './samples/GroupChannelSendAnAdminMes
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import GroupChannelFreezeUnfreeze from './samples/GroupChannelFreezeUnfreeze';
 import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
+import OpenChannelCategorizeByCustomType from './samples/OpenChannelCategorizeByCustomType';
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
         <Route path='/open-channel-display-og-tags' element={<OpenChannelDisplayOGTags />} />
         <Route path='/group-channel-freeze-unfreeze' element={<GroupChannelFreezeUnfreeze />} />
         <Route path='/group-channel-display-og-tags' element={<GroupChannelDisplayOGTags />} />
+        <Route path='/open-channel-categorize-by-custom-type' element={<OpenChannelCategorizeByCustomType />} />
       </Routes>
     </div>
   );
