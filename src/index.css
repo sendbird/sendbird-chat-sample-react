@@ -258,8 +258,16 @@ code {
   width: 14px;
 }
 
-.message:hover .message-icon{
+.message:hover .message-icon {
   visibility: visible;
+}
+
+.oc-document-message {
+  display: flex;
+}
+
+.oc-document-message-icon {
+  width: 24px;
 }
 
 .oc-message:hover .oc-message-icon, .message-input .oc-message-icon{
@@ -450,4 +458,12 @@ code {
 .user-copied-message {
   position: fixed;
   right: 20px;
+}
+
+.image-size-error {
+  width: 100%;
+  background: rgba(255, 0, 0, 0.2);
+  padding: 5px;
+  margin: 5px 0;
+  text-align: center;
 }
