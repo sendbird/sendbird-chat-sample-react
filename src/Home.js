@@ -14,6 +14,7 @@ const Home = () => {
         <li><Link to="/open-channel-send-an-admin-message">Open Channel Send an Admin message</Link></li>
         <li><Link to="/open-channel-message-threading">Open Channel Message Threading</Link></li>
         <li><Link to="/open-channel-copy-message">Open Channel Copy Message</Link></li>
+        <li><Link to="/open-channel-send-and-receive-various-types-of-files">Open Channel Send and Receive Various Types of Files</Link></li>
         <li><Link to="/group-channel-send-an-admin-message">Group Channel Send An Admin Message</Link></li>
         <li><Link to="/open-channel-display-og-tags">Open Channel Display OG-tags</Link></li>
         <li><Link to="/group-channel-freeze-unfreeze">Group Channel with Freeze feature</Link></li>
