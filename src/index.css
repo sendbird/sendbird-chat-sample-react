@@ -262,8 +262,32 @@ code {
   visibility: visible;
 }
 
-.oc-document-message {
+.oc-document-message, .message-user-info, .oc-react-button-wrapper, .reactions-list {
   display: flex;
+}
+
+.reactions-list {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+  background: white;
+  border-radius: 8px;
+}
+
+.reactions-list li {
+  margin-right: 2px;
+  padding: 4px;
+}
+
+.oc-react-button-wrapper {
+  margin: 5px 5px 0 0;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.oc-react-button-img {
+  width: 20px;
+  filter: none;
 }
 
 .oc-document-message-icon {
@@ -272,10 +296,6 @@ code {
 
 .oc-message:hover .oc-message-icon, .message-input .oc-message-icon{
   visibility: visible;
-}
-
-.message-user-info{
-  display:flex;
 }
 
 .oc-message-sender-name{
@@ -379,7 +399,7 @@ code {
   margin-right:8px;
 }
 
-.control-button{
+.control-button {
   background: inherit;
   padding:4px;
   margin-right:1px;

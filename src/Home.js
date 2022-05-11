@@ -19,6 +19,7 @@ const Home = () => {
         <li><Link to="/open-channel-display-og-tags">Open Channel Display OG-tags</Link></li>
         <li><Link to="/group-channel-freeze-unfreeze">Group Channel with Freeze feature</Link></li>
         <li><Link to="/group-channel-display-og-tags">Group Channel Display OG-tags</Link></li>
+        <li><Link to="/group-channel-react-to-a-message">Group Channel React to a message</Link></li>
       </ul>
 
     </div>
