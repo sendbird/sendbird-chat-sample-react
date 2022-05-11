@@ -14,6 +14,7 @@ import GroupChannelSendAnAdminMessage from './samples/GroupChannelSendAnAdminMes
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import GroupChannelFreezeUnfreeze from './samples/GroupChannelFreezeUnfreeze';
 import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
+import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
         <Route path='/open-channel-display-og-tags' element={<OpenChannelDisplayOGTags />} />
         <Route path='/group-channel-freeze-unfreeze' element={<GroupChannelFreezeUnfreeze />} />
         <Route path='/group-channel-display-og-tags' element={<GroupChannelDisplayOGTags />} />
+        <Route path='/group-channel-react-to-a-message' element={<GroupChannelReactToAMessage />} />
       </Routes>
     </div>
   );
