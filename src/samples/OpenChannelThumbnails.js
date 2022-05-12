@@ -21,7 +21,7 @@ import { timestampToTime } from '../utils/messageUtils';
 
 let sb;
 
-const ThumbnailsOpenChannelSample = (props) => {
+const OpenChannelThumbnails = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
@@ -497,8 +497,8 @@ const CreateUserForm = ({
 
 }
 
-const Thumbnails = ({ createdAt, sender, thumbnails, smallThumb }) => {
-    const thumbnail = smallThumb ? thumbnails[0] : thumbnails[1];
+const Thumbnails = ({ createdAt, sender, thumbnails }) => {
+    const thumbnail = thumbnails[0];
 
     return (
       <div className="oc-message">
@@ -508,7 +508,7 @@ const Thumbnails = ({ createdAt, sender, thumbnails, smallThumb }) => {
 
           <img src={thumbnail.url} height={thumbnail.height} width={thumbnail.width} title="thumbnail" alt="thumbnail"  />
       </div >
-    )
+    );
 };
 
 
@@ -582,4 +582,4 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default ThumbnailsOpenChannelSample;
+export default OpenChannelThumbnails;
