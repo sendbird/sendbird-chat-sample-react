@@ -262,7 +262,7 @@ code {
   visibility: visible;
 }
 
-.oc-document-message, .message-user-info, .oc-react-button-wrapper, .reactions-list {
+.oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list {
   display: flex;
 }
 
@@ -279,15 +279,28 @@ code {
   padding: 4px;
 }
 
-.oc-react-button-wrapper {
+.react-button-wrapper {
   margin: 5px 5px 0 0;
   width: 100%;
   justify-content: flex-end;
 }
 
-.oc-react-button-img {
+.react-button-img {
   width: 20px;
   filter: none;
+}
+
+.reactions {
+  margin: 5px 0 0;
+}
+
+.reactions-item {
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+sup {
+  font-size: 10px;
 }
 
 .oc-document-message-icon {
