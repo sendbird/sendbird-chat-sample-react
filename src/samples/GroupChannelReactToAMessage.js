@@ -13,9 +13,6 @@ import {
     UserMessageUpdateParams,
     FileMessageCreateParams
 } from '@sendbird/chat/message';
-// import {
-//   addReaction
-// } from '@sendbird/chat/'
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
@@ -56,6 +53,7 @@ const GroupChannelReactToAMessage = (props) => {
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
         const [messages, error] = await joinChannel(channel);
+
         if (error) {
             return onError(error);
         }
@@ -200,6 +198,17 @@ const GroupChannelReactToAMessage = (props) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
     }
 
+    const updateMessageReactions = async (message) => {
+      const { messages, currentlyJoinedChannel } = state;
+
+      const userMessageUpdateParams = new UserMessageUpdateParams();
+      const updatedMessage = await currentlyJoinedChannel.updateUserMessage(message.messageId, userMessageUpdateParams)
+      const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
+      messages[messageIndex] = updatedMessage;
+
+      updateState({ ...state, messages: messages, isReactions: false });
+    }
+
     const toggleReactions = async (message) => {
       const { isReactions } = state;
       updateState({ ...state, isReactions: !isReactions, currentMessage: message })
@@ -207,13 +216,23 @@ const GroupChannelReactToAMessage = (props) => {
 
     const addReactToAMessage = async (message, e) => {
       const { currentlyJoinedChannel } = state;
+
       const emojiKey = e.target.innerText;
       const reactionEvent = await currentlyJoinedChannel.addReaction(message, emojiKey);
       message.applyReactionEvent(reactionEvent);
 
-      console.log("message", message)
+      updateMessageReactions(message)
 
       updateState({ ...state, isReactions: false, currentMessage: {} });
+    }
+
+    const removeReactToAMessage = async (message, messageKey) => {
+      const { currentlyJoinedChannel } = state;
+      const emojiKey = messageKey;
+      const reactionEvent = await currentlyJoinedChannel.deleteReaction(message, emojiKey);
+      message.applyReactionEvent(reactionEvent);
+
+      updateMessageReactions(message)
     }
 
     const handleLoadMemberSelectionList = async () => {
@@ -299,6 +318,7 @@ const GroupChannelReactToAMessage = (props) => {
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                     addReactToAMessage={addReactToAMessage}
+                    removeReactToAMessage={removeReactToAMessage}
                     toggleReactions={toggleReactions}
                     isReactions={state.isReactions}
                     currentMessage={state.currentMessage}
@@ -399,7 +419,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addReactToAMessage, toggleReactions, isReactions, currentMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addReactToAMessage, toggleReactions, isReactions, currentMessage, removeReactToAMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
@@ -409,6 +429,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addReactTo
                     <Message
                         message={message}
                         addReactToAMessage={addReactToAMessage}
+                        removeReactToAMessage={removeReactToAMessage}
                         handleDeleteMessage={handleDeleteMessage}
                         updateMessage={updateMessage}
                         toggleReactions={toggleReactions}
@@ -422,7 +443,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addReactTo
     </div >
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, addReactToAMessage, toggleReactions, isReactions, currentMessage }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, addReactToAMessage, toggleReactions, isReactions, currentMessage, removeReactToAMessage }) => {
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -450,8 +471,13 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-            <div className='oc-react-button-wrapper'>
-              {showReactions && <ul className='reactions-list'>
+            {message.reactions.length > 0 && <div className='reactions'>
+                {message.reactions.map((react, i) => {
+                  return <span className="reactions-item" key={i + react.key} onClick={() => removeReactToAMessage(message, react.key)}>{react.key}<sup>{react.userIds.length > 1 ? react.userIds.length : ""}</sup></span>
+                })}
+              </div>}
+            <div className="react-button-wrapper">
+              {showReactions && <ul className="reactions-list">
                 <li>
                   <button className="control-button" onClick={(e) => addReactToAMessage(message, e)}>&#128512;</button>
                 </li>
@@ -469,7 +495,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </li>
               </ul>}
               <button className="control-button react-button" onClick={() => toggleReactions(message)}>
-                <span className="message-icon oc-react-button-img">&#128512;</span>
+                <span className="message-icon react-button-img">&#128512;</span>
               </button>
             </div>
         </div >
@@ -606,6 +632,7 @@ const joinChannel = async (channel) => {
         const messageListParams = new MessageListParams();
         messageListParams.nextResultSize = 20;
         const messages = await channel.getMessagesByTimestamp(0, messageListParams);
+
         return [messages, null];
     } catch (error) {
         return [null, error];
