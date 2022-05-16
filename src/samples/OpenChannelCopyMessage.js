@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { v4 as uuid } from 'uuid';
 
 import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
@@ -21,7 +21,7 @@ import { timestampToTime } from '../utils/messageUtils';
 
 let sb;
 
-const FreezeOpenChannelSample = (props) => {
+const OpenChannelCopyMessage = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
@@ -29,6 +29,7 @@ const FreezeOpenChannelSample = (props) => {
         messages: [],
         channels: [],
         showChannelCreate: false,
+        isCopied: false,
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -43,6 +44,17 @@ const FreezeOpenChannelSample = (props) => {
     //need to access state in message reeived callback
     const stateRef = useRef();
     stateRef.current = state;
+
+    useEffect(() => {
+        if (state.isCopied) {
+            setTimeout(() => {
+                updateState({
+                    ...state,
+                    isCopied: false
+                });
+            }, 3000);
+        }
+    }, [state.isCopied])
 
     const onError = (error) => {
         updateState({ ...state, error: error.message });
@@ -66,15 +78,19 @@ const FreezeOpenChannelSample = (props) => {
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
-            debugger;
             const updatedMessages = [...stateRef.current.messages, message];
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
 
+        channelHandler.onMessageDeleted = (channel, message) => {
+            const updatedMessages = stateRef.current.messages.filter((messageObject) => {
+                return messageObject.messageId !== message;
+            });
+            updateState({ ...stateRef.current, messages: updatedMessages });
+        }
         sb.openChannel.addOpenChannelHandler(uuid(), channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
@@ -194,13 +210,27 @@ const FreezeOpenChannelSample = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-        const { currentlyJoinedChannel, messages } = state;
-        await deleteMessage(currentlyJoinedChannel, messageToDelete);
-        const updatedMessages = messages.filter((message) => {
-            return message.messageId !== messageToDelete.messageId;
-        });
-        updateState({ ...state, messages: updatedMessages });
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
 
+    }
+
+    const handleCopyMessage = async (messageToCopy) => {
+        const { currentlyJoinedChannel, messages } = state;
+        const copyMethod = messageToCopy.messageType === "file" ? "copyFileMessage" : "copyUserMessage";
+
+        const response = await currentlyJoinedChannel[copyMethod](currentlyJoinedChannel, messageToCopy)
+          .catch((error) => console.log("Copy Error:", error));
+
+        if (response) {
+            const updatedMessages = [...messages, response];
+
+            updateState({
+                ...state,
+                messages: updatedMessages,
+                isCopied: true
+            });
+        }
     }
 
     const updateMessage = async (message) => {
@@ -271,16 +301,18 @@ const FreezeOpenChannelSample = (props) => {
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
-                {state.currentlyJoinedChannel?.isFrozen && DisplayFreezeMessage()}
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
+                    handleCopyMessage={handleCopyMessage}
                     updateMessage={updateMessage}
                 />
                 <MessageInput
                     value={state.messageInputValue}
+                    isVisibleInsertButton={state.isVisibleInsertButton}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
+                    isCopied={state.isCopied}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange} />
             </Channel>
@@ -304,7 +336,6 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                             <div className="channel-list-item-name"
                                 onClick={() => { handleJoinChannel(channel.url) }}>
                                 {channel.name}
-                                {channel.isFrozen && <img className="frozen-icon" src='/icon_freeze.png' />}
                             </div>
                             {userIsOperator &&
                                 <div>
@@ -344,12 +375,13 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, handleCopyMessage, updateMessage }) => {
     return messages.map(message => {
         return (
             <div key={message.messageId} className="oc-message-item">
                 <Message
                     handleDeleteMessage={handleDeleteMessage}
+                    handleCopyMessage={handleCopyMessage}
                     updateMessage={updateMessage}
                     message={message}
                 />
@@ -357,19 +389,27 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     })
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessage }) => {
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
 
-                <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
+                <div className="oc-message-sender-name">{message.sender.nickname}{': '}</div>
 
                 <img src={message.url} />
+                {messageSentByCurrentUser && <>
+                  <button className="control-button" onClick={() => handleDeleteMessage(message)}>
+                      <img className="oc-message-icon" src='/icon_delete.png' />
+                  </button>
+                </>}
+                <button className="control-button" onClick={() => handleCopyMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_copy.png' />
+                </button>
             </div >);
     }
 
-    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
@@ -385,16 +425,18 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-
-
+            <button className="control-button" onClick={() => handleCopyMessage(message)}>
+                <img className="oc-message-icon" src='/icon_copy.png' />
+            </button>
         </div >
     );
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isCopied }) => {
     return (
         <div className="message-input">
+            {isCopied && <div className={`user-copied-message ${isCopied ? "copied" : ""}`}>Copied!</div>}
             <input
                 placeholder="write a message"
                 value={value}
@@ -504,9 +546,6 @@ const CreateUserForm = ({
 
 }
 
-const DisplayFreezeMessage = () => (
-  <div className='frozen-toast'>Channel Frozen </div>
-)
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
@@ -578,4 +617,4 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default FreezeOpenChannelSample;
+export default OpenChannelCopyMessage;
