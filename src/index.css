@@ -262,8 +262,45 @@ code {
   visibility: visible;
 }
 
-.oc-document-message {
+.oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list {
   display: flex;
+}
+
+.reactions-list {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+  background: white;
+  border-radius: 8px;
+}
+
+.reactions-list li {
+  margin-right: 2px;
+  padding: 4px;
+}
+
+.react-button-wrapper {
+  margin: 5px 5px 0 0;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.react-button-img {
+  width: 20px;
+  filter: none;
+}
+
+.reactions {
+  margin: 5px 0 0;
+}
+
+.reactions-item {
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.reactions-item-inner {
+  font-size: 10px;
 }
 
 .oc-document-message-icon {
@@ -272,10 +309,6 @@ code {
 
 .oc-message:hover .oc-message-icon, .message-input .oc-message-icon{
   visibility: visible;
-}
-
-.message-user-info{
-  display:flex;
 }
 
 .oc-message-sender-name{
@@ -392,7 +425,7 @@ code {
   margin-right:8px;
 }
 
-.control-button{
+.control-button {
   background: inherit;
   padding:4px;
   margin-right:1px;
