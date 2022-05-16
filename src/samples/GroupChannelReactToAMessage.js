@@ -61,12 +61,20 @@ const GroupChannelReactToAMessage = (props) => {
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
         channelHandler.onChannelChanged = () => { };
+        channelHandler.onReactionUpdated = (channel, reactionEvent) => {
+            const [message] = stateRef.current.messages.filter((messageObject) => {
+                return messageObject.messageId === reactionEvent.messageId;
+            });
+            message.applyReactionEvent(reactionEvent);
+
+            const updatedMessages = [...stateRef.current.messages];
+            updateState({ ...stateRef.current, messages: updatedMessages });
+        };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -118,7 +126,6 @@ const GroupChannelReactToAMessage = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
-
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
@@ -126,7 +133,6 @@ const GroupChannelReactToAMessage = (props) => {
         }
         updateState({ ...state, applicationUsers: users });
     }
-
 
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
@@ -137,7 +143,6 @@ const GroupChannelReactToAMessage = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
-
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -203,7 +208,7 @@ const GroupChannelReactToAMessage = (props) => {
 
       const userMessageUpdateParams = new UserMessageUpdateParams();
       const updatedMessage = await currentlyJoinedChannel.updateUserMessage(message.messageId, userMessageUpdateParams)
-      const messageIndex = messages.findIndex((item => item.messageId == message.messageId));
+      const messageIndex = messages.findIndex((item => item.messageId === message.messageId));
       messages[messageIndex] = updatedMessage;
 
       updateState({ ...state, messages: messages, isReactions: false });
@@ -221,15 +226,14 @@ const GroupChannelReactToAMessage = (props) => {
       const reactionEvent = await currentlyJoinedChannel.addReaction(message, emojiKey);
       message.applyReactionEvent(reactionEvent);
 
-      updateMessageReactions(message)
+      updateMessageReactions(message);
 
       updateState({ ...state, isReactions: false, currentMessage: {} });
     }
 
     const removeReactToAMessage = async (message, messageKey) => {
       const { currentlyJoinedChannel } = state;
-      const emojiKey = messageKey;
-      const reactionEvent = await currentlyJoinedChannel.deleteReaction(message, emojiKey);
+      const reactionEvent = await currentlyJoinedChannel.deleteReaction(message, messageKey);
       message.applyReactionEvent(reactionEvent);
 
       updateMessageReactions(message)
@@ -627,9 +631,10 @@ const loadChannels = async () => {
 
 }
 
-const joinChannel = async (channel) => {
+const joinChannel = async (channel, updateMessageReactions) => {
     try {
         const messageListParams = new MessageListParams();
+        messageListParams.includeReactions = true;
         messageListParams.nextResultSize = 20;
         const messages = await channel.getMessagesByTimestamp(0, messageListParams);
 
@@ -637,7 +642,6 @@ const joinChannel = async (channel) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
