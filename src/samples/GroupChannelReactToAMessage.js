@@ -219,7 +219,7 @@ const GroupChannelReactToAMessage = (props) => {
       updateState({ ...state, isReactions: !isReactions, currentMessage: message })
     }
 
-    const addReactToAMessage = async (message, e) => {
+    const addMessageReaction = async (message, e) => {
       const { currentlyJoinedChannel } = state;
 
       const emojiKey = e.target.innerText;
@@ -231,7 +231,7 @@ const GroupChannelReactToAMessage = (props) => {
       updateState({ ...state, isReactions: false, currentMessage: {} });
     }
 
-    const removeReactToAMessage = async (message, messageKey) => {
+    const removeMessageReaction = async (message, messageKey) => {
       const { currentlyJoinedChannel } = state;
       const reactionEvent = await currentlyJoinedChannel.deleteReaction(message, messageKey);
       message.applyReactionEvent(reactionEvent);
@@ -321,8 +321,8 @@ const GroupChannelReactToAMessage = (props) => {
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
-                    addReactToAMessage={addReactToAMessage}
-                    removeReactToAMessage={removeReactToAMessage}
+                    addMessageReaction={addMessageReaction}
+                    removeMessageReaction={removeMessageReaction}
                     toggleReactions={toggleReactions}
                     isReactions={state.isReactions}
                     currentMessage={state.currentMessage}
@@ -423,7 +423,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addReactToAMessage, toggleReactions, isReactions, currentMessage, removeReactToAMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addMessageReaction, toggleReactions, isReactions, currentMessage, removeMessageReaction }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
@@ -432,8 +432,8 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addReactTo
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
                         message={message}
-                        addReactToAMessage={addReactToAMessage}
-                        removeReactToAMessage={removeReactToAMessage}
+                        addMessageReaction={addMessageReaction}
+                        removeMessageReaction={removeMessageReaction}
                         handleDeleteMessage={handleDeleteMessage}
                         updateMessage={updateMessage}
                         toggleReactions={toggleReactions}
@@ -447,7 +447,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addReactTo
     </div >
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, addReactToAMessage, toggleReactions, isReactions, currentMessage, removeReactToAMessage }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, addMessageReaction, toggleReactions, isReactions, currentMessage, removeMessageReaction }) => {
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -477,25 +477,25 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             <div>{message.message}</div>
             {message.reactions.length > 0 && <div className='reactions'>
                 {message.reactions.map((react, i) => {
-                  return <span className="reactions-item" key={i + react.key} onClick={() => removeReactToAMessage(message, react.key)}>{react.key}<sup>{react.userIds.length > 1 ? react.userIds.length : ""}</sup></span>
+                  return <span className="reactions-item" key={i + react.key} onClick={() => removeMessageReaction(message, react.key)}>{react.key}<sup className="reactions-item-inner">{react.userIds.length > 1 ? react.userIds.length : ""}</sup></span>
                 })}
               </div>}
             <div className="react-button-wrapper">
               {showReactions && <ul className="reactions-list">
                 <li>
-                  <button className="control-button" onClick={(e) => addReactToAMessage(message, e)}>&#128512;</button>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128512;</button>
                 </li>
                 <li>
-                  <button className="control-button" onClick={(e) => addReactToAMessage(message, e)}>&#128516;</button>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128516;</button>
                 </li>
                 <li>
-                  <button className="control-button" onClick={(e) => addReactToAMessage(message, e)}>&#128517;</button>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128517;</button>
                 </li>
                 <li>
-                  <button className="control-button" onClick={(e) => addReactToAMessage(message, e)}>&#128579;</button>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128579;</button>
                 </li>
                 <li>
-                  <button className="control-button" onClick={(e) => addReactToAMessage(message, e)}>&#128529;</button>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128529;</button>
                 </li>
               </ul>}
               <button className="control-button react-button" onClick={() => toggleReactions(message)}>
