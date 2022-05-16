@@ -258,7 +258,7 @@ code {
   width: 14px;
 }
 
-.message:hover .message-icon {
+.message:hover .message-icon, .double_tick-icon {
   visibility: visible;
 }
 

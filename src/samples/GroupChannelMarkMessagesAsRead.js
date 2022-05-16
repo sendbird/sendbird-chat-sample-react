@@ -34,7 +34,8 @@ const GroupChannelMarkMessagesAsRead = (props) => {
         file: null,
         messageToUpdate: null,
         loading: false,
-        error: false
+        error: false,
+        messageMarkAsDelivered: false
     });
 
     //need to access state in message received callback
@@ -55,18 +56,20 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             return onError(error);
         }
 
-        channel.markAsRead()
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
         channelHandler.onChannelChanged = () => { };
-        channelHandler.onUnreadMemberCountUpdated = (channel) => { console.log() }
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
 
+        }
+
+        channelHandler.onDeliveryReceiptUpdated = (channel) => {
+            console.log("onDeliveryReceiptUpdated work");
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -159,9 +162,12 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-
-                    updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
+                    currentlyJoinedChannel.markAsDelivered().then((data) => {
+                      updateState({ ...state, messageMarkAsDelivered: true, messages: updatedMessages, messageInputValue: ""})
+                    }).catch((error) => {
+                      console.log(error)
+                      console.log("error")
+                    });
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -280,6 +286,7 @@ const GroupChannelMarkMessagesAsRead = (props) => {
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
+                    messageMarkAsDelivered={state.messageMarkAsDelivered}
                 />
 
                 <MessageInput
@@ -377,7 +384,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, messageMarkAsDelivered }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
@@ -387,6 +394,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                     <Message
                         message={message}
                         handleDeleteMessage={handleDeleteMessage}
+                        messageMarkAsDelivered={messageMarkAsDelivered}
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
@@ -396,7 +404,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     </div >
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, messageMarkAsDelivered }) => {
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -423,6 +431,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
+            {messageMarkAsDelivered && <div><img className="message-icon double_tick-icon" src='/double_tick.png' /></div>}
         </div >
     );
 
