@@ -18,7 +18,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelReactToAMessage = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -34,7 +34,9 @@ const BasicGroupChannelSample = (props) => {
         file: null,
         messageToUpdate: null,
         loading: false,
-        error: false
+        error: false,
+        isReactions: false,
+        currentMessage: {}
     });
 
     //need to access state in message received callback
@@ -51,6 +53,7 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
         const [messages, error] = await joinChannel(channel);
+
         if (error) {
             return onError(error);
         }
@@ -58,12 +61,20 @@ const BasicGroupChannelSample = (props) => {
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
         channelHandler.onChannelChanged = () => { };
+        channelHandler.onReactionUpdated = (channel, reactionEvent) => {
+            const [message] = stateRef.current.messages.filter((messageObject) => {
+                return messageObject.messageId === reactionEvent.messageId;
+            });
+            message.applyReactionEvent(reactionEvent);
+
+            const updatedMessages = [...stateRef.current.messages];
+            updateState({ ...stateRef.current, messages: updatedMessages });
+        };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -115,7 +126,6 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
-
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
@@ -123,7 +133,6 @@ const BasicGroupChannelSample = (props) => {
         }
         updateState({ ...state, applicationUsers: users });
     }
-
 
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
@@ -134,7 +143,6 @@ const BasicGroupChannelSample = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
-
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -195,6 +203,42 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
     }
 
+    const updateMessageReactions = async (message) => {
+      const { messages, currentlyJoinedChannel } = state;
+
+      const userMessageUpdateParams = new UserMessageUpdateParams();
+      const updatedMessage = await currentlyJoinedChannel.updateUserMessage(message.messageId, userMessageUpdateParams)
+      const messageIndex = messages.findIndex((item => item.messageId === message.messageId));
+      messages[messageIndex] = updatedMessage;
+
+      updateState({ ...state, messages: messages, isReactions: false });
+    }
+
+    const toggleReactions = async (message) => {
+      const { isReactions } = state;
+      updateState({ ...state, isReactions: !isReactions, currentMessage: message })
+    }
+
+    const addMessageReaction = async (message, e) => {
+      const { currentlyJoinedChannel } = state;
+
+      const emojiKey = e.target.innerText;
+      const reactionEvent = await currentlyJoinedChannel.addReaction(message, emojiKey);
+      message.applyReactionEvent(reactionEvent);
+
+      updateMessageReactions(message);
+
+      updateState({ ...state, isReactions: false, currentMessage: {} });
+    }
+
+    const removeMessageReaction = async (message, messageKey) => {
+      const { currentlyJoinedChannel } = state;
+      const reactionEvent = await currentlyJoinedChannel.deleteReaction(message, messageKey);
+      message.applyReactionEvent(reactionEvent);
+
+      updateMessageReactions(message)
+    }
+
     const handleLoadMemberSelectionList = async () => {
         updateState({ ...state, currentlyJoinedChannel: null });
         const [users, error] = await getAllApplicationUsers();
@@ -233,7 +277,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
-
+        console.log(sb.currentUser.userId);
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
@@ -277,6 +321,11 @@ const BasicGroupChannelSample = (props) => {
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
+                    addMessageReaction={addMessageReaction}
+                    removeMessageReaction={removeMessageReaction}
+                    toggleReactions={toggleReactions}
+                    isReactions={state.isReactions}
+                    currentMessage={state.currentMessage}
                 />
 
                 <MessageInput
@@ -374,7 +423,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addMessageReaction, toggleReactions, isReactions, currentMessage, removeMessageReaction }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
@@ -383,8 +432,13 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
                         message={message}
+                        addMessageReaction={addMessageReaction}
+                        removeMessageReaction={removeMessageReaction}
                         handleDeleteMessage={handleDeleteMessage}
                         updateMessage={updateMessage}
+                        toggleReactions={toggleReactions}
+                        isReactions={isReactions}
+                        currentMessage={currentMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
 
@@ -393,7 +447,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     </div >
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, addMessageReaction, toggleReactions, isReactions, currentMessage, removeMessageReaction }) => {
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -405,6 +459,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             </div >);
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+    const showReactions = isReactions && (currentMessage.messageId === message.messageId)
 
     return (
         <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -420,12 +475,33 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-            {message.ogMetaData && <div className='message-og-tags'>
-              <a className='og-tags-url' href={message.ogMetaData.url}>{message.ogMetaData.url}</a>
-              <h3 className='og-tags-title'>{ message.ogMetaData.title }</h3>
-              <p className='og-tags-description'>{ message.ogMetaData.description }</p>
-              <img className='og-tags-img' src={message.ogMetaData.defaultImage.url} />
-            </div>}
+            {message.reactions.length > 0 && <div className='reactions'>
+                {message.reactions.map((react, i) => {
+                  return <span className="reactions-item" key={i + react.key} onClick={() => removeMessageReaction(message, react.key)}>{react.key}<sup className="reactions-item-inner">{react.userIds.length > 1 ? react.userIds.length : ""}</sup></span>
+                })}
+              </div>}
+            <div className="react-button-wrapper">
+              {showReactions && <ul className="reactions-list">
+                <li>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128512;</button>
+                </li>
+                <li>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128516;</button>
+                </li>
+                <li>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128517;</button>
+                </li>
+                <li>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128579;</button>
+                </li>
+                <li>
+                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128529;</button>
+                </li>
+              </ul>}
+              <button className="control-button react-button" onClick={() => toggleReactions(message)}>
+                <span className="message-icon react-button-img">&#128512;</span>
+              </button>
+            </div>
         </div >
     );
 
@@ -555,16 +631,17 @@ const loadChannels = async () => {
 
 }
 
-const joinChannel = async (channel) => {
+const joinChannel = async (channel, updateMessageReactions) => {
     try {
         const messageListParams = new MessageListParams();
+        messageListParams.includeReactions = true;
         messageListParams.nextResultSize = 20;
         const messages = await channel.getMessagesByTimestamp(0, messageListParams);
+
         return [messages, null];
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
@@ -613,4 +690,4 @@ const getAllApplicationUsers = async () => {
 
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelReactToAMessage;

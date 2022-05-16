@@ -18,7 +18,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelCategorizeByCustomType = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -26,6 +26,7 @@ const BasicGroupChannelSample = (props) => {
         currentlyJoinedChannel: null,
         messages: [],
         channels: [],
+        currentCustomType: "all",
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -115,6 +116,9 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
+    const handleChangeCustomType = (e) => {
+        updateState({ ...state, currentCustomType: e.target.value })
+    }
 
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
@@ -259,10 +263,12 @@ const BasicGroupChannelSample = (props) => {
                 onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
+                currentCustomType={state.currentCustomType}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
+                handleChangeCustomType={handleChangeCustomType} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -297,9 +303,11 @@ const BasicGroupChannelSample = (props) => {
 // Chat UI Components
 const ChannelList = ({
     channels,
+    currentCustomType,
     handleJoinChannel,
     handleDeleteChannel,
-    handleLoadMemberSelectionList
+    handleLoadMemberSelectionList,
+    handleChangeCustomType
 }) => {
     return (
         <div className='channel-list'>
@@ -307,21 +315,36 @@ const ChannelList = ({
                 <h1>Group Channels</h1>
                 <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
             </div>
-            {channels.map(channel => {
-                return (
-                    <div key={channel.url} className="channel-list-item" >
-                        <div
-                            className="channel-list-item-name"
-                            onClick={() => { handleJoinChannel(channel.url) }}>
-                            <ChannelName members={channel.members} />
-                            <div className="last-message">{channel.lastMessage?.message}</div>
-                        </div>
-                        <div>
-                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                <img className="channel-icon" src='/icon_delete.png' />
-                            </button>
-                        </div>
-                    </div>);
+            <div className="select-custom-type">
+                <p>Custom type:</p>
+                <select onChange={(e) => handleChangeCustomType(e)} value={currentCustomType}>
+                    <option value="all">all</option>
+                    {
+                        [...new Set(channels
+                            .map(channel => channel.customType)
+                            .filter(channel => channel))
+                        ].map(item =>
+                            <option value={item}>{item}</option>)
+                    }
+                </select>
+            </div>
+            {channels
+                .filter(channel => currentCustomType === 'all' ? channel : channel.customType === currentCustomType)
+                .map(channel => {
+                    return (
+                        <div key={channel.url} className="channel-list-item" >
+                            <div
+                                className="channel-list-item-name"
+                                onClick={() => { handleJoinChannel(channel.url) }}>
+                                <ChannelName members={channel.members} />
+                                <div className="last-message">{channel.lastMessage?.message}</div>
+                            </div>
+                            <div>
+                                <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                    <img className="channel-icon" src='/icon_delete.png' />
+                                </button>
+                            </div>
+                        </div>);
             })}
         </div >);
 }
@@ -420,12 +443,6 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-            {message.ogMetaData && <div className='message-og-tags'>
-              <a className='og-tags-url' href={message.ogMetaData.url}>{message.ogMetaData.url}</a>
-              <h3 className='og-tags-title'>{ message.ogMetaData.title }</h3>
-              <p className='og-tags-description'>{ message.ogMetaData.description }</p>
-              <img className='og-tags-img' src={message.ogMetaData.defaultImage.url} />
-            </div>}
         </div >
     );
 
@@ -613,4 +630,4 @@ const getAllApplicationUsers = async () => {
 
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelCategorizeByCustomType;

@@ -304,7 +304,7 @@ const GroupChannelMessageThreading = (props) => {
     if (error) {
       return onError(error);
     }
-    console.log(sb.currentUser.userId);
+
     updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
   }
 
