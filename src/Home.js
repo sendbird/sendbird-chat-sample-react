@@ -21,6 +21,7 @@ const Home = () => {
         <li><Link to="/group-channel-display-og-tags">Group Channel Display OG-tags</Link></li>
         <li><Link to="/open-channel-categorize-by-custom-type">Open Channel with Categorize by custom type feature</Link></li>
         <li><Link to="/open-channel-thumbnails">Open Channel with auto generated Thumbnails feature</Link></li>
+        <li><Link to="/group-channel-mark-messages-as-read">Group Channel mark messages as read</Link></li>
       </ul>
 
     </div>
