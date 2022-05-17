@@ -485,7 +485,7 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, fileLoa
               />
           </div>
           {fileLoading && progress < 100 && (
-            <button onClick={onFileCancel}>Cancel loading</button>
+            <button className="cancel-btn" onClick={onFileCancel}>Cancel loading</button>
           )}
       </div>
     );

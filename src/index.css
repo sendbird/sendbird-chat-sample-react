@@ -546,3 +546,7 @@ code {
   border-radius: 10px;
   transition: width 0.5s ease-in;
 }
+
+.cancel-btn {
+  margin-left: 20px;
+}
