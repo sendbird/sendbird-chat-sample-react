@@ -23,6 +23,7 @@ import GroupChannelFreezeUnfreeze from './samples/GroupChannelFreezeUnfreeze';
 import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
+import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
 
 const App = () => {
   return (
@@ -46,6 +47,7 @@ const App = () => {
         <Route path='/open-channel-categorize-by-custom-type' element={<OpenChannelCategorizeByCustomType />} />
         <Route path='/open-channel-thumbnails' element={<OpenChannelThumbnails />} />
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
+        <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
       </Routes>
     </div>
   );
