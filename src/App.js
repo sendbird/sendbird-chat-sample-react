@@ -24,6 +24,7 @@ import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
 import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
+import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel'
 
 const App = () => {
   return (
@@ -48,6 +49,7 @@ const App = () => {
         <Route path='/open-channel-thumbnails' element={<OpenChannelThumbnails />} />
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
+        <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
       </Routes>
     </div>
   );
