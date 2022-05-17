@@ -72,7 +72,12 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             console.log("onDeliveryReceiptUpdated work");
         }
 
+        channelHandler.onUnreadMemberCountUpdated = (channel) => {
+            console.log("onUnreadMemberCountUpdated work");
+        }
+
         channelHandler.onMessageReceived = (channel, message) => {
+            channel.markAsRead()
             const updatedMessages = [...stateRef.current.messages, message];
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
@@ -84,7 +89,7 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
+        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false, messageMarkAsDelivered: true })
     }
 
     const handleLeaveChannel = async () => {
@@ -162,7 +167,7 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-                    currentlyJoinedChannel.markAsDelivered().then((data) => {
+                    currentlyJoinedChannel.markAsDelivered().then(() => {
                       updateState({ ...state, messageMarkAsDelivered: true, messages: updatedMessages, messageInputValue: ""})
                     }).catch((error) => {
                       console.log(error)
@@ -287,6 +292,7 @@ const GroupChannelMarkMessagesAsRead = (props) => {
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                     messageMarkAsDelivered={state.messageMarkAsDelivered}
+                    currentlyJoinedChannel={state.currentlyJoinedChannel}
                 />
 
                 <MessageInput
@@ -384,7 +390,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, messageMarkAsDelivered }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, messageMarkAsDelivered, currentlyJoinedChannel }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
@@ -395,6 +401,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, messageMar
                         message={message}
                         handleDeleteMessage={handleDeleteMessage}
                         messageMarkAsDelivered={messageMarkAsDelivered}
+                        currentlyJoinedChannel={currentlyJoinedChannel}
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
@@ -404,7 +411,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, messageMar
     </div >
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, messageMarkAsDelivered }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, messageMarkAsDelivered, currentlyJoinedChannel }) => {
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -416,6 +423,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             </div >);
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+    const isMessagesRead = currentlyJoinedChannel.unreadMessageCount === 0;
 
     return (
         <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -431,7 +439,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-            {messageMarkAsDelivered && <div><img className="message-icon double_tick-icon" src='/double_tick.png' /></div>}
+            {messageMarkAsDelivered && <div><img className={`message-icon double_tick-icon ${isMessagesRead && "double_tick-icon-read"}`} src={isMessagesRead ? '/double_tick_as_read.png' : '/double_tick.png'} /></div>}
         </div >
     );
 

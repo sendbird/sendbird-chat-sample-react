@@ -21,8 +21,6 @@ import GroupChannelMessageThreading from './samples/GroupChannelMessageThreading
 import GroupChannelSendAnAdminMessage from './samples/GroupChannelSendAnAdminMessage';
 import GroupChannelFreezeUnfreeze from './samples/GroupChannelFreezeUnfreeze';
 import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
-import OpenChannelCategorizeByCustomType from './samples/OpenChannelCategorizeByCustomType';
-import OpenChannelThumbnails from './samples/OpenChannelThumbnails';
 import GroupChannelMarkMessagesAsRead from './samples/GroupChannelMarkMessagesAsRead';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
