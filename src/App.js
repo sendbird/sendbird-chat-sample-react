@@ -14,6 +14,7 @@ import OpenChannelFreeze from './samples/OpenChannelFreeze';
 import OpenChannelSendAndReceiveVariousTypesOfFiles from './samples/OpenChannelSendAndReceiveVariousTypesOfFiles'
 import OpenChannelCopyMessage from './samples/OpenChannelCopyMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
+import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -46,6 +47,7 @@ const App = () => {
         <Route path='/open-channel-categorize-by-custom-type' element={<OpenChannelCategorizeByCustomType />} />
         <Route path='/open-channel-thumbnails' element={<OpenChannelThumbnails />} />
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
+        <Route path='/open-channel-report-a-message-user-channel' element={<OpenChannelReportAMessageUserChannel />} />
       </Routes>
     </div>
   );
