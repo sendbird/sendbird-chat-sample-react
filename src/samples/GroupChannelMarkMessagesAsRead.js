@@ -49,13 +49,15 @@ const GroupChannelMarkMessagesAsRead = (props) => {
     }
 
     const handleRead = (channel) => {
-        channel.markAsRead()
-          .then(() => {
-            updateState({ ...stateRef.current, isMessagesRead: true });
-        })
-          .catch((error) => {
-              console.log("error", error);
-          });
+        if (channel.unreadMessageCount === 0) {
+            channel.markAsRead()
+              .then(() => {
+                  updateState({ ...stateRef.current, isMessagesRead: true });
+              })
+              .catch((error) => {
+                  console.log("error", error);
+              });
+        }
     }
 
     const handleJoinChannel = async (channelUrl) => {
@@ -82,13 +84,10 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         }
 
-        channelHandler.onDeliveryReceiptUpdated = (channel) => {
-            console.log("onDeliveryReceiptUpdated work");
-        }
-
         channelHandler.onUnreadMemberCountUpdated = (channel) => {
-            console.log('channel', channel)
-            updateState({ ...stateRef.current, isMessagesRead: true });
+            if (channel.unreadMessageCount === 0) {
+                updateState({ ...stateRef.current, isMessagesRead: true });
+            }
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
