@@ -35,6 +35,7 @@ const Home = () => {
           <li><Link to="/group-channel-display-og-tags">Group Channel Display OG-tags</Link></li>
           <li><Link to="/group-channel-react-to-a-message">Group Channel React to a message</Link></li>
           <li><Link to="/group-channel-categorize-by-custom-type">Group Channel with Categorize by custom type feature</Link></li>
+          <li><Link to="/group-channel-track-and-cancel">Group Channel with Track and Cancel File upload</Link></li>
         </ul>
       </div>
     </div>
