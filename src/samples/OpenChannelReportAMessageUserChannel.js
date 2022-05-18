@@ -39,7 +39,6 @@ const OpenChannelReportAMessageUserChannel = (props) => {
         loading: false,
         error: false,
         isOpenReportModal: false,
-        isOpenChoiceReport: false,
         reportObject: {},
         reportKey: "",
         reportCategoriesInputValue: "",
@@ -96,7 +95,6 @@ const OpenChannelReportAMessageUserChannel = (props) => {
         await currentlyJoinedChannel.exit();
 
         updateState({ ...state, currentlyJoinedChannel: null })
-
     }
 
     const handleCreateChannel = async () => {
@@ -223,8 +221,6 @@ const OpenChannelReportAMessageUserChannel = (props) => {
             modules: [new OpenChannelModule()]
         });
 
-
-
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
@@ -242,14 +238,9 @@ const OpenChannelReportAMessageUserChannel = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
-    const toggleChoiceReport = async (message) => {
-      const { isOpenChoiceReport } = state;
-      updateState({ ...state, isOpenChoiceReport: !isOpenChoiceReport, reportObject: message })
-    }
-
-    const toggleNotificationMessage = async (notification) => {
+    const toggleNotificationMessage = (notification) => {
       const { showNotification } = state;
-      updateState({ ...state, showNotification: !showNotification, isOpenReportModal: false, isOpenChoiceReport: false, reportNotification: notification, reportObject: {}, reportKey: "" })
+      updateState({ ...state, showNotification: !showNotification, isOpenReportModal: false, reportNotification: notification, reportObject: {}, reportKey: "" })
     }
 
     const toggleReportModal = (obj, key) => {
@@ -273,10 +264,6 @@ const OpenChannelReportAMessageUserChannel = (props) => {
         case 'Message':
           // Report a message.
           await currentlyJoinedChannel.reportMessage(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
-          break;
-        case 'User':
-          // Report a user.
-          await currentlyJoinedChannel.reportUser(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
           break;
         case 'Channel':
           // Report a channel.
@@ -325,11 +312,6 @@ const OpenChannelReportAMessageUserChannel = (props) => {
                 handleUpdateChannel={handleUpdateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 toggleChannelDetails={toggleChannelDetails} />
-            <СhoiceReportModal
-              isOpenChoiceReport={state.isOpenChoiceReport}
-              toggleReportModal={toggleReportModal}
-              reportObject={state.reportObject}
-            />
             <ReportModal
               isOpenReportModal={state.isOpenReportModal}
               toggleReportModal={toggleReportModal}
@@ -353,7 +335,7 @@ const OpenChannelReportAMessageUserChannel = (props) => {
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
-                    toggleChoiceReport={toggleChoiceReport}
+                    toggleReportModal={toggleReportModal}
                 />
                 <MessageInput
                     value={state.messageInputValue}
@@ -424,7 +406,7 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleChoiceReport }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleReportModal }) => {
     return messages.map(message => {
         return (
             <div key={message.messageId} className="oc-message-item">
@@ -432,13 +414,13 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleChoi
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                     message={message}
-                    toggleChoiceReport={toggleChoiceReport}
+                    toggleReportModal={toggleReportModal}
                 />
             </div>);
     })
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, toggleChoiceReport }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, toggleReportModal }) => {
     if (message.url) {
         return (
             <div className="oc-message">
@@ -447,7 +429,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, toggleChoiceRepo
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
 
                 <img src={message.url} />
-                <button className="control-button" onClick={() => toggleChoiceReport(message)}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                <button className="control-button" onClick={() => toggleReportModal(message)}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
             </div >);
     }
 
@@ -467,7 +449,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, toggleChoiceRepo
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-            <button className="control-button" onClick={() => toggleChoiceReport(message)}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+            <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
         </div >
     );
 
@@ -519,17 +501,6 @@ const ChannelDetails = ({
         </div >;
     }
     return null;
-}
-
-const СhoiceReportModal = ({ isOpenChoiceReport, toggleReportModal, reportObject }) => {
-  if(isOpenChoiceReport) {
-    return <div className="overlay">
-      <div className="overlay-content">
-        <h3 style={{ textAlign: "center" }}>Report about <span className='choise-report-obj' onClick={() => toggleReportModal(reportObject, "Message")}>message</span> or <span className='choise-report-obj' onClick={() => toggleReportModal(reportObject.sender, "User")}>user</span>?</h3>
-      </div>
-    </div>
-  }
-  return null;
 }
 
 const ReportModal = ({ isOpenReportModal, toggleReportModal, sendReport, onReportCategoriesInputChange, reportDescriptionInputValue, onReportDescriptionInputChange }) => {
