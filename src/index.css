@@ -258,7 +258,11 @@ code {
   width: 14px;
 }
 
-.message:hover .message-icon {
+.double_tick-icon-read {
+  filter: none;
+}
+
+.message:hover .message-icon, .double_tick-icon {
   visibility: visible;
 }
 
