@@ -268,8 +268,12 @@ code {
   width: 14px;
 }
 
-.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon{
+.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .double_tick-icon {
   visibility: visible;
+}
+
+.double_tick-icon-read {
+  filter: none;
 }
 
 .oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list {
