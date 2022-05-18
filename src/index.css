@@ -224,6 +224,16 @@ code {
   background: rgba(255, 0, 0, 0.05);
 }
 
+.report-notification {
+  background: rgba(0, 255, 0, 0.5);
+  color: white;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  margin: 5px 0;
+  padding: 5px;
+}
+
 .message{
   border-radius: 8px;
   width:70%;
@@ -253,17 +263,17 @@ code {
   filter: brightness(0) invert(1);
 }
 
-.oc-message-icon{
+.oc-message-icon, .oc-channel-list-icon{
   visibility:hidden;
   width: 14px;
 }
 
-.double_tick-icon-read {
-  filter: none;
+.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .double_tick-icon {
+  visibility: visible;
 }
 
-.message:hover .message-icon, .double_tick-icon {
-  visibility: visible;
+.double_tick-icon-read {
+  filter: none;
 }
 
 .oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list {
@@ -532,4 +542,10 @@ code {
   padding: 5px;
   margin: 5px 0;
   text-align: center;
+}
+
+.choise-report-obj {
+  cursor: pointer;
+  color: #6210CC;
+  text-decoration: underline;
 }
