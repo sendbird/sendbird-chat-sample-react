@@ -18,7 +18,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
 let sb;
 
-const GroupChannelReactToAMessage = (props) => {
+const GroupChannelMarkMessagesAsRead = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -35,8 +35,8 @@ const GroupChannelReactToAMessage = (props) => {
         messageToUpdate: null,
         loading: false,
         error: false,
-        isReactions: false,
-        currentMessage: {}
+        messageMarkAsDelivered: false,
+        isMessagesRead: false
     });
 
     //need to access state in message received callback
@@ -48,28 +48,34 @@ const GroupChannelReactToAMessage = (props) => {
         console.log(error);
     }
 
+    const handleRead = async (channel) => {
+        if (channel.unreadMessageCount === 0) {
+            try {
+                await channel.markAsRead();
+                updateState({ ...stateRef.current, isMessagesRead: true });
+            } catch(error) {
+                console.log("error", error);
+            }
+        }
+    }
+
     const handleJoinChannel = async (channelUrl) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
         const [messages, error] = await joinChannel(channel);
-
         if (error) {
             return onError(error);
         }
+
+        if (messages) {
+            handleRead(channel);
+        }
+
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
         channelHandler.onChannelChanged = () => { };
-        channelHandler.onReactionUpdated = (channel, reactionEvent) => {
-            const [message] = stateRef.current.messages.filter((messageObject) => {
-                return messageObject.messageId === reactionEvent.messageId;
-            });
-            message.applyReactionEvent(reactionEvent);
-
-            const updatedMessages = [...stateRef.current.messages];
-            updateState({ ...stateRef.current, messages: updatedMessages });
-        };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
             const updatedMessages = [...stateRef.current.messages];
@@ -77,9 +83,21 @@ const GroupChannelReactToAMessage = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         }
 
-        channelHandler.onMessageReceived = (channel, message) => {
-            const updatedMessages = [...stateRef.current.messages, message];
-            updateState({ ...stateRef.current, messages: updatedMessages });
+        channelHandler.onUnreadMemberCountUpdated = (channel) => {
+            if (channel.unreadMessageCount === 0) {
+                updateState({ ...stateRef.current, isMessagesRead: true });
+            }
+        }
+
+        channelHandler.onMessageReceived = async (channel, message) => {
+            try {
+                await channel.markAsDelivered()
+                const updatedMessages = [...stateRef.current.messages, message];
+                updateState({ ...stateRef.current, messages: updatedMessages, messageMarkAsDelivered: true})
+            } catch (error) {
+                console.log(error)
+                console.log("error")
+            }
         };
 
         channelHandler.onMessageDeleted = (channel, message) => {
@@ -89,7 +107,7 @@ const GroupChannelReactToAMessage = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
+        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false, messageMarkAsDelivered: true })
     }
 
     const handleLeaveChannel = async () => {
@@ -126,6 +144,7 @@ const GroupChannelReactToAMessage = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
+
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
@@ -133,6 +152,7 @@ const GroupChannelReactToAMessage = (props) => {
         }
         updateState({ ...state, applicationUsers: users });
     }
+
 
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
@@ -143,6 +163,7 @@ const GroupChannelReactToAMessage = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
+
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -164,9 +185,7 @@ const GroupChannelReactToAMessage = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-
-                    updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
+                    updateState({ ...state, messages: updatedMessages, messageInputValue: ""})
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -201,42 +220,6 @@ const GroupChannelReactToAMessage = (props) => {
 
     const updateMessage = async (message) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
-    }
-
-    const updateMessageReactions = async (message) => {
-      const { messages, currentlyJoinedChannel } = state;
-
-      const userMessageUpdateParams = new UserMessageUpdateParams();
-      const updatedMessage = await currentlyJoinedChannel.updateUserMessage(message.messageId, userMessageUpdateParams)
-      const messageIndex = messages.findIndex((item => item.messageId === message.messageId));
-      messages[messageIndex] = updatedMessage;
-
-      updateState({ ...state, messages: messages, isReactions: false });
-    }
-
-    const toggleReactions = async (message) => {
-      const { isReactions } = state;
-      updateState({ ...state, isReactions: !isReactions, currentMessage: message })
-    }
-
-    const addMessageReaction = async (message, e) => {
-      const { currentlyJoinedChannel } = state;
-
-      const emojiKey = e.target.innerText;
-      const reactionEvent = await currentlyJoinedChannel.addReaction(message, emojiKey);
-      message.applyReactionEvent(reactionEvent);
-
-      updateMessageReactions(message);
-
-      updateState({ ...state, isReactions: false, currentMessage: {} });
-    }
-
-    const removeMessageReaction = async (message, messageKey) => {
-      const { currentlyJoinedChannel } = state;
-      const reactionEvent = await currentlyJoinedChannel.deleteReaction(message, messageKey);
-      message.applyReactionEvent(reactionEvent);
-
-      updateMessageReactions(message)
     }
 
     const handleLoadMemberSelectionList = async () => {
@@ -318,13 +301,11 @@ const GroupChannelReactToAMessage = (props) => {
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
                 <MessagesList
                     messages={state.messages}
+                    isMessagesRead={state.isMessagesRead}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
-                    addMessageReaction={addMessageReaction}
-                    removeMessageReaction={removeMessageReaction}
-                    toggleReactions={toggleReactions}
-                    isReactions={state.isReactions}
-                    currentMessage={state.currentMessage}
+                    messageMarkAsDelivered={state.messageMarkAsDelivered}
+                    currentlyJoinedChannel={state.currentlyJoinedChannel}
                 />
 
                 <MessageInput
@@ -418,11 +399,9 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     } else {
         return null;
     }
-
-
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addMessageReaction, toggleReactions, isReactions, currentMessage, removeMessageReaction }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, messageMarkAsDelivered, currentlyJoinedChannel, isMessagesRead }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
@@ -431,13 +410,11 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addMessage
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
                         message={message}
-                        addMessageReaction={addMessageReaction}
-                        removeMessageReaction={removeMessageReaction}
+                        isMessagesRead={isMessagesRead}
                         handleDeleteMessage={handleDeleteMessage}
+                        messageMarkAsDelivered={messageMarkAsDelivered}
+                        currentlyJoinedChannel={currentlyJoinedChannel}
                         updateMessage={updateMessage}
-                        toggleReactions={toggleReactions}
-                        isReactions={isReactions}
-                        currentMessage={currentMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
 
@@ -446,7 +423,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addMessage
     </div >
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, addMessageReaction, toggleReactions, isReactions, currentMessage, removeMessageReaction }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, messageMarkAsDelivered, isMessagesRead }) => {
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -458,7 +435,6 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             </div >);
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
-    const showReactions = isReactions && (currentMessage.messageId === message.messageId)
 
     return (
         <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -474,33 +450,13 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-            {message.reactions.length > 0 && <div className='reactions'>
-                {message.reactions.map((react, i) => {
-                  return <span className="reactions-item" key={i + react.key} onClick={() => removeMessageReaction(message, react.key)}>{react.key}<sup className="reactions-item-inner">{react.userIds.length > 1 ? react.userIds.length : ""}</sup></span>
-                })}
-              </div>}
-            <div className="react-button-wrapper">
-              {showReactions && <ul className="reactions-list">
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128512;</button>
-                </li>
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128516;</button>
-                </li>
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128517;</button>
-                </li>
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128579;</button>
-                </li>
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128529;</button>
-                </li>
-              </ul>}
-              <button className="control-button react-button" onClick={() => toggleReactions(message)}>
-                <span className="message-icon react-button-img">&#128512;</span>
-              </button>
-            </div>
+            {
+                messageSentByYou && messageMarkAsDelivered && (
+                  <div>
+                      <img className={`message-icon double_tick-icon ${isMessagesRead && "double_tick-icon-read"}`} src={isMessagesRead ? '/double_tick_as_read.png' : '/double_tick.png'} />
+                  </div>
+                )
+            }
         </div >
     );
 
@@ -630,17 +586,16 @@ const loadChannels = async () => {
 
 }
 
-const joinChannel = async (channel, updateMessageReactions) => {
+const joinChannel = async (channel) => {
     try {
         const messageListParams = new MessageListParams();
-        messageListParams.includeReactions = true;
         messageListParams.nextResultSize = 20;
         const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-
         return [messages, null];
     } catch (error) {
         return [null, error];
     }
+
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
@@ -689,4 +644,4 @@ const getAllApplicationUsers = async () => {
 
 }
 
-export default GroupChannelReactToAMessage;
+export default GroupChannelMarkMessagesAsRead;

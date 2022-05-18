@@ -21,6 +21,7 @@ import GroupChannelMessageThreading from './samples/GroupChannelMessageThreading
 import GroupChannelSendAnAdminMessage from './samples/GroupChannelSendAnAdminMessage';
 import GroupChannelFreezeUnfreeze from './samples/GroupChannelFreezeUnfreeze';
 import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
+import GroupChannelMarkMessagesAsRead from './samples/GroupChannelMarkMessagesAsRead';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
 import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
@@ -47,6 +48,7 @@ const App = () => {
         <Route path='/group-channel-react-to-a-message' element={<GroupChannelReactToAMessage />} />
         <Route path='/open-channel-categorize-by-custom-type' element={<OpenChannelCategorizeByCustomType />} />
         <Route path='/open-channel-thumbnails' element={<OpenChannelThumbnails />} />
+        <Route path='/group-channel-mark-messages-as-read' element={<GroupChannelMarkMessagesAsRead />} />
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
