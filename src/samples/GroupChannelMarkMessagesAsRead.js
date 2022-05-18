@@ -48,15 +48,14 @@ const GroupChannelMarkMessagesAsRead = (props) => {
         console.log(error);
     }
 
-    const handleRead = (channel) => {
+    const handleRead = async (channel) => {
         if (channel.unreadMessageCount === 0) {
-            channel.markAsRead()
-              .then(() => {
-                  updateState({ ...stateRef.current, isMessagesRead: true });
-              })
-              .catch((error) => {
-                  console.log("error", error);
-              });
+            try {
+                await channel.markAsRead();
+                updateState({ ...stateRef.current, isMessagesRead: true });
+            } catch(error) {
+                console.log("error", error);
+            }
         }
     }
 
@@ -90,14 +89,15 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             }
         }
 
-        channelHandler.onMessageReceived = (channel, message) => {
-            channel.markAsDelivered().then(() => {
+        channelHandler.onMessageReceived = async (channel, message) => {
+            try {
+                await channel.markAsDelivered()
                 const updatedMessages = [...stateRef.current.messages, message];
                 updateState({ ...stateRef.current, messages: updatedMessages, messageMarkAsDelivered: true})
-            }).catch((error) => {
+            } catch (error) {
                 console.log(error)
                 console.log("error")
-            });
+            }
         };
 
         channelHandler.onMessageDeleted = (channel, message) => {
@@ -260,7 +260,6 @@ const GroupChannelMarkMessagesAsRead = (props) => {
         if (error) {
             return onError(error);
         }
-        console.log(sb.currentUser.userId);
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
