@@ -23,11 +23,8 @@ import GroupChannelFreezeUnfreeze from './samples/GroupChannelFreezeUnfreeze';
 import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
-<<<<<<< HEAD
 import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
-=======
 import GroupChannelTrackAndCancelFileUpload from './samples/GroupChannelTrackAndCancelFileUpload';
->>>>>>> 2c720c7 (Track and cancles the file sending)
 
 const App = () => {
   return (
