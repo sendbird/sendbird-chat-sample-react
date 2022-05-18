@@ -268,12 +268,13 @@ code {
   width: 14px;
 }
 
-.double_tick-icon-read {
-  filter: none;
+
+.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .member-item:hover .message-icon, .double_tick-icon {
+  visibility: visible;
 }
 
-.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .member-item:hover .message-icon {
-  visibility: visible;
+.double_tick-icon-read {
+  filter: none;
 }
 
 .member-item .message-icon {
@@ -547,4 +548,10 @@ code {
   padding: 5px;
   margin: 5px 0;
   text-align: center;
+}
+
+.choise-report-obj {
+  cursor: pointer;
+  color: #6210CC;
+  text-decoration: underline;
 }
