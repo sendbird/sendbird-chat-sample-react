@@ -268,11 +268,16 @@ code {
   width: 14px;
 }
 
-.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .double_tick-icon {
+
+.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .member-item:hover .message-icon, .double_tick-icon {
   visibility: visible;
 }
 
 .double_tick-icon-read {
+  filter: none;
+}
+
+.member-item .message-icon {
   filter: none;
 }
 
@@ -356,6 +361,7 @@ code {
   padding-bottom: 4px;
   display:flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .member-item:hover{
