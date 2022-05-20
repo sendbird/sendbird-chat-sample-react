@@ -23,6 +23,7 @@ const Home = () => {
           <li><Link to="/open-channel-thumbnails">Open Channel with auto generated Thumbnails feature</Link></li>
           <li><Link to="/freeze-open-channel">Open Channel with Freeze feature</Link></li>
           <li><Link to="/open-channel-categorize-messages-by-custom-type">Open Channel with Categorize messages by custom type feature</Link></li>
+          <li><Link to="/open-channel-metadata-and-metacounter">Open Channel Metadata and Metacounter</Link></li>
         </ul>
       </div>
       <div>

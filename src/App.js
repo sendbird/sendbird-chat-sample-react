@@ -14,6 +14,8 @@ import OpenChannelFreeze from './samples/OpenChannelFreeze';
 import OpenChannelSendAndReceiveVariousTypesOfFiles from './samples/OpenChannelSendAndReceiveVariousTypesOfFiles'
 import OpenChannelCopyMessage from './samples/OpenChannelCopyMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
+import OpenChannelCategorizeMessagesByCustomType from './samples/OpenChannelCategorizeMessagesByCustomType';
+import OpenChannelMetadataAndMetacounter from './samples/OpenChannelMetadataAndMetacounter';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -24,7 +26,6 @@ import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
 import GroupChannelMarkMessagesAsRead from './samples/GroupChannelMarkMessagesAsRead';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
-import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
 
 const App = () => {
   return (
@@ -50,6 +51,7 @@ const App = () => {
         <Route path='/group-channel-mark-messages-as-read' element={<GroupChannelMarkMessagesAsRead />} />
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
+        <Route path='/open-channel-metadata-and-metacounter' element={<OpenChannelMetadataAndMetacounter />} />
       </Routes>
     </div>
   );
