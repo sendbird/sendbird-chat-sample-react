@@ -6,6 +6,7 @@ import {
     GroupChannelHandler,
     GroupChannelModule,
     GroupChannelCreateParams,
+    GroupChannelHideParams
 } from '@sendbird/chat/groupChannel';
 import {
     UserMessageCreateParams,
@@ -116,16 +117,16 @@ const GroupChannelArchive = (props) => {
     }
 
     const handleArchiveChannel = async (channelUrl) => {
-        const [channel, error] = await archiveChannel(channelUrl);
-        console.log('CHANNNNNNNEL', channel)
-        if (error) {
-            console.log('ERRRRRRRRRRRRROR', error)
-            return onError(error);
+        try {
+            await archiveChannel(channelUrl);
+
+            const updatedChannels = state.channels.filter((channel) => {
+                return channel.url !== channelUrl;
+            });
+            updateState({ ...state, channels: updatedChannels });
+        } catch (error) {
+            console.log("error", error)
         }
-        const updatedChannels = state.channels.filter((channel) => {
-            return channel.url !== channelUrl;
-        });
-        updateState({ ...state, channels: updatedChannels });
     }
 
     const handleMemberInvite = async () => {
@@ -618,7 +619,9 @@ const archiveChannel = async (channelUrl) => {
     // }
     const channel = await sb.groupChannel.getChannel(channelUrl);
     // await channel.hide(false);
-    await channel.hide({hidePreviousMessages: true, allowAutoUnhid: false});
+    const params = new GroupChannelHideParams();
+    params.hidePreviousMessages = true;
+    await channel.hide(params);
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
