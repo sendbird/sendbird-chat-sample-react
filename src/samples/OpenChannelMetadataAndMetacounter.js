@@ -72,8 +72,10 @@ const OpenChannelMetadataAndMetacounter = (props) => {
         }
 
         const metaData = await channel.getMetaData([]);
-        const metaCounters = await channel.getMetaCounters([]);
+        const metaCounters = await channel.getMetaCounters(['likes']);
 
+        // await channel.createMetaCounters({ "messages": stateRef.current.messages.length });
+        //
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
         channelHandler.onMessageUpdated = (channel, message) => {
@@ -250,98 +252,90 @@ const OpenChannelMetadataAndMetacounter = (props) => {
     }
 
     const toggleMetadataModal = async () => {
-      const { isOpenMetadataModal } = state;
-      updateState({ ...state, isOpenMetadataModal: !isOpenMetadataModal })
-    }
+      const { isOpenMetadataModal, currentlyJoinedChannel } = state;
+      const data = await currentlyJoinedChannel.getAllMetaData();
 
-    const saveMetadata = async () => {
-      const { metadataObject, currentlyJoinedChannel, currentMetadataObject } = state;
-      const isEmpty = Object.keys(metadataObject).length === 0;
-      const isUpdate = Object.keys(metadataObject).length < Object.keys(currentMetadataObject).length
-      if(isEmpty) {
-        alert("Metadata empty")
-        return null
-      } else if(isUpdate) {
-        const upsertIfKeyNotExist = true;
-        await currentlyJoinedChannel.updateMetaData(currentMetadataObject, upsertIfKeyNotExist);
-      } else {
-        await currentlyJoinedChannel.createMetaData(metadataObject);
-      }
-
-      toggleMetadataModal()
+      updateState({ ...state, isOpenMetadataModal: !isOpenMetadataModal, currentMetadataObject: { ...data} })
     }
 
     const addMetadataObjectItem = async () => {
-      const { metadataKeyInputValue, metadataValueInputValue, metadataObject, currentMetadataObject, metadataItemToUpdate, currentlyJoinedChannel } = state
-      if(metadataItemToUpdate) {
+      const { currentMetadataObject, metadataKeyInputValue, metadataValueInputValue, metadataItemToUpdate, currentlyJoinedChannel } = state;
 
-        if(metadataItemToUpdate in metadataObject) {
-          let newMetadataObj = Object.assign({}, metadataObject);
-          let newCurrentMetadataObject = Object.assign({}, currentMetadataObject);
-          newMetadataObj[metadataKeyInputValue] = metadataValueInputValue;
-          newCurrentMetadataObject[metadataKeyInputValue] = metadataValueInputValue;
-          delete newMetadataObj[metadataItemToUpdate];
-          delete newCurrentMetadataObject[metadataItemToUpdate]
+      const newObject = {
+         [metadataKeyInputValue]: metadataValueInputValue
+      }
 
-          const data = await currentlyJoinedChannel.getMetaData([metadataItemToUpdate]);
-          const isEmpty = Object.keys(data).length === 0;
+      const isEmpty = metadataKeyInputValue === "" || metadataValueInputValue === "";
 
-          !isEmpty && await currentlyJoinedChannel.deleteMetaData(metadataItemToUpdate);
-          
-          updateState({ ...state, metadataObject: newMetadataObj, currentMetadataObject: newCurrentMetadataObject, metadataKeyInputValue: "", metadataValueInputValue: "", metadataItemToUpdate: null })
-        } else {
-          let newCurrentMetadataObject = Object.assign({}, currentMetadataObject);
-          newCurrentMetadataObject[metadataKeyInputValue] = metadataValueInputValue;
-          let newObject = { [metadataKeyInputValue]: metadataValueInputValue }
-          delete newCurrentMetadataObject[metadataItemToUpdate]
+      if (isEmpty) {
+        alert("Metadata empty");
+        return null;
+      }
 
+      if (metadataItemToUpdate) {
+        const upsertIfKeyNotExist = true;
+
+        const update = {
+          [metadataItemToUpdate]: metadataValueInputValue
+        }
+
+        if (metadataItemToUpdate !== metadataKeyInputValue) {
           await currentlyJoinedChannel.deleteMetaData(metadataItemToUpdate);
 
-          updateState({ ...state, metadataObject: newObject, currentMetadataObject: newCurrentMetadataObject, metadataKeyInputValue: "", metadataValueInputValue: "", metadataItemToUpdate: null })
+          await currentlyJoinedChannel.createMetaData({[metadataKeyInputValue]: metadataValueInputValue});
+
+        } else {
+          await currentlyJoinedChannel.updateMetaData(update, upsertIfKeyNotExist);
         }
 
+        const { [metadataItemToUpdate]: remove, ...rest } = currentMetadataObject;
+
+        updateState({
+          ...state,
+          metadataObject: newObject,
+          currentMetadataObject: {...newObject, ...rest},
+          metadataKeyInputValue: "",
+          metadataValueInputValue: "",
+          metadataItemToUpdate: null
+        })
+
       } else {
-        if(metadataKeyInputValue && metadataValueInputValue) {
-          metadataObject[metadataKeyInputValue] = metadataValueInputValue
-          currentMetadataObject[metadataKeyInputValue] = metadataValueInputValue
-          updateState({ ...state, metadataObject, currentMetadataObject, metadataKeyInputValue: "", metadataValueInputValue: ""})
-        } else {
-          alert("Fill in key and value");
-        }
+        await currentlyJoinedChannel.createMetaData(newObject);
+
+        updateState({
+          ...state,
+          metadataObject: newObject,
+          currentMetadataObject: {...state.currentMetadataObject, ...newObject},
+          metadataKeyInputValue: "",
+          metadataValueInputValue: ""
+        })
       }
     }
 
-    const updateMetadataObjectItem = async (key, value) => {
+    const updateMetadataObjectItem = (key, value) => {
       updateState({ ...state, metadataItemToUpdate: key, metadataKeyInputValue: key, metadataValueInputValue: value })
     }
 
     const handleDeleteMetadataObjectItem = async (key) => {
-      const { metadataObject, currentMetadataObject, currentlyJoinedChannel } = state
+      const { currentMetadataObject, currentlyJoinedChannel } = state
 
-      let newMetadataObj = Object.assign({}, metadataObject);
-      let newCurrentMetadataObject = Object.assign({}, currentMetadataObject);
-      delete newMetadataObj[key];
-      delete newCurrentMetadataObject[key]
+      await currentlyJoinedChannel.deleteMetaData(key);
+      const { [key]: remove, ...rest } = currentMetadataObject;
 
-      const data = await currentlyJoinedChannel.getMetaData([key]);
-      const isEmpty = Object.keys(data).length === 0;
-
-      !isEmpty && await currentlyJoinedChannel.deleteMetaData(key);
-
-      updateState({ ...state, metadataObject: newMetadataObj, currentMetadataObject: newCurrentMetadataObject })
+      updateState({ ...state, currentMetadataObject: rest })
     }
 
-    const onMetadataKeyInputValue = async (e) => {
+    const onMetadataKeyInputValue = (e) => {
       const metadataKeyInputValue = e.currentTarget.value
       updateState({ ...state, metadataKeyInputValue})
     }
 
-    const onMetadataValueInputValue = async (e) => {
+    const onMetadataValueInputValue = (e) => {
       const metadataValueInputValue = e.currentTarget.value
       updateState({ ...state, metadataValueInputValue})
     }
 
-    const toggleMetacounterModal = async () => {
+    const toggleMetacounterModal = () => {
       const { isOpenMetacounterModal } = state;
       updateState({ ...state, isOpenMetacounterModal: !isOpenMetacounterModal })
     }
@@ -370,8 +364,10 @@ const OpenChannelMetadataAndMetacounter = (props) => {
         if(metacounterItemToUpdate in metacounterObject) {
           let newMetacounterObj = Object.assign({}, metacounterObject);
           let newCurrentMetacounterObject = Object.assign({}, currentMetacounterObject);
+
           newMetacounterObj[metacounterKeyInputValue] = metacounterValueInputValue;
           newCurrentMetacounterObject[metacounterKeyInputValue] = metacounterValueInputValue;
+
           delete newMetacounterObj[metacounterItemToUpdate];
           delete newCurrentMetacounterObject[metacounterItemToUpdate]
 
@@ -403,7 +399,7 @@ const OpenChannelMetadataAndMetacounter = (props) => {
       }
     }
 
-    const updateMetacounterObjectItem = async (key, value) => {
+    const updateMetacounterObjectItem = (key, value) => {
       updateState({ ...state, metacounterItemToUpdate: key, metacounterKeyInputValue: key, metacounterValueInputValue: value })
     }
 
@@ -423,12 +419,12 @@ const OpenChannelMetadataAndMetacounter = (props) => {
       updateState({ ...state, metacounterObject: newMetacounterObj, currentMetacounterObject: newCurrentMetacounterObject })
     }
 
-    const onMetacounterKeyInputValue = async (e) => {
+    const onMetacounterKeyInputValue = (e) => {
       const metacounterKeyInputValue = e.currentTarget.value
       updateState({ ...state, metacounterKeyInputValue})
     }
 
-    const onMetacounterValueInputValue = async (e) => {
+    const onMetacounterValueInputValue = (e) => {
       const metacounterValueInputValue = e.currentTarget.value
       updateState({ ...state, metacounterValueInputValue})
     }
@@ -474,7 +470,6 @@ const OpenChannelMetadataAndMetacounter = (props) => {
               onMetadataKeyInputValue={onMetadataKeyInputValue}
               onMetadataValueInputValue={onMetadataValueInputValue}
               addMetadataObjectItem={addMetadataObjectItem}
-              saveMetadata={saveMetadata}
               toggleMetadataModal={toggleMetadataModal} />
             <MetacounterModal
               isOpenMetacounterModal={state.isOpenMetacounterModal}
@@ -739,7 +734,7 @@ const CreateUserForm = ({
 
 }
 
-const MetadataModal = ({ isOpenMetadataModal, toggleMetadataModal, saveMetadata, addMetadataObjectItem, metadataKeyInputValue, onMetadataKeyInputValue, onMetadataValueInputValue, metadataValueInputValue, currentMetadataObject, updateMetadataObjectItem, handleDeleteMetadataObjectItem }) => {
+const MetadataModal = ({ isOpenMetadataModal, toggleMetadataModal, addMetadataObjectItem, metadataKeyInputValue, onMetadataKeyInputValue, onMetadataValueInputValue, metadataValueInputValue, currentMetadataObject, updateMetadataObjectItem, handleDeleteMetadataObjectItem }) => {
   const isEmpty = Object.keys(currentMetadataObject).length == 0;
   const keys = Object.keys(currentMetadataObject);
 
@@ -766,7 +761,6 @@ const MetadataModal = ({ isOpenMetadataModal, toggleMetadataModal, saveMetadata,
                 <input type="text" placeholder="value" onChange={(e) => onMetadataValueInputValue(e)} name="value" value={metadataValueInputValue}></input>
                 <button onClick={() => addMetadataObjectItem()}>Add</button>
             </div>
-            <button onClick={() => saveMetadata()}>Save</button>
             <button className="form-button" onClick={() => toggleMetadataModal()}>Close</button>
           </div>
       </div>
