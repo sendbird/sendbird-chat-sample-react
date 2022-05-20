@@ -16,6 +16,7 @@ import OpenChannelCopyMessage from './samples/OpenChannelCopyMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import OpenChannelCategorizeMessagesByCustomType from './samples/OpenChannelCategorizeMessagesByCustomType';
 import OpenChannelMetadataAndMetacounter from './samples/OpenChannelMetadataAndMetacounter';
+import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -26,6 +27,8 @@ import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
 import GroupChannelMarkMessagesAsRead from './samples/GroupChannelMarkMessagesAsRead';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
+import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
+import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel'
 
 const App = () => {
   return (
@@ -50,8 +53,10 @@ const App = () => {
         <Route path='/open-channel-thumbnails' element={<OpenChannelThumbnails />} />
         <Route path='/group-channel-mark-messages-as-read' element={<GroupChannelMarkMessagesAsRead />} />
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
+        <Route path='/open-channel-report-a-message-user-channel' element={<OpenChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
         <Route path='/open-channel-metadata-and-metacounter' element={<OpenChannelMetadataAndMetacounter />} />
+        <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
       </Routes>
     </div>
   );
