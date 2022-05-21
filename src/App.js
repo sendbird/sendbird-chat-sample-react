@@ -26,7 +26,8 @@ import GroupChannelMarkMessagesAsRead from './samples/GroupChannelMarkMessagesAs
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
 import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
-import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel'
+import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel';
+import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegisterUnregisterOperator';
 
 const App = () => {
   return (
@@ -54,6 +55,7 @@ const App = () => {
         <Route path='/open-channel-report-a-message-user-channel' element={<OpenChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
+        <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
       </Routes>
     </div>
   );
