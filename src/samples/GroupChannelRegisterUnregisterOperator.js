@@ -26,6 +26,7 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
         currentlyJoinedChannel: null,
         messages: [],
         channels: [],
+        members: [],
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -34,7 +35,8 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
         file: null,
         messageToUpdate: null,
         loading: false,
-        error: false
+        error: false,
+        userIsOperator: false
     });
 
     //need to access state in message received callback
@@ -47,13 +49,17 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
     }
 
     const handleJoinChannel = async (channelUrl) => {
-        const { channels } = state;
+        const { channels, userIdInputValue } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
         const [messages, error] = await joinChannel(channel);
         if (error) {
             return onError(error);
         }
+
+        const memberIndex = channel.members.findIndex((item => item.userId === userIdInputValue));
+        const userIsOperator = channel.members[memberIndex].role === "operator"
+
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
@@ -78,7 +84,7 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
+        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false, members: channel.members, userIsOperator: userIsOperator })
     }
 
     const handleLeaveChannel = async () => {
@@ -237,31 +243,28 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
-    const registerAnOperator = async (id) => {
-      debugger
-      const { currentlyJoinedChannel } = state;
+    const registerUnregisterAnOperator = async (member) => {
+      const { currentlyJoinedChannel, members } = state;
 
-      currentlyJoinedChannel.addOperators([id], function(response, error) {
-        if (error) {
-          console.log("Error");
-          console.log(error);
-        }
-    
-        console.log("Operator was register");
-      });
-    }
+      if(member.role === "operator") {
+        currentlyJoinedChannel.removeOperators([member.userId], function(response, error) {
+          if (error) {
+            console.log("Error");
+            console.log(error);
+          }
+        }).then(() => updateState({ ...state, members: members }));
 
-    const unregisterAnOperator = async (id) => {
-      const { currentlyJoinedChannel } = state;
+        alert("Operator was unregister");
+      } else {
+        currentlyJoinedChannel.addOperators([member.userId], function(response, error) {
+          if (error) {
+            console.log("Error");
+            console.log(error);
+          }
+        }).then(() => updateState({ ...state, members: members }));
 
-      currentlyJoinedChannel.removeOperators([id], function(response, error) {
-        if (error) {
-          console.log("Error");
-          console.log(error);
-        }
-    
-        console.log("Operator was register");
-      });
+        alert("Operator was register");
+      }
     }
 
     if (state.loading) {
@@ -314,9 +317,10 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
                     onFileInputChange={onFileInputChange} />
             </Channel>
             <MembersList
-                channel={state.currentlyJoinedChannel}
-                registerAnOperator={registerAnOperator}
-                unregisterAnOperator={unregisterAnOperator}
+                members={state.members}
+                userIdInputValue={state.userIdInputValue}
+                userIsOperator={state.userIsOperator}
+                registerUnregisterAnOperator={registerUnregisterAnOperator}
                 handleMemberInvite={handleMemberInvite}
             />
         </>
@@ -388,18 +392,25 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MembersList = ({ channel, handleMemberInvite, registerAnOperator, unregisterAnOperator }) => {
-    if (channel) {
+const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator, userIsOperator, userIdInputValue }) => {
+    if (members) {
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
-            {channel.members.map((member) => {
-              console.log("member.userId", member.userId)
-              console.log("member", member)
+            {members.map((member) => {
+              const isOperator = (member.role === "operator");
+              const memberIsSender = (member.userId !== userIdInputValue);
               return(
-                <div key={member.userId} style={{ display: "flex", flexDirection: "column" }}>
-                  <div className="member-item">{member.nickname}</div>
-                  <button onClick={() => registerAnOperator(member.userId)}>Register an operator</button>
-                  <button onClick={() => unregisterAnOperator(member.userId)}>Unregister an operator</button>
+                <div key={member.userId}>
+                  {userIsOperator && <div key={member.userId} className="member-item-wrapper">
+                    <div className="member-item">
+                      {member.nickname}
+                      {isOperator && <img className="message-icon" src='/operator_icon.png' />}
+                    </div>
+                    {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
+                      {isOperator ? "Unregister as operator" : "Register as operator"}
+                    </button>}
+                  </div>}
+                  {!userIsOperator && <div className="member-item">{member.nickname}</div>}
                 </div>
               )
             })}
