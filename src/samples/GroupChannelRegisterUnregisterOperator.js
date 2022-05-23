@@ -243,28 +243,26 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
-    const registerUnregisterAnOperator = async (member) => {
-      const { currentlyJoinedChannel, members } = state;
+    const handleOperator = async (callbackName, member) => {
+        const { currentlyJoinedChannel, members } = state;
 
-      if(member.role === "operator") {
-        currentlyJoinedChannel.removeOperators([member.userId], function(response, error) {
-          if (error) {
+        try {
+            await currentlyJoinedChannel[callbackName]([member.userId]);
+            updateState({ ...state, members: members })
+        } catch (error) {
             console.log("Error");
             console.log(error);
-          }
-        }).then(() => updateState({ ...state, members: members }));
+        }
+    }
 
-        alert("Operator was unregister");
-      } else {
-        currentlyJoinedChannel.addOperators([member.userId], function(response, error) {
-          if (error) {
-            console.log("Error");
-            console.log(error);
-          }
-        }).then(() => updateState({ ...state, members: members }));
-
-        alert("Operator was register");
-      }
+    const registerUnregisterAnOperator = (member) => {
+        if(member.role === "operator") {
+            handleOperator("removeOperators", member);
+            alert("Operator was unregister");
+        } else {
+            handleOperator("addOperators", member);
+            alert("Operator was register");
+        }
     }
 
     if (state.loading) {
