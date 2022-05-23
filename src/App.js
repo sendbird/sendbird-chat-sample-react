@@ -15,6 +15,7 @@ import OpenChannelSendAndReceiveVariousTypesOfFiles from './samples/OpenChannelS
 import OpenChannelCopyMessage from './samples/OpenChannelCopyMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
+import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -25,8 +26,9 @@ import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
 import GroupChannelMarkMessagesAsRead from './samples/GroupChannelMarkMessagesAsRead';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
-import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
 import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel'
+import GroupChannelCategorizeMessagesByCustomType  from './samples/GroupChannelCategorizeMessagesByCustomType';
+
 
 const App = () => {
   return (
@@ -54,6 +56,7 @@ const App = () => {
         <Route path='/open-channel-report-a-message-user-channel' element={<OpenChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
+        <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
       </Routes>
     </div>
   );
