@@ -269,7 +269,7 @@ code {
 }
 
 
-.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .member-item:hover .message-icon, .double_tick-icon {
+.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .member-item:hover .message-icon, .double_tick-icon, .member-item-wrapper .message-icon {
   visibility: visible;
 }
 
@@ -362,6 +362,12 @@ code {
   display:flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.member-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin: 5px 0;
 }
 
 .member-item:hover{
