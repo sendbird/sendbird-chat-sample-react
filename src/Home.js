@@ -38,11 +38,8 @@ const Home = () => {
           <li><Link to="/group-channel-categorize-by-custom-type">Group Channel with Categorize by custom type feature</Link></li>
           <li><Link to="/group-channel-report-a-message-user-channel">Group Channel Report a message,user, or channel</Link></li>
           <li><Link to="/group-channel-mark-messages-as-read">Group Channel mark messages as read</Link></li>
-<<<<<<< HEAD
-          <li><Link to="/group-channel-register-unregister-operator">Group Channel Register and Unregister operator</Link></li>
-=======
           <li><Link to="/group-channel-categorize-messages-by-custom-type">Group Channel with Categorize messages by custom type feature</Link></li>
->>>>>>> origin/main
+          <li><Link to="/group-channel-register-unregister-operator">Group Channel Register and Unregister operator</Link></li>
         </ul>
       </div>
     </div>
