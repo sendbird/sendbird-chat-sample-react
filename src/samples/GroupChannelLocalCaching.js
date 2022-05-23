@@ -54,7 +54,6 @@ const GroupChannelLocalCaching = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
-        // const [messages, error] = await joinChannel(channel);
         const [messages, error] = await loadCachedMessages(channel);
         if (error) {
             return onError(error);
@@ -541,6 +540,25 @@ const CreateUserForm = ({
 
 }
 
+// Helpful functions that call Sendbird
+const loadChannels = async (isCaching) => {
+    if (isCaching) {
+        try {
+            loadCachedChannels()
+        } catch (error) {
+            console.log("Error", error)
+        }
+    }
+
+    try {
+        const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
+        const channels = await groupChannelQuery.next();
+        return [channels, null];
+    } catch (error) {
+        return [null, error];
+    }
+}
+
 const loadCachedChannels = async () => {
     const groupChannelFilter = new GroupChannelFilter();
     groupChannelFilter.includeEmpty = true;
@@ -564,25 +582,6 @@ const loadCachedChannels = async () => {
 
     const channels = await collection.loadMore();
     return [channels, null];
-}
-
-// Helpful functions that call Sendbird
-const loadChannels = async (isCaching) => {
-    if (isCaching) {
-        try {
-            loadCachedChannels()
-        } catch (error) {
-            console.log("Error", error)
-        }
-    }
-
-    try {
-        const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
-        const channels = await groupChannelQuery.next();
-        return [channels, null];
-    } catch (error) {
-        return [null, error];
-    }
 }
 
 const loadCachedMessages = async (channel) => {
@@ -618,7 +617,9 @@ const loadCachedMessages = async (channel) => {
       .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
       .onCacheResult((err, messages) => {
           // Messages will be retrieved from the local cache.
-          console.log("From cache")
+          if (err) {
+              console.log('Error', err)
+          }
           return [messages, null];
       })
       .onApiResult((err, messages) => {
@@ -626,7 +627,10 @@ const loadCachedMessages = async (channel) => {
           // According to the InitPolicy.CACHE_AND_REPLACE_BY_API,
           // the existing data source needs to be cleared
           // before adding retrieved messages to the local cache.
-          return [null];
+          if (err) {
+              console.log('Error', err)
+          }
+          return [messages, null];
       });
 
     // Load next messages.
@@ -640,18 +644,6 @@ const loadCachedMessages = async (channel) => {
         const messages = await collection.loadPrevious();
         return [messages, null];
     }
-}
-
-const joinChannel = async (channel) => {
-    try {
-        const messageListParams = new MessageListParams();
-        messageListParams.nextResultSize = 20;
-        const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-        return [messages, null];
-    } catch (error) {
-        return [null, error];
-    }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
