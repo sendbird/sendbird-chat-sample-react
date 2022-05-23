@@ -568,17 +568,7 @@ const loadCachedChannels = async () => {
         order: GroupChannelListOrder.LATEST_LAST_MESSAGE,
     });
 
-    collection.setGroupChannelCollectionHandler({
-        onChannelsAdded: (context, channels) => {
-            console.log('onChannelsAdded')
-        },
-        onChannelsUpdated: (context, channels) => {
-            console.log('onChannelsUpdated')
-        },
-        onChannelsDeleted: (context, channelUrls) => {
-            console.log('onChannelsDeleted')
-        },
-    });
+    collection.setGroupChannelCollectionHandler();
 
     const channels = await collection.loadMore();
     return [channels, null];
@@ -592,26 +582,7 @@ const loadCachedMessages = async (channel) => {
         filter: messageFilter,
     });
 
-    collection.setMessageCollectionHandler({
-        onMessagesAdded: (context, channel, messages) => {
-            console.log('onMessagesAdded')
-        },
-        onMessagesUpdated: (context, channel, messages) => {
-            console.log('onMessagesUpdated')
-        },
-        onMessagesDeleted: (context, channel, messageIds) => {
-            console.log('onMessagesDeleted')
-        },
-        onChannelUpdated: (context, channel) => {
-            console.log('onChannelUpdated')
-        },
-        onChannelDeleted: (context, channelUrl) => {
-            console.log('onChannelDeleted')
-        },
-        onHugeGapDetected: () => {
-            console.log('onHugeGapDetected')
-        }
-    });
+    collection.setMessageCollectionHandler();
 
     collection
       .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
