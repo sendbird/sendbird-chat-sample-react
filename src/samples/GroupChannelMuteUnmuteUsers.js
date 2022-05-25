@@ -36,8 +36,7 @@ const GroupChannelMuteUnmuteUsers = (props) => {
         messageToUpdate: null,
         loading: false,
         error: false,
-        userIsOperator: false,
-        toggleMute: false
+        userIsOperator: false
     });
 
     //need to access state in message received callback
@@ -256,10 +255,6 @@ const GroupChannelMuteUnmuteUsers = (props) => {
         }
     }
 
-    const handleToggleMute = () => {
-        updateState({ ...state, toggleMute: !state.toggleMute });
-    }
-
     const registerUnregisterAnOperator = (member) => {
         if(member.role === "operator") {
             handleOperator("removeOperators", member);
@@ -274,32 +269,19 @@ const GroupChannelMuteUnmuteUsers = (props) => {
         if (member.role === "operator") {
             if (member.isMuted) {
                 unmuteUser(channel, member)
-                // console.log("Operator unmuted");
             } else {
-                muteUser(channel, member)
-                // console.log("Operator muted");
+                muteUser(channel, member, 'description')
             }
         }
 
-        console.log('11111111111111111111')
-        console.table(state.members.map(item => item.isMuted))
-        console.log('11111111111111111111')
-
-
-        updateState(prevState => {
-            const updated = state.members.map(item => {
-                if (item.userId === member.userId) {
-                    return { ...item, isMuted: !item.isMuted }
-                }
-                return item
-            });
-
-            return {...state, members: updated}
+        const updatedMembers = state.members.map(item => {
+            if (item.userId === member.userId) {
+                return { ...item, isMuted: !item.isMuted }
+            }
+            return item
         });
 
-        console.log('222222222222')
-        console.table(state.members.map(item => item.isMuted))
-        console.log('222222222222')
+        updateState({ ...state, members: updatedMembers });
     }
 
     if (state.loading) {
@@ -322,12 +304,6 @@ const GroupChannelMuteUnmuteUsers = (props) => {
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
                 onUserNameInputChange={onUserNameInputChange} />
-            <MuteUserForm
-                toggleMute={state.toggleMute}
-                members={state.members}
-                currentlyJoinedChannel={state.currentlyJoinedChannel}
-                userIdInputValue={state.userIdInputValue}
-                muteUnmuteUser={muteUnmuteUser} />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
@@ -364,7 +340,6 @@ const GroupChannelMuteUnmuteUsers = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 userIsOperator={state.userIsOperator}
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
-                handleToggleMute={handleToggleMute}
                 registerUnregisterAnOperator={registerUnregisterAnOperator}
                 muteUnmuteUser={muteUnmuteUser}
                 handleMemberInvite={handleMemberInvite}
@@ -438,7 +413,7 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MembersList = ({ members, currentlyJoinedChannel, handleMemberInvite, handleToggleMute, registerUnregisterAnOperator, muteUnmuteUser, userIsOperator, userIdInputValue }) => {
+const MembersList = ({ members, currentlyJoinedChannel, handleMemberInvite, registerUnregisterAnOperator, muteUnmuteUser, userIsOperator, userIdInputValue }) => {
     if (members) {
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
@@ -455,11 +430,11 @@ const MembersList = ({ members, currentlyJoinedChannel, handleMemberInvite, hand
                         {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
                         {isOperator ? "Unregister as operator" : "Register as operator"}
                         </button>}
-                            {memberIsSender && <button className="mute-button" onClick={() => muteUnmuteUser(currentlyJoinedChannel, member)}>
-                        {member.isMuted ? "Unmute" : "Mute"}
-                        {member.userId}
-                        {'' + member.isMuted}
-                        </button>}
+                        {memberIsSender &&
+                            <button className="mute-button" onClick={() => muteUnmuteUser(currentlyJoinedChannel, member)}>
+                                {member.isMuted ? "Unmute" : "Mute"}
+                            </button>
+                        }
                     </div>}
                     {!userIsOperator && <div className="member-item">{member.nickname}</div>}
                     </div>
@@ -538,27 +513,29 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, members
     const member = members.find(member => member.userId === userIdInputValue)
 
     return (
-        !member.isMuted && <div className="message-input">
-            <input
-                placeholder="write a message"
-                value={value}
-                onChange={onChange} />
-
-            <div className="message-input-buttons">
-                <button className="send-message-button" onClick={sendMessage}>Send Message</button>
-                <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
+        member.isMuted
+            ? <div>You are muted until {new Date(member.restrictionInfo.endAt).toUTCString()}</div>
+            : < div className = "message-input" >
                 <input
-                    id="upload"
-                    className="file-upload-button"
-                    type='file'
-                    hidden={true}
-                    onChange={onFileInputChange}
-                    onClick={() => { }}
-                />
-            </div>
+                    placeholder="write a message"
+                    value={value}
+                    onChange={onChange} />
 
-        </div>);
+                <div className="message-input-buttons">
+                    <button className="send-message-button" onClick={sendMessage}>Send Message</button>
+                    <label className="file-upload-label" htmlFor="upload" >Select File</label>
+
+                    <input
+                        id="upload"
+                        className="file-upload-button"
+                        type='file'
+                        hidden={true}
+                        onChange={onFileInputChange}
+                        onClick={() => { }}
+                    />
+                </div>
+
+            </div>);
 }
 
 const MembersSelect = ({
@@ -627,42 +604,6 @@ const CreateUserForm = ({
                 <button
                     className="user-submit-button"
                     onClick={setupUser}>Connect</button>
-            </div>
-        </div>
-
-
-    } else {
-        return null;
-    }
-
-}
-
-const MuteUserForm = ({
-    toggleMute,
-    members,
-    currentlyJoinedChannel,
-    userIdInputValue,
-    muteUnmuteUser
-}) => {
-    const member = members.find(member => member.userId === userIdInputValue)
-
-    if (toggleMute && member.isMuted) {
-        return <div className="overlay">
-            <div className="overlay-content">
-                <div>Seconds:</div>
-
-                <input
-                    className="form-input"
-                    type="text" />
-
-                <div>Description:</div>
-                <input
-                    className="form-input"
-                    type="text" />
-
-                <button
-                    className="user-submit-button"
-                    onClick={() => muteUnmuteUser(currentlyJoinedChannel, member)}>Mute</button>
             </div>
         </div>
 
@@ -744,20 +685,12 @@ const getAllApplicationUsers = async () => {
 
 }
 
-const muteUser = async (channel, userId) => {
-    await channel.muteUser(userId, 6000000, 'description');
+const muteUser = async (channel, userId, description) => {
+    await channel.muteUser(userId, 600000, description);
 }
 
 const unmuteUser = async (channel, userId) => {
     await channel.unmuteUser(userId);
 }
-
-// const muteUser = async (userId) => {
-//     await unmuteUserWithUserId(userId, 60, 'description');
-// }
-
-// const unmuteUser = async (channel, userId) => {
-//     await channel.unmuteUser(userId);
-// }
 
 export default GroupChannelMuteUnmuteUsers;
