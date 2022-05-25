@@ -18,7 +18,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
 let sb;
 
-const GroupChannelRegisterUnregisterOperator = (props) => {
+const BasicGroupChannelSample = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -653,4 +653,4 @@ const getAllApplicationUsers = async () => {
 
 }
 
-export default GroupChannelRegisterUnregisterOperator;
+export default BasicGroupChannelSample;
