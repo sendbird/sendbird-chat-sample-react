@@ -29,6 +29,9 @@ import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorize
 import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel'
 import GroupChannelCategorizeMessagesByCustomType  from './samples/GroupChannelCategorizeMessagesByCustomType';
 import GroupChannelRetrieveOnlineStatus from './samples/GroupChannelRetrieveOnlineStatus';
+import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegisterUnregisterOperator';
+import GroupChannelLocalCaching from './samples/GroupChannelLocalCaching';
+import GroupChannelArchive from './samples/GroupChannelArchive';
 
 const App = () => {
   return (
@@ -56,8 +59,11 @@ const App = () => {
         <Route path='/open-channel-report-a-message-user-channel' element={<OpenChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
+        <Route path='/group-channel-local-caching' element={<GroupChannelLocalCaching />} />
         <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-retrieve-online-status' element={<GroupChannelRetrieveOnlineStatus />} />
+        <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
+        <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
       </Routes>
     </div>
   );
