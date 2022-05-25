@@ -31,6 +31,7 @@ import GroupChannelCategorizeMessagesByCustomType  from './samples/GroupChannelC
 import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegisterUnregisterOperator';
 import GroupChannelLocalCaching from './samples/GroupChannelLocalCaching';
 import GroupChannelArchive from './samples/GroupChannelArchive'
+import GroupChannelMuteUnmuteUsers from './samples/GroupChannelMuteUnmuteUsers';
 
 const App = () => {
   return (
@@ -62,6 +63,7 @@ const App = () => {
         <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
         <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
+        <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
       </Routes>
     </div>
   );
