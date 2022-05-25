@@ -60,7 +60,7 @@ const GroupChannelBanUnbanUsers = (props) => {
 
         const memberIndex = channel.members.findIndex((item => item.userId === userIdInputValue));
         const userIsOperator = channel.members[memberIndex].role === "operator";
-        const bannedMembers = await getBannedMembers(channel);
+        const bannedMembers = (channel.myRole === "operator") ? await getBannedMembers(channel) : [];
 
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
