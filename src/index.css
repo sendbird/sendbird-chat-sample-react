@@ -80,6 +80,21 @@ code {
   visibility: visible;
 }
 
+.sort-channels {
+  width: 100%;
+  font-size: 16px;
+  padding: 7px;
+  cursor: pointer;
+}
+
+.unarchive {
+  transform: rotate(180deg);
+}
+
+.archived-channel {
+  padding: 10px;
+}
+
 .last-message{
   font-weight:300;
 }
@@ -269,7 +284,7 @@ code {
 }
 
 
-.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .member-item:hover .message-icon, .double_tick-icon {
+.message:hover .message-icon, .channel-list-item:hover .oc-channel-list-icon, .member-item:hover .message-icon, .double_tick-icon, .member-item-wrapper .message-icon {
   visibility: visible;
 }
 
@@ -362,6 +377,12 @@ code {
   display:flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.member-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin: 5px 0;
 }
 
 .member-item:hover{
