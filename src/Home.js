@@ -41,6 +41,7 @@ const Home = () => {
           <li><Link to="/group-channel-local-caching">Group Channel local caching</Link></li>
           <li><Link to="/group-channel-categorize-messages-by-custom-type">Group Channel with Categorize messages by custom type feature</Link></li>
           <li><Link to="/group-channel-register-unregister-operator">Group Channel Register and Unregister operator</Link></li>
+          <li><Link to="/group-channel-bun-unban-users">Group Channel Ban and Unban users</Link></li>
         </ul>
       </div>
     </div>
