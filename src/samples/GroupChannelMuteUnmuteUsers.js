@@ -287,13 +287,14 @@ const GroupChannelMuteUnmuteUsers = (props) => {
 
 
         updateState(prevState => {
-            const updated = prevState.members.map(item => {
+            const updated = state.members.map(item => {
                 if (item.userId === member.userId) {
-                    return item.isMuted = !item.isMuted
+                    return { ...item, isMuted: !item.isMuted }
                 }
-                return null
-            })
-            return {...prevState, members: updated}
+                return item
+            });
+
+            return {...state, members: updated}
         });
 
         console.log('222222222222')
