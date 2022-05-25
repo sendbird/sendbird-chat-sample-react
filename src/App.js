@@ -30,6 +30,7 @@ import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportA
 import GroupChannelCategorizeMessagesByCustomType  from './samples/GroupChannelCategorizeMessagesByCustomType';
 import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegisterUnregisterOperator';
 import GroupChannelLocalCaching from './samples/GroupChannelLocalCaching';
+import GroupChannelUpdateDeleteMessageByOperator from './samples/GroupChannelUpdateDeleteMessageByOperator';
 
 const App = () => {
   return (
@@ -60,6 +61,7 @@ const App = () => {
         <Route path='/group-channel-local-caching' element={<GroupChannelLocalCaching />} />
         <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
+        <Route path='/group-channel-update-delete-message-by-operator' element={<GroupChannelUpdateDeleteMessageByOperator />} />
       </Routes>
     </div>
   );
