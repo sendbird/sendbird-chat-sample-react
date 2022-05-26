@@ -452,7 +452,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 <img src={message.url} />
             </div >);
     }
-    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId || currentlyJoinedChannel.myRole === 'operator';
+    const showAdditionalMessageControls = message.sender.userId === sb.currentUser.userId || currentlyJoinedChannel.myRole === 'operator';
 
     return (
         <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
