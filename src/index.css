@@ -281,7 +281,7 @@ code {
   filter: none;
 }
 
-.oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list {
+.oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list, .create-channel-wrapper {
   display: flex;
 }
 
@@ -429,8 +429,17 @@ code {
   background-color: #6210CC;
 }
 
+.create-channel-wrapper {
+  align-items: baseline;
+}
+
 .channel-create-button{
   background-color: #62EEAB;
+}
+
+.create-channel-checkbox {
+  width: auto;
+  margin: 0 5px 0 10px;
 }
 
 .select-custom-type {
