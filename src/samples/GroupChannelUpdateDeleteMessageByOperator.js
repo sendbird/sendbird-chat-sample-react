@@ -461,7 +461,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                {messageSentByCurrentUser &&
+                {showAdditionalMessageControls &&
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
