@@ -26,7 +26,6 @@ const BasicGroupChannelSample = (props) => {
         currentlyJoinedChannel: null,
         messages: [],
         channels: [],
-        members: [],
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -35,8 +34,7 @@ const BasicGroupChannelSample = (props) => {
         file: null,
         messageToUpdate: null,
         loading: false,
-        error: false,
-        userIsOperator: false
+        error: false
     });
 
     //need to access state in message received callback
@@ -49,17 +47,13 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const handleJoinChannel = async (channelUrl) => {
-        const { channels, userIdInputValue } = state;
+        const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
         const [messages, error] = await joinChannel(channel);
         if (error) {
             return onError(error);
         }
-
-        const memberIndex = channel.members.findIndex((item => item.userId === userIdInputValue));
-        const userIsOperator = channel.members[memberIndex].role === "operator"
-
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
@@ -84,7 +78,7 @@ const BasicGroupChannelSample = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false, members: channel.members, userIsOperator: userIsOperator })
+        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
     }
 
     const handleLeaveChannel = async () => {
@@ -243,28 +237,6 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
-    const handleOperator = async (callbackName, member) => {
-        const { currentlyJoinedChannel, members } = state;
-
-        try {
-            await currentlyJoinedChannel[callbackName]([member.userId]);
-            updateState({ ...state, members: members })
-        } catch (error) {
-            console.log("Error");
-            console.log(error);
-        }
-    }
-
-    const registerUnregisterAnOperator = (member) => {
-        if(member.role === "operator") {
-            handleOperator("removeOperators", member);
-            alert("Operator was unregister");
-        } else {
-            handleOperator("addOperators", member);
-            alert("Operator was register");
-        }
-    }
-
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -315,10 +287,7 @@ const BasicGroupChannelSample = (props) => {
                     onFileInputChange={onFileInputChange} />
             </Channel>
             <MembersList
-                members={state.members}
-                userIdInputValue={state.userIdInputValue}
-                userIsOperator={state.userIsOperator}
-                registerUnregisterAnOperator={registerUnregisterAnOperator}
+                channel={state.currentlyJoinedChannel}
                 handleMemberInvite={handleMemberInvite}
             />
         </>
@@ -390,28 +359,13 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator, userIsOperator, userIdInputValue }) => {
-    if (members) {
+const MembersList = ({ channel, handleMemberInvite }) => {
+    if (channel) {
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
-            {members.map((member) => {
-              const isOperator = (member.role === "operator");
-              const memberIsSender = (member.userId !== userIdInputValue);
-              return(
-                <div key={member.userId}>
-                  {userIsOperator && <div key={member.userId} className="member-item-wrapper">
-                    <div className="member-item">
-                      {member.nickname}
-                      {isOperator && <img className="message-icon" src='/operator_icon.png' />}
-                    </div>
-                    {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
-                      {isOperator ? "Unregister as operator" : "Register as operator"}
-                    </button>}
-                  </div>}
-                  {!userIsOperator && <div className="member-item">{member.nickname}</div>}
-                </div>
-              )
-            })}
+            {channel.members.map((member) =>
+                <div className="member-item" key={member.userId}>{member.nickname}</div>
+            )}
         </div>;
     } else {
         return null;
