@@ -80,6 +80,21 @@ code {
   visibility: visible;
 }
 
+.sort-channels {
+  width: 100%;
+  font-size: 16px;
+  padding: 7px;
+  cursor: pointer;
+}
+
+.unarchive {
+  transform: rotate(180deg);
+}
+
+.archived-channel {
+  padding: 10px;
+}
+
 .last-message{
   font-weight:300;
 }
