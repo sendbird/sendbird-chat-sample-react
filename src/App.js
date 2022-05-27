@@ -35,6 +35,7 @@ import GroupChannelUpdateDeleteMessageByOperator from './samples/GroupChannelUpd
 import GroupChannelArchive from './samples/GroupChannelArchive'
 import GroupChannelMuteUnmuteUsers from './samples/GroupChannelMuteUnmuteUsers';
 import GroupChannelBanUnbanUsers from './samples/GroupChannelBanUnbanUsers';
+import GroupChannelRetrieveAListOfBannedOrMutedUsers from './samples/GroupChannelRetrieveAListOfBannedOrMutedUsers';
 
 const App = () => {
   return (
@@ -69,7 +70,8 @@ const App = () => {
         <Route path='/group-channel-update-delete-message-by-operator' element={<GroupChannelUpdateDeleteMessageByOperator />} />
         <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
         <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
-        <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} /> 
+        <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} />
+        <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} /> 
       </Routes>
     </div>
   );

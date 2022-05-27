@@ -46,6 +46,7 @@ const Home = () => {
           <li><Link to="/group-channel-archive">Group Channel Archive</Link></li>
           <li><Link to="/group-channel-mute-unmute-users">Group Channel Mute Unmute users</Link></li>
           <li><Link to="/group-channel-bun-unban-users">Group Channel Ban and Unban users</Link></li>
+          <li><Link to="/group-channel-retrieve-banned-or-muted-users">Group Channel Retrieve banned or muted users</Link></li>
         </ul>
       </div>
     </div>
