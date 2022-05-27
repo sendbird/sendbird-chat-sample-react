@@ -34,7 +34,8 @@ const GroupChannelTypes = (props) => {
         messageToUpdate: null,
         loading: false,
         error: false,
-        isCreateSuperGroup: false
+        isCreateSuperGroup: false,
+        isPublicChannel: false
     });
 
     //need to access state in message received callback
@@ -57,6 +58,8 @@ const GroupChannelTypes = (props) => {
         // listen for incoming messages
         const channelHandler = new GroupChannelHandler();
         channelHandler.onUserJoined = () => { };
+        channelHandler.onUserReceivedInvitation = () => { alert("Accepted an invitation") };
+        channelHandler.onUserDeclinedInvitation = () => { alert("Declined an invitation.") };
         channelHandler.onChannelChanged = () => { };
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
@@ -89,8 +92,8 @@ const GroupChannelTypes = (props) => {
     }
 
     const handleCreateChannel = async (channelName = "testChannel",) => {
-        const { isCreateSuperGroup } = state;
-        const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers, isCreateSuperGroup);
+        const { isCreateSuperGroup, isPublicChannel } = state;
+        const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers, isCreateSuperGroup, isPublicChannel);
         if (error) {
             return onError(error);
         }
@@ -227,6 +230,8 @@ const GroupChannelTypes = (props) => {
         userUpdateParams.nickname = userNameInputValue;
         userUpdateParams.userId = userIdInputValue;
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+        const autoAccept = false;
+        await sendbirdChat.setChannelInvitationPreference(autoAccept);
 
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
@@ -241,6 +246,11 @@ const GroupChannelTypes = (props) => {
     const onCreateChannelCheckboxChange = (e) => {
       const isCreateSuperGroup = e.currentTarget.checked;
       updateState({ ...state, isCreateSuperGroup });
+    }
+
+    const onCreatePublicChannelCheckboxChange = (e) => {
+      const isPublicChannel = e.currentTarget.checked;
+      updateState({ ...state, isPublicChannel });
     }
 
     if (state.loading) {
@@ -277,6 +287,7 @@ const GroupChannelTypes = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
                 onCreateChannelCheckboxChange={onCreateChannelCheckboxChange}
+                onCreatePublicChannelCheckboxChange={onCreatePublicChannelCheckboxChange}
             />
 
             <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
@@ -311,16 +322,18 @@ const ChannelList = ({
     return (
         <div className='channel-list'>
             <div className="channel-type">
-                <h1>Group Channels</h1>
+                <h2>Group Channels</h2>
                 <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
             </div>
             {channels.map(channel => {
-                return (
+                if(!channel.isSuper) {
+                  return (
                     <div key={channel.url} className="channel-list-item" >
                         <div
                             className="channel-list-item-name"
                             onClick={() => { handleJoinChannel(channel.url) }}>
                             <ChannelName members={channel.members} />
+                            {channel.isPublic && <sup className="channel-list-item-sup">public</sup>}
                             <div className="last-message">{channel.lastMessage?.message}</div>
                         </div>
                         <div>
@@ -328,7 +341,30 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>)
+                };
+            })}
+            <div className="channel-type">
+              <h2>Supergroup Channels</h2>
+            </div>
+            {channels.map((channel) => {
+              if(channel.isSuper) {
+                return (
+                  <div key={channel.url} className="channel-list-item" >
+                      <div
+                          className="channel-list-item-name"
+                          onClick={() => { handleJoinChannel(channel.url) }}>
+                          <ChannelName members={channel.members} />
+                          {channel.isPublic && <sup className="channel-list-item-sup">public</sup>}
+                          <div className="last-message">{channel.lastMessage?.message}</div>
+                      </div>
+                      <div>
+                          <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                              <img className="channel-icon" src='/icon_delete.png' />
+                          </button>
+                      </div>
+                  </div>)
+              };
             })}
         </div >);
 }
@@ -474,7 +510,8 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList,
-    onCreateChannelCheckboxChange
+    onCreateChannelCheckboxChange,
+    onCreatePublicChannelCheckboxChange
 }) => {
 
     if (applicationUsers.length > 0) {
@@ -490,7 +527,10 @@ const MembersSelect = ({
                   }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                   {!currentlyJoinedChannel && <>
                     <input className="create-channel-checkbox" onChange={(e) => onCreateChannelCheckboxChange(e)} type="checkbox" id="supergroup" name="supergroup" />
-                    <label htmlFor="supergroup">Supergroup</label></>}
+                    <label htmlFor="supergroup">Supergroup</label>
+                    <input className="create-channel-checkbox" onChange={(e) => onCreatePublicChannelCheckboxChange(e)} type="checkbox" id="public-channel" name="public-channel" />
+                    <label htmlFor="public-channel">Public</label>
+                    </>}
                 </div>
                 {applicationUsers.map((user) => {
                     const userSelected = groupChannelMembers.some((member) => member === user.userId);
@@ -577,14 +617,17 @@ const inviteUsersToChannel = async (channel, userIds) => {
 }
 
 
-const createChannel = async (channelName, userIdsToInvite, isCreateSuperGroup) => {
+const createChannel = async (channelName, userIdsToInvite, isCreateSuperGroup, isPublicChannel) => {
     try {
         const groupChannelParams = new GroupChannelCreateParams();
         groupChannelParams.addUserIds(userIdsToInvite);
         groupChannelParams.name = isCreateSuperGroup ? "Supergroup channel" : channelName;
         groupChannelParams.operatorUserIds = userIdsToInvite;
         if(isCreateSuperGroup) {
-          groupChannelParams.isSuper = true;
+          groupChannelParams.isSuper = isCreateSuperGroup;
+        }
+        if(isPublicChannel) {
+          groupChannelParams.isPublic = isPublicChannel;
         }
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
         return [groupChannel, null];
