@@ -33,6 +33,7 @@ import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegist
 import GroupChannelLocalCaching from './samples/GroupChannelLocalCaching';
 import GroupChannelUpdateDeleteMessageByOperator from './samples/GroupChannelUpdateDeleteMessageByOperator';
 import GroupChannelArchive from './samples/GroupChannelArchive'
+import GroupChannelMuteUnmuteUsers from './samples/GroupChannelMuteUnmuteUsers';
 
 const App = () => {
   return (
@@ -66,6 +67,7 @@ const App = () => {
         <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
         <Route path='/group-channel-update-delete-message-by-operator' element={<GroupChannelUpdateDeleteMessageByOperator />} />
         <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
+        <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
       </Routes>
     </div>
   );
