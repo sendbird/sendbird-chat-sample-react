@@ -292,6 +292,10 @@ code {
   filter: none;
 }
 
+.mute-button {
+  margin-top: 3px;
+}
+
 .member-item .message-icon {
   filter: none;
 }
