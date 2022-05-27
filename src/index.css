@@ -292,6 +292,10 @@ code {
   filter: none;
 }
 
+.mute-button {
+  margin-top: 3px;
+}
+
 .member-item .message-icon {
   filter: none;
 }
@@ -391,6 +395,10 @@ code {
 
 .member-item-name{
   margin-left:12px;
+}
+
+.member-list-btn {
+  margin: 0 0 5px;
 }
 
 .member-selected{

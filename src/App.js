@@ -28,9 +28,13 @@ import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
 import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel'
 import GroupChannelCategorizeMessagesByCustomType  from './samples/GroupChannelCategorizeMessagesByCustomType';
+import GroupChannelRetrieveOnlineStatus from './samples/GroupChannelRetrieveOnlineStatus';
 import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegisterUnregisterOperator';
 import GroupChannelLocalCaching from './samples/GroupChannelLocalCaching';
+import GroupChannelUpdateDeleteMessageByOperator from './samples/GroupChannelUpdateDeleteMessageByOperator';
 import GroupChannelArchive from './samples/GroupChannelArchive'
+import GroupChannelMuteUnmuteUsers from './samples/GroupChannelMuteUnmuteUsers';
+import GroupChannelBanUnbanUsers from './samples/GroupChannelBanUnbanUsers';
 import GroupChannelMembersListOrder from './samples/GroupChannelMembersListOrder';
 
 const App = () => {
@@ -61,8 +65,12 @@ const App = () => {
         <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
         <Route path='/group-channel-local-caching' element={<GroupChannelLocalCaching />} />
         <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
+        <Route path='/group-channel-retrieve-online-status' element={<GroupChannelRetrieveOnlineStatus />} />
         <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
+        <Route path='/group-channel-update-delete-message-by-operator' element={<GroupChannelUpdateDeleteMessageByOperator />} />
         <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
+        <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
+        <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} />
         <Route path='/group-channel-members-list-order' element={<GroupChannelMembersListOrder />} />
       </Routes>
     </div>
