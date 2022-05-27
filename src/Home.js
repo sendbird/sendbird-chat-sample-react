@@ -44,6 +44,7 @@ const Home = () => {
           <li><Link to="/group-channel-register-unregister-operator">Group Channel Register and Unregister operator</Link></li>
           <li><Link to="/group-channel-update-delete-message-by-operator">Group Channel Update and delete message by operator</Link></li>
           <li><Link to="/group-channel-archive">Group Channel Archive</Link></li>
+          <li><Link to="/group-channel-mute-unmute-users">Group Channel Mute Unmute users</Link></li>
         </ul>
       </div>
     </div>
