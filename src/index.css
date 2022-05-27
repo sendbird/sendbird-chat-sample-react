@@ -584,3 +584,7 @@ code {
   color: #6210CC;
   text-decoration: underline;
 }
+
+.banned-muted-users-list {
+  margin-top: 20px;
+}
