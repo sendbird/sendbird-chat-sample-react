@@ -94,6 +94,11 @@ code {
   flex:1;
 }
 
+.channel-list-item-sup {
+  margin: 0 0 0 5px;
+  font-size: 10px;
+}
+
 .channel-icon{
   visibility:hidden;
   width: 20px;
