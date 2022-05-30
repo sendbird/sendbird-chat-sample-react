@@ -411,18 +411,23 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUn
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, numberOfUndeliveredMembers, getNumberOfUndeliveredMembers, currentMessage }) => {
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+    const showNumberOfUndeliveredMembers = numberOfUndeliveredMembers && (currentMessage.messageId === message.messageId);
+
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
-                <div className="message-user-info">
-                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
-                    <div>{timestampToTime(message.createdAt)}</div>
+                <div className="message-info">
+                  <div className="message-user-info">
+                      <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                      <div>{timestampToTime(message.createdAt)}</div>
+                  </div>
+                  {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of undelivered members"  onClick={() => getNumberOfUndeliveredMembers(message)}><img className="message-icon" src='/icon_not_delivered.png' /></button></div>}
                 </div>
                 <img src={message.url} />
+                {showNumberOfUndeliveredMembers && <div className="number-of-undelivered-members">Number of members unreceived a message: {numberOfUndeliveredMembers}</div>}
             </div >);
     }
-    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
-    const showNumberOfUndeliveredMembers = numberOfUndeliveredMembers && (currentMessage.messageId === message.messageId)
 
     return (
         <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
