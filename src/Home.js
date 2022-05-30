@@ -49,6 +49,7 @@ const Home = () => {
           <li><Link to="/group-channel-retrieve-number-of-members-havent-received-message">Group Channel Retrieve number of members haven't received message</Link></li>
           <li><Link to="/group-channel-operators-list">Group Channel Operators List</Link></li>
           <li><Link to="/group-channel-members-list-order">Group Channel Members list order</Link></li>
+          <li><Link to="/group-channel-retrieve-banned-or-muted-users">Group Channel Retrieve banned or muted users</Link></li>
         </ul>
       </div>
     </div>

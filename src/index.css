@@ -618,3 +618,7 @@ code {
   padding: 2px 4px;
   font-size: 10px;
 }
+
+.banned-muted-users-list {
+  margin-top: 20px;
+}
