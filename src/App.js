@@ -16,6 +16,7 @@ import OpenChannelCopyMessage from './samples/OpenChannelCopyMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
 import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
+import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -76,6 +77,7 @@ const App = () => {
         <Route path='/group-channel-operators-list' element={<GroupChannelOperatorsList />} />
         <Route path='/group-channel-members-list-order' element={<GroupChannelMembersListOrder />} />
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} /> 
+        <Route path='/open-channel-structured-data' element={<OpenChannelStructuredData />} /> 
       </Routes>
     </div>
   );
