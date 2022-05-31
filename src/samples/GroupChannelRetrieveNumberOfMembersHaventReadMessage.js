@@ -246,6 +246,10 @@ const GroupChannelRetrieveNumberOfMembersHaventReadMessage = (props) => {
       updateState({ ...state, numberOfUnreadMembers, currentMessage: message })
     }
 
+    const closeNumberOfUnreadMembers = () => {
+      updateState({ ...state, numberOfUnreadMembers: null })
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -288,6 +292,7 @@ const GroupChannelRetrieveNumberOfMembersHaventReadMessage = (props) => {
                     updateMessage={updateMessage}
                     numberOfUnreadMembers={state.numberOfUnreadMembers}
                     getNumberOfUnreadMembers={getNumberOfUnreadMembers}
+                    closeNumberOfUnreadMembers={closeNumberOfUnreadMembers}
                     currentMessage={state.currentMessage}
                 />
 
@@ -386,7 +391,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUnreadMembers, getNumberOfUnreadMembers, currentMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUnreadMembers, getNumberOfUnreadMembers, currentMessage, closeNumberOfUnreadMembers }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
@@ -398,6 +403,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUn
                         handleDeleteMessage={handleDeleteMessage}
                         numberOfUnreadMembers={numberOfUnreadMembers}
                         getNumberOfUnreadMembers={getNumberOfUnreadMembers}
+                        closeNumberOfUnreadMembers={closeNumberOfUnreadMembers}
                         currentMessage={currentMessage}
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
@@ -408,7 +414,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUn
     </div >
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, numberOfUnreadMembers, getNumberOfUnreadMembers, currentMessage }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, numberOfUnreadMembers, getNumberOfUnreadMembers, currentMessage, closeNumberOfUnreadMembers }) => {
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     const showNumberOfUnreadMembers = numberOfUnreadMembers && (currentMessage.messageId === message.messageId);
 
@@ -423,7 +429,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                   {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of unread members" onClick={() => getNumberOfUnreadMembers(message)}><img className="message-icon" src='/unread_icon.png' /></button></div>}
                 </div>
                 <img src={message.url} />
-                {showNumberOfUnreadMembers && <div className="number-of-undelivered-members">Number of members unread a message: {numberOfUnreadMembers}</div>}
+                {showNumberOfUnreadMembers && <div className="number-of-undelivered-members">Number of members unread a message: {numberOfUnreadMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUnreadMembers}>&#10006;</span></div>}
             </div >);
     }
 
@@ -442,7 +448,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-            {showNumberOfUnreadMembers && <div className="number-of-undelivered-members">Number of members unread a message: {numberOfUnreadMembers}</div>}
+            {showNumberOfUnreadMembers && <div className="number-of-undelivered-members">Number of members unread a message: {numberOfUnreadMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUnreadMembers}>&#10006;</span></div>}
         </div >
     );
 
