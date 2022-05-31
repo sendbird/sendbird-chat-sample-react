@@ -624,3 +624,19 @@ code {
 .banned-muted-users-list {
   margin-top: 20px;
 }
+
+.number-of-undelivered-members {
+  padding: 5px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.number-of-undelivered-message-btn:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  border: 1px solid gray;
+  background-color: darkgray;
+  border-radius: 5px;
+  padding: 2px 4px;
+  font-size: 10px;
+}
