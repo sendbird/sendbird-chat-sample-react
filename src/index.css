@@ -507,7 +507,7 @@ code {
   width:100%;
 }
 
-.file-upload-label{
+.file-upload-label, .number-of-undelivered-members-btn {
   cursor:pointer;
 }
 
@@ -611,6 +611,8 @@ code {
 
 .number-of-undelivered-members {
   padding: 5px 0;
+  display: flex;
+  justify-content: space-between;
 }
 
 .number-of-undelivered-message-btn:hover::after {
