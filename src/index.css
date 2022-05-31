@@ -55,6 +55,18 @@ code {
   color: #6210CC;
 }
 
+.card {
+  width: fit-content;
+  padding: 15px;
+  margin-left: 60px;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.card-name {
+  font-weight: bold;
+}
+
 .channel-list {
   background: white;
   flex:1;
