@@ -246,6 +246,10 @@ const GroupChannelRetrieveNumberOfMembersHaventReceivedMessage = (props) => {
       updateState({ ...state, numberOfUndeliveredMembers, currentMessage: message })
     }
 
+    const closeNumberOfUndeliveredMembers = () => {
+      updateState({ ...state, numberOfUndeliveredMembers: null })
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -290,6 +294,7 @@ const GroupChannelRetrieveNumberOfMembersHaventReceivedMessage = (props) => {
                     updateMessage={updateMessage}
                     numberOfUndeliveredMembers={state.numberOfUndeliveredMembers}
                     getNumberOfUndeliveredMembers={getNumberOfUndeliveredMembers}
+                    closeNumberOfUndeliveredMembers={closeNumberOfUndeliveredMembers}
                     currentMessage={state.currentMessage}
                 />
 
@@ -388,7 +393,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUndeliveredMembers, getNumberOfUndeliveredMembers, currentMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUndeliveredMembers, getNumberOfUndeliveredMembers, currentMessage, closeNumberOfUndeliveredMembers }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
@@ -400,6 +405,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUn
                         handleDeleteMessage={handleDeleteMessage}
                         numberOfUndeliveredMembers={numberOfUndeliveredMembers}
                         getNumberOfUndeliveredMembers={getNumberOfUndeliveredMembers}
+                        closeNumberOfUndeliveredMembers={closeNumberOfUndeliveredMembers}
                         currentMessage={currentMessage}
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
@@ -410,7 +416,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUn
     </div >
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, numberOfUndeliveredMembers, getNumberOfUndeliveredMembers, currentMessage }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, numberOfUndeliveredMembers, getNumberOfUndeliveredMembers, currentMessage, closeNumberOfUndeliveredMembers }) => {
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     const showNumberOfUndeliveredMembers = numberOfUndeliveredMembers && (currentMessage.messageId === message.messageId);
 
@@ -425,7 +431,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                   {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of undelivered members"  onClick={() => getNumberOfUndeliveredMembers(message)}><img className="message-icon" src='/icon_not_delivered.png' /></button></div>}
                 </div>
                 <img src={message.url} />
-                {showNumberOfUndeliveredMembers && <div className="number-of-undelivered-members">Number of members unreceived a message: {numberOfUndeliveredMembers}</div>}
+                {showNumberOfUndeliveredMembers && <div className="number-of-undelivered-members">Number of members unreceived a message: {numberOfUndeliveredMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUndeliveredMembers}>&#10006;</span></div>}
             </div >);
     }
 
@@ -444,7 +450,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-            {showNumberOfUndeliveredMembers && <div className="number-of-undelivered-members">Number of members unreceived a message: {numberOfUndeliveredMembers}</div>}
+            {showNumberOfUndeliveredMembers && <div className="number-of-undelivered-members">Number of members unreceived a message: {numberOfUndeliveredMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUndeliveredMembers}>&#10006;</span></div>}
         </div >
     );
 
