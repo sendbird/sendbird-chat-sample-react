@@ -15,7 +15,6 @@ import OpenChannelSendAndReceiveVariousTypesOfFiles from './samples/OpenChannelS
 import OpenChannelCopyMessage from './samples/OpenChannelCopyMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
-import OpenChannelCategorizeMessagesByCustomType from './samples/OpenChannelCategorizeMessagesByCustomType';
 import OpenChannelUsersOnlineStatus from './samples/OpenChannelUsersOnlineStatus';
 import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
 import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
