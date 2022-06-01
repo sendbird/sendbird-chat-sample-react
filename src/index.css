@@ -231,7 +231,7 @@ code {
   margin: 0 0 5px;
 }
 
-.og-tags-img {
+.og-tags-img, .show-users-status-btn, .members-invite-btn {
   width: 100%;
 }
 
@@ -546,6 +546,7 @@ code {
   width: 50px;
   height: 50px;
   border-radius: 25px;
+  object-fit: cover;
 }
 
 .typing-indicator {
@@ -607,4 +608,13 @@ code {
 
 .banned-muted-users-list {
   margin-top: 20px;
+}
+
+.show-users-status-btn {
+  display: block;
+  margin-top: 5px;
+}
+
+.user-online-status {
+  margin: 0 0 0 5px;
 }
