@@ -24,6 +24,7 @@ const Home = () => {
           <li><Link to="/freeze-open-channel">Open Channel with Freeze feature</Link></li>
           <li><Link to="/open-channel-report-a-message-user-channel">Open Channel Report a message,user or channel</Link></li>
           <li><Link to="/open-channel-categorize-messages-by-custom-type">Open Channel with Categorize messages by custom type feature</Link></li>
+          <li><Link to="/open-channel-users-online-status">Open Channel Users online status</Link></li>
         </ul>
       </div>
       <div>
@@ -49,6 +50,7 @@ const Home = () => {
           <li><Link to="/group-channel-operators-list">Group Channel Operators List</Link></li>
           <li><Link to="/group-channel-members-list-order">Group Channel Members list order</Link></li>
           <li><Link to="/group-channel-retrieve-banned-or-muted-users">Group Channel Retrieve banned or muted users</Link></li>
+          <li><Link to="/group-channel-users-online-status">Group Channel Users online status</Link></li>
         </ul>
       </div>
     </div>
