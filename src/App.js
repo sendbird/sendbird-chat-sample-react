@@ -17,6 +17,7 @@ import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
 import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
 import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
+import OpenChannelUserDoNotDisturbOrSnooze from './samples/OpenChannelUserDoNotDisturbOrSnooze';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -41,6 +42,7 @@ import GroupChannelOperatorsList from './samples/GroupChannelOperatorsList';
 import GroupChannelMembersListOrder from './samples/GroupChannelMembersListOrder';
 import GroupChannelRetrieveAListOfBannedOrMutedUsers from './samples/GroupChannelRetrieveAListOfBannedOrMutedUsers';
 import GroupChannelRetrieveNumberOfMembersHaventReadMessage from './samples/GroupChannelRetrieveNumberOfMembersHaventReadMessage';
+import GroupChannelUserDoNotDisturbOrSnooze from './samples/GroupChannelUserDoNotDisturbOrSnooze';
 
 const App = () => {
   return (
@@ -84,6 +86,8 @@ const App = () => {
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} /> 
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
         <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
+        <Route path='/group-channel-user-do-not-disturb-or-snooze' element={<GroupChannelUserDoNotDisturbOrSnooze />} />
+        <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
       </Routes>
     </div>
   );

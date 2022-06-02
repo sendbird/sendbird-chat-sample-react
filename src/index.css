@@ -486,6 +486,7 @@ code {
 
 .channel-create-button{
   background-color: #62EEAB;
+  width: 100%;
 }
 
 .select-custom-type {
@@ -651,4 +652,30 @@ code {
   border-radius: 5px;
   padding: 2px 4px;
   font-size: 10px;
+}
+
+.do-not-disturb-wrapper, .do-not-disturb-start-wrapper, .do-not-disturb-end-wrapper, .notifications-snooze-wrapper, .notifications-snooze-input-wrapper {
+  display: flex;
+}
+
+.do-not-disturb-wrapper, .notifications-snooze-wrapper {
+  flex-direction: column;
+}
+
+.do-not-disturb-wrapper, .do-not-disturb-start-wrapper, .do-not-disturb-end-wrapper, .notifications-snooze-wrapper, .notifications-snooze-input-wrapper {
+  margin-bottom: 10px;
+}
+
+.notifications-overlay-content {
+  padding: 40px;
+  width: 50%;
+  max-height: 500px;
+}
+
+.notification-modal-label, .notification-modal-input {
+  margin-right: 10px;
+}
+
+.notification-modal-input {
+  width: 40%;
 }
