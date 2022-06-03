@@ -27,6 +27,7 @@ const Home = () => {
           <li><Link to="/open-channel-users-online-status">Open Channel Users online status</Link></li>
           <li><Link to="/open-channel-user-profile-update">Open Channel User Profile update</Link></li>
           <li><Link to="/open-channel-structured-data">Open Channel Structured Data</Link></li>
+          <li><Link to="/open-channel-user-do-not-disturb-or-snooze">Open Channel User do not disturb or snooze</Link></li>
         </ul>
       </div>
       <div>
@@ -56,6 +57,7 @@ const Home = () => {
           <li><Link to="/group-channel-users-online-status">Group Channel Users online status</Link></li>
           <li><Link to="/group-channel-user-profile-update">Group Channel User Profile update</Link></li>
           <li><Link to="/group-channel-retrieve-number-of-members-havent-read-message">Group Channel Retrieve number of members haven't read message</Link></li>
+          <li><Link to="/group-channel-user-do-not-disturb-or-snooze">Group Channel User do not disturb or snooze</Link></li>
         </ul>
       </div>
     </div>
