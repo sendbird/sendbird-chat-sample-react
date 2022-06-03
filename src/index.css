@@ -486,6 +486,7 @@ code {
 
 .channel-create-button{
   background-color: #62EEAB;
+  width: 100%;
 }
 
 .select-custom-type {
@@ -519,7 +520,7 @@ code {
   width:100%;
 }
 
-.file-upload-label, .number-of-undelivered-members-btn {
+.file-upload-label, .user-profile-image-upload-label, .number-of-undelivered-members-btn {
   cursor: pointer;
 }
 
@@ -637,6 +638,45 @@ code {
   margin-top: 20px;
 }
 
+.user-profile-title {
+  margin-top: 0;
+}
+
+.user-profile-image-wrapper, .user-profile-nickname-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.user-profile-nickname-wrapper {
+  margin: 0 0 10px;
+}
+
+.user-profile-image {
+  border-radius: 50%;
+  padding: 5px;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+}
+
+.user-profile-nickname-input {
+  width: auto;
+}
+
+.user-profile-nickname-button {
+  border: none;
+  background: transparent;
+  color: black;
+}
+
+.user-profile-image-upload-label, .user-profile-nickname-button {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  padding: 5px;
+}
+
 .number-of-undelivered-members {
   padding: 5px 0;
   display: flex;
@@ -652,3 +692,4 @@ code {
   padding: 2px 4px;
   font-size: 10px;
 }
+
