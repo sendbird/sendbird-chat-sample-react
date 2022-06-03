@@ -1,3 +1,3 @@
 export const SENDBIRD_INFO = {
-  appId: '{YOUR_SENDBIRD_APP_ID}'
+  appId: 'E748CBA9-6712-4E58-8373-846AED841FBA'
 };

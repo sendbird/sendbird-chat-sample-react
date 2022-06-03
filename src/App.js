@@ -41,6 +41,7 @@ import GroupChannelOperatorsList from './samples/GroupChannelOperatorsList';
 import GroupChannelMembersListOrder from './samples/GroupChannelMembersListOrder';
 import GroupChannelRetrieveAListOfBannedOrMutedUsers from './samples/GroupChannelRetrieveAListOfBannedOrMutedUsers';
 import GroupChannelRetrieveNumberOfMembersHaventReadMessage from './samples/GroupChannelRetrieveNumberOfMembersHaventReadMessage';
+import GroupChannelPushNotifications from './samples/GroupChannelPushNotifications';
 
 const App = () => {
   return (
@@ -84,6 +85,7 @@ const App = () => {
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} /> 
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
         <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
+        <Route path='/group-channel-push-notifications' element={<GroupChannelPushNotifications />} />
       </Routes>
     </div>
   );
