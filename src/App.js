@@ -17,6 +17,7 @@ import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
 import OpenChannelUsersOnlineStatus from './samples/OpenChannelUsersOnlineStatus';
 import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
+import OpenChannelUserProfileUpdate from './samples/OpenChannelUserProfileUpdate';
 import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
 
 // Group channel samples
@@ -41,7 +42,7 @@ import GroupChannelRetrieveNumberOfMembersHaventReceivedMessage from './samples/
 import GroupChannelOperatorsList from './samples/GroupChannelOperatorsList';
 import GroupChannelMembersListOrder from './samples/GroupChannelMembersListOrder';
 import GroupChannelRetrieveAListOfBannedOrMutedUsers from './samples/GroupChannelRetrieveAListOfBannedOrMutedUsers';
-import GroupChannelUsersOnlineStatus from './samples/GroupChannelUsersOnlineStatus';
+import GroupChannelUserProfileUpdate from './samples/GroupChannelUserProfileUpdate';
 import GroupChannelRetrieveNumberOfMembersHaventReadMessage from './samples/GroupChannelRetrieveNumberOfMembersHaventReadMessage';
 
 const App = () => {
@@ -65,7 +66,7 @@ const App = () => {
         <Route path='/group-channel-react-to-a-message' element={<GroupChannelReactToAMessage />} />
         <Route path='/open-channel-categorize-by-custom-type' element={<OpenChannelCategorizeByCustomType />} />
         <Route path='/open-channel-thumbnails' element={<OpenChannelThumbnails />} />
-        <Route path='/open-channel-structured-data' element={<OpenChannelStructuredData />} /> 
+        <Route path='/open-channel-structured-data' element={<OpenChannelStructuredData />} />
         <Route path='/group-channel-mark-messages-as-read' element={<GroupChannelMarkMessagesAsRead />} />
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
         <Route path='/open-channel-report-a-message-user-channel' element={<OpenChannelReportAMessageUserChannel />} />
@@ -80,13 +81,14 @@ const App = () => {
         <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
         <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} />
         <Route path='/group-channel-retrieve-number-of-members-havent-received-message' element={<GroupChannelRetrieveNumberOfMembersHaventReceivedMessage />} />
-        <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} /> 
+        <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} />
         <Route path='/group-channel-operators-list' element={<GroupChannelOperatorsList />} />
         <Route path='/group-channel-members-list-order' element={<GroupChannelMembersListOrder />} />
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
-        <Route path='/group-channel-users-online-status' element={<GroupChannelUsersOnlineStatus />} />
         <Route path='/open-channel-users-online-status' element={<OpenChannelUsersOnlineStatus />} />
-        <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} /> 
+        <Route path='/open-channel-user-profile-update' element={<OpenChannelUserProfileUpdate />} />
+        <Route path='/group-channel-user-profile-update' element={<GroupChannelUserProfileUpdate />} />
+        <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
         <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
       </Routes>

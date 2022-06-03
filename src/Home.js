@@ -25,6 +25,7 @@ const Home = () => {
           <li><Link to="/open-channel-report-a-message-user-channel">Open Channel Report a message,user or channel</Link></li>
           <li><Link to="/open-channel-categorize-messages-by-custom-type">Open Channel with Categorize messages by custom type feature</Link></li>
           <li><Link to="/open-channel-users-online-status">Open Channel Users online status</Link></li>
+          <li><Link to="/open-channel-user-profile-update">Open Channel User Profile update</Link></li>
           <li><Link to="/open-channel-structured-data">Open Channel Structured Data</Link></li>
         </ul>
       </div>
@@ -53,6 +54,7 @@ const Home = () => {
           <li><Link to="/group-channel-members-list-order">Group Channel Members list order</Link></li>
           <li><Link to="/group-channel-retrieve-banned-or-muted-users">Group Channel Retrieve banned or muted users</Link></li>
           <li><Link to="/group-channel-users-online-status">Group Channel Users online status</Link></li>
+          <li><Link to="/group-channel-user-profile-update">Group Channel User Profile update</Link></li>
           <li><Link to="/group-channel-retrieve-number-of-members-havent-read-message">Group Channel Retrieve number of members haven't read message</Link></li>
         </ul>
       </div>
