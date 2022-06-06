@@ -728,7 +728,8 @@ code {
   width: 40%;
 }
 
-/* .register-as-operator-btn {
-  margin-top: 10px;
-  margin-bottom: 10px;
-} */
+.oc-members-list {
+  margin-bottom: 80px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
