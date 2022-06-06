@@ -21,6 +21,7 @@ import OpenChannelUserProfileUpdate from './samples/OpenChannelUserProfileUpdate
 import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
 import OpenChannelUserDoNotDisturbOrSnooze from './samples/OpenChannelUserDoNotDisturbOrSnooze';
 import OpenChannelRegisterUnregisterOperator from './samples/OpenChannelRegisterUnregisterOperator';
+import OpenChannelMuteUnmuteUsers from './samples/OpenChannelMuteUnmuteUsers';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -97,6 +98,7 @@ const App = () => {
         <Route path='/group-channel-user-do-not-disturb-or-snooze' element={<GroupChannelUserDoNotDisturbOrSnooze />} />
         <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
         <Route path='/open-channel-register-unregister-operator' element={<OpenChannelRegisterUnregisterOperator />} />
+        <Route path='/open-channel-mute-unmute-users' element={<OpenChannelMuteUnmuteUsers />} />
       </Routes>
     </div>
   );

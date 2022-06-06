@@ -21,7 +21,7 @@ import { timestampToTime } from '../utils/messageUtils';
 
 let sb;
 
-const OpenChannelRegisterUnregisterOperator = (props) => {
+const OpenChannelMuteUnmuteUsers = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
@@ -266,6 +266,26 @@ const OpenChannelRegisterUnregisterOperator = (props) => {
       }
   }
 
+  const muteUnmuteUser = (user, isOperator) => {
+    const { currentlyJoinedChannel } = state;
+    if (isOperator) {
+        if (user.isMuted) {
+            unmuteUser(currentlyJoinedChannel, user)
+        } else {
+            muteUser(currentlyJoinedChannel, user, 'description')
+        }
+    }
+
+    const updatedUsers = state.applicationUsers.map(item => {
+        if (item.userId === user.userId) {
+            return { ...item, isMuted: !item.isMuted }
+        }
+        return item
+    });
+
+    updateState({ ...state, applicationUsers: updatedUsers });
+  }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -327,6 +347,7 @@ const OpenChannelRegisterUnregisterOperator = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 operators={state.currentlyJoinedChannelOperators}
                 registerUnregisterAnOperator={registerUnregisterAnOperator}
+                muteUnmuteUser={muteUnmuteUser}
             />
         </>
     );
@@ -549,7 +570,7 @@ const CreateUserForm = ({
 
 }
 
-const MembersList = ({ toggleMembersList, isShowMembersList, users, registerUnregisterAnOperator, userIdInputValue, operators }) => {
+const MembersList = ({ toggleMembersList, isShowMembersList, users, registerUnregisterAnOperator, userIdInputValue, operators, muteUnmuteUser }) => {
   if (isShowMembersList && users) {
       return <div className="members-list">
           <button onClick={toggleMembersList}>Close</button>
@@ -565,6 +586,9 @@ const MembersList = ({ toggleMembersList, isShowMembersList, users, registerUnre
                     </div>
                     {userIsNotSender && <button onClick={() => registerUnregisterAnOperator(user, isOperator)}>
                       {isOperator ? "Unregister as operator" : "Register as operator"}
+                    </button>}
+                    {userIsNotSender && <button className="mute-button" onClick={() => muteUnmuteUser(user, isOperator)}>
+                      {user.isMuted ? "Unmute" : "Mute"}
                     </button>}
                   </div>
                 </div>
@@ -667,4 +691,12 @@ const getChannelOperators = async (channel) => {
   }
 }
 
-export default OpenChannelRegisterUnregisterOperator;
+const muteUser = async (channel, userId, description) => {
+  await channel.muteUser(userId, 600000, description);
+}
+
+const unmuteUser = async (channel, userId) => {
+  await channel.unmuteUser(userId);
+}
+
+export default OpenChannelMuteUnmuteUsers;
