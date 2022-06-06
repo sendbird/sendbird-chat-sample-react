@@ -14,8 +14,13 @@ import OpenChannelFreeze from './samples/OpenChannelFreeze';
 import OpenChannelSendAndReceiveVariousTypesOfFiles from './samples/OpenChannelSendAndReceiveVariousTypesOfFiles'
 import OpenChannelCopyMessage from './samples/OpenChannelCopyMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
-import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel';
 import OpenChannelAddExtraDataToMessage from './samples/OpenChannelAddExtraDataToMessage';
+import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
+import OpenChannelUsersOnlineStatus from './samples/OpenChannelUsersOnlineStatus';
+import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
+import OpenChannelUserProfileUpdate from './samples/OpenChannelUserProfileUpdate';
+import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
+import OpenChannelUserDoNotDisturbOrSnooze from './samples/OpenChannelUserDoNotDisturbOrSnooze';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -26,8 +31,22 @@ import GroupChannelDisplayOGTags from './samples/GroupChannelDisplayOGTags';
 import GroupChannelMarkMessagesAsRead from './samples/GroupChannelMarkMessagesAsRead';
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
-import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
 import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel'
+import GroupChannelCategorizeMessagesByCustomType  from './samples/GroupChannelCategorizeMessagesByCustomType';
+import GroupChannelRetrieveOnlineStatus from './samples/GroupChannelRetrieveOnlineStatus';
+import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegisterUnregisterOperator';
+import GroupChannelLocalCaching from './samples/GroupChannelLocalCaching';
+import GroupChannelUpdateDeleteMessageByOperator from './samples/GroupChannelUpdateDeleteMessageByOperator';
+import GroupChannelArchive from './samples/GroupChannelArchive'
+import GroupChannelMuteUnmuteUsers from './samples/GroupChannelMuteUnmuteUsers';
+import GroupChannelBanUnbanUsers from './samples/GroupChannelBanUnbanUsers';
+import GroupChannelRetrieveNumberOfMembersHaventReceivedMessage from './samples/GroupChannelRetrieveNumberOfMembersHaventReceivedMessage';
+import GroupChannelOperatorsList from './samples/GroupChannelOperatorsList';
+import GroupChannelMembersListOrder from './samples/GroupChannelMembersListOrder';
+import GroupChannelRetrieveAListOfBannedOrMutedUsers from './samples/GroupChannelRetrieveAListOfBannedOrMutedUsers';
+import GroupChannelUserProfileUpdate from './samples/GroupChannelUserProfileUpdate';
+import GroupChannelRetrieveNumberOfMembersHaventReadMessage from './samples/GroupChannelRetrieveNumberOfMembersHaventReadMessage';
+import GroupChannelUserDoNotDisturbOrSnooze from './samples/GroupChannelUserDoNotDisturbOrSnooze';
 
 const App = () => {
   return (
@@ -50,12 +69,31 @@ const App = () => {
         <Route path='/group-channel-react-to-a-message' element={<GroupChannelReactToAMessage />} />
         <Route path='/open-channel-categorize-by-custom-type' element={<OpenChannelCategorizeByCustomType />} />
         <Route path='/open-channel-thumbnails' element={<OpenChannelThumbnails />} />
+        <Route path='/open-channel-structured-data' element={<OpenChannelStructuredData />} />
         <Route path='/group-channel-mark-messages-as-read' element={<GroupChannelMarkMessagesAsRead />} />
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
         <Route path='/open-channel-report-a-message-user-channel' element={<OpenChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-add-extra-data-to-message' element={<OpenChannelAddExtraDataToMessage />} />
+        <Route path='/group-channel-local-caching' element={<GroupChannelLocalCaching />} />
+        <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
+        <Route path='/group-channel-retrieve-online-status' element={<GroupChannelRetrieveOnlineStatus />} />
+        <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
+        <Route path='/group-channel-update-delete-message-by-operator' element={<GroupChannelUpdateDeleteMessageByOperator />} />
+        <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
+        <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
+        <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} />
+        <Route path='/group-channel-retrieve-number-of-members-havent-received-message' element={<GroupChannelRetrieveNumberOfMembersHaventReceivedMessage />} />
+        <Route path='/group-channel-operators-list' element={<GroupChannelOperatorsList />} />
+        <Route path='/group-channel-members-list-order' element={<GroupChannelMembersListOrder />} />
+        <Route path='/open-channel-users-online-status' element={<OpenChannelUsersOnlineStatus />} />
+        <Route path='/open-channel-user-profile-update' element={<OpenChannelUserProfileUpdate />} />
+        <Route path='/group-channel-user-profile-update' element={<GroupChannelUserProfileUpdate />} />
+        <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
+        <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
+        <Route path='/group-channel-user-do-not-disturb-or-snooze' element={<GroupChannelUserDoNotDisturbOrSnooze />} />
+        <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
       </Routes>
     </div>
   );

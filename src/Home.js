@@ -25,6 +25,10 @@ const Home = () => {
           <li><Link to="/open-channel-report-a-message-user-channel">Open Channel Report a message,user or channel</Link></li>
           <li><Link to="/open-channel-categorize-messages-by-custom-type">Open Channel with Categorize messages by custom type feature</Link></li>
           <li><Link to="/open-channel-add-extra-data-to-message">Open Channel Add extra data to message</Link></li>
+          <li><Link to="/open-channel-users-online-status">Open Channel Users online status</Link></li>
+          <li><Link to="/open-channel-user-profile-update">Open Channel User Profile update</Link></li>
+          <li><Link to="/open-channel-structured-data">Open Channel Structured Data</Link></li>
+          <li><Link to="/open-channel-user-do-not-disturb-or-snooze">Open Channel User do not disturb or snooze</Link></li>
         </ul>
       </div>
       <div>
@@ -39,6 +43,22 @@ const Home = () => {
           <li><Link to="/group-channel-categorize-by-custom-type">Group Channel with Categorize by custom type feature</Link></li>
           <li><Link to="/group-channel-report-a-message-user-channel">Group Channel Report a message,user, or channel</Link></li>
           <li><Link to="/group-channel-mark-messages-as-read">Group Channel mark messages as read</Link></li>
+          <li><Link to="/group-channel-retrieve-online-status">Group Channel retrieve online status</Link></li>
+          <li><Link to="/group-channel-local-caching">Group Channel local caching</Link></li>
+          <li><Link to="/group-channel-categorize-messages-by-custom-type">Group Channel with Categorize messages by custom type feature</Link></li>
+          <li><Link to="/group-channel-register-unregister-operator">Group Channel Register and Unregister operator</Link></li>
+          <li><Link to="/group-channel-update-delete-message-by-operator">Group Channel Update and delete message by operator</Link></li>
+          <li><Link to="/group-channel-archive">Group Channel Archive</Link></li>
+          <li><Link to="/group-channel-mute-unmute-users">Group Channel Mute Unmute users</Link></li>
+          <li><Link to="/group-channel-bun-unban-users">Group Channel Ban and Unban users</Link></li>
+          <li><Link to="/group-channel-retrieve-number-of-members-havent-received-message">Group Channel Retrieve number of members haven't received message</Link></li>
+          <li><Link to="/group-channel-operators-list">Group Channel Operators List</Link></li>
+          <li><Link to="/group-channel-members-list-order">Group Channel Members list order</Link></li>
+          <li><Link to="/group-channel-retrieve-banned-or-muted-users">Group Channel Retrieve banned or muted users</Link></li>
+          <li><Link to="/group-channel-users-online-status">Group Channel Users online status</Link></li>
+          <li><Link to="/group-channel-user-profile-update">Group Channel User Profile update</Link></li>
+          <li><Link to="/group-channel-retrieve-number-of-members-havent-read-message">Group Channel Retrieve number of members haven't read message</Link></li>
+          <li><Link to="/group-channel-user-do-not-disturb-or-snooze">Group Channel User do not disturb or snooze</Link></li>
         </ul>
       </div>
     </div>
