@@ -20,6 +20,7 @@ import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCat
 import OpenChannelUserProfileUpdate from './samples/OpenChannelUserProfileUpdate';
 import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
 import OpenChannelUserDoNotDisturbOrSnooze from './samples/OpenChannelUserDoNotDisturbOrSnooze';
+import OpenChannelRegisterUnregisterOperator from './samples/OpenChannelRegisterUnregisterOperator';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -95,6 +96,7 @@ const App = () => {
         <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
         <Route path='/group-channel-user-do-not-disturb-or-snooze' element={<GroupChannelUserDoNotDisturbOrSnooze />} />
         <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
+        <Route path='/open-channel-register-unregister-operator' element={<OpenChannelRegisterUnregisterOperator />} />
       </Routes>
     </div>
   );
