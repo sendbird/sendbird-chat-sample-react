@@ -22,6 +22,7 @@ import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
 import OpenChannelUserDoNotDisturbOrSnooze from './samples/OpenChannelUserDoNotDisturbOrSnooze';
 import OpenChannelRegisterUnregisterOperator from './samples/OpenChannelRegisterUnregisterOperator';
 import OpenChannelMuteUnmuteUsers from './samples/OpenChannelMuteUnmuteUsers';
+import OpenChannelBanUnbanUsers from './samples/OpenChannelBanUnbanUsers';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -83,7 +84,6 @@ const App = () => {
         <Route path='/group-channel-update-delete-message-by-operator' element={<GroupChannelUpdateDeleteMessageByOperator />} />
         <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
         <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
-        <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} />
         <Route path='/group-channel-retrieve-number-of-members-havent-received-message' element={<GroupChannelRetrieveNumberOfMembersHaventReceivedMessage />} />
         <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} />
         <Route path='/group-channel-operators-list' element={<GroupChannelOperatorsList />} />
@@ -92,13 +92,12 @@ const App = () => {
         <Route path='/open-channel-users-online-status' element={<OpenChannelUsersOnlineStatus />} />
         <Route path='/open-channel-user-profile-update' element={<OpenChannelUserProfileUpdate />} />
         <Route path='/group-channel-user-profile-update' element={<GroupChannelUserProfileUpdate />} />
-        <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
-        <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
         <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
         <Route path='/group-channel-user-do-not-disturb-or-snooze' element={<GroupChannelUserDoNotDisturbOrSnooze />} />
         <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
         <Route path='/open-channel-register-unregister-operator' element={<OpenChannelRegisterUnregisterOperator />} />
         <Route path='/open-channel-mute-unmute-users' element={<OpenChannelMuteUnmuteUsers />} />
+        <Route path='/open-channel-bun-unban-users' element={<OpenChannelBanUnbanUsers />} />
       </Routes>
     </div>
   );
