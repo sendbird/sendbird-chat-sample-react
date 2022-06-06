@@ -29,6 +29,7 @@ const Home = () => {
           <li><Link to="/open-channel-structured-data">Open Channel Structured Data</Link></li>
           <li><Link to="/open-channel-user-do-not-disturb-or-snooze">Open Channel User do not disturb or snooze</Link></li>
           <li><Link to="/open-channel-register-unregister-operator">Open Channel Register and Unregister operator</Link></li>
+          <li><Link to="/open-channel-mute-unmute-users">Open Channel Mute and Unmute users</Link></li>
         </ul>
       </div>
       <div>
