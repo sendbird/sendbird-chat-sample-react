@@ -32,6 +32,7 @@ const Home = () => {
           <li><Link to="/open-channel-mute-unmute-users">Open Channel Mute and Unmute users</Link></li>
           <li><Link to="/open-channel-bun-unban-users">Open Channel Ban and Unban users</Link></li>
           <li><Link to="/open-channel-update-delete-message-by-operator">Open Channel Update and delete message by operator</Link></li>
+          <li><Link to="/open-channel-members-list-order">Open Channel Members list order</Link></li>
         </ul>
       </div>
       <div>
