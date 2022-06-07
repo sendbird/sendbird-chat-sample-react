@@ -24,6 +24,7 @@ const Home = () => {
           <li><Link to="/freeze-open-channel">Open Channel with Freeze feature</Link></li>
           <li><Link to="/open-channel-report-a-message-user-channel">Open Channel Report a message,user or channel</Link></li>
           <li><Link to="/open-channel-categorize-messages-by-custom-type">Open Channel with Categorize messages by custom type feature</Link></li>
+          <li><Link to="/open-channel-add-extra-data-to-message">Open Channel Add extra data to message</Link></li>
           <li><Link to="/open-channel-users-online-status">Open Channel Users online status</Link></li>
           <li><Link to="/open-channel-user-profile-update">Open Channel User Profile update</Link></li>
           <li><Link to="/open-channel-structured-data">Open Channel Structured Data</Link></li>
