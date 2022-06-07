@@ -24,6 +24,7 @@ import OpenChannelRegisterUnregisterOperator from './samples/OpenChannelRegister
 import OpenChannelMuteUnmuteUsers from './samples/OpenChannelMuteUnmuteUsers';
 import OpenChannelBanUnbanUsers from './samples/OpenChannelBanUnbanUsers';
 import OpenChannelUpdateDeleteMessageByOperator from './samples/OpenChannelUpdateDeleteMessageByOperator';
+import OpenChannelMembersListOrder from './samples/OpenChannelMembersListOrder';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -100,6 +101,7 @@ const App = () => {
         <Route path='/open-channel-mute-unmute-users' element={<OpenChannelMuteUnmuteUsers />} />
         <Route path='/open-channel-bun-unban-users' element={<OpenChannelBanUnbanUsers />} />
         <Route path='/open-channel-update-delete-message-by-operator' element={<OpenChannelUpdateDeleteMessageByOperator />} />
+        <Route path='/open-channel-members-list-order' element={<OpenChannelMembersListOrder />} />
       </Routes>
     </div>
   );
