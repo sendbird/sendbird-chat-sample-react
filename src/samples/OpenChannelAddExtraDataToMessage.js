@@ -13,7 +13,8 @@ import {
     UserMessageUpdateParams,
     UserMessageCreateParams,
     MessageListParams,
-    FileMessageCreateParams
+    FileMessageCreateParams,
+    MessageMetaArray
 } from '@sendbird/chat/message';
 
 import { SENDBIRD_INFO } from '../constants/constants';
@@ -38,7 +39,8 @@ const OpenChannelAddExtraDataToMessage = (props) => {
         messageToUpdate: null,
         loading: false,
         error: false,
-        isMessageExtraData: false
+        isMessageExtraData: false,
+        isShowRequiredMessages: false
     });
 
     //need to access state in message reeived callback
@@ -174,19 +176,12 @@ const OpenChannelAddExtraDataToMessage = (props) => {
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = new UserMessageCreateParams();
+            if(isMessageExtraData) {
+              const meta = new MessageMetaArray({ key: "required", value: ["true"] });
+              userMessageParams.metaArrays = [meta];
+            }
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded(async (message) => {
-
-                if(isMessageExtraData) {
-                  let messageWithKye = await currentlyJoinedChannel.createMessageMetaArrayKeys(message, ['required']);
-
-                  const messageExtraData = {
-                    'required': [true]
-                  }
-
-                  let messageWithExtraData = await currentlyJoinedChannel.addMessageMetaArrayValues(messageWithKye, messageExtraData);
-                }
-
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
 
@@ -251,6 +246,10 @@ const OpenChannelAddExtraDataToMessage = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
+    const toggleShowRequiredMessages = () => {
+      updateState({ ...state, isShowRequiredMessages: !state.isShowRequiredMessages })
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -287,11 +286,16 @@ const OpenChannelAddExtraDataToMessage = (props) => {
                 toggleShowCreateChannel={toggleShowCreateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+            <Channel
+              toggleShowRequiredMessages={toggleShowRequiredMessages}
+              isShowRequiredMessages={state.isShowRequiredMessages}
+              currentlyJoinedChannel={state.currentlyJoinedChannel}
+              handleLeaveChannel={handleLeaveChannel}>
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
+                    isShowRequiredMessages={state.isShowRequiredMessages}
                 />
                 <MessageInput
                     onMessageExtraDataInputValue={onMessageExtraDataInputValue}
@@ -340,12 +344,15 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
 }
 
 
-const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
+const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, toggleShowRequiredMessages, isShowRequiredMessages }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel">
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
+                <button className="leave-channel" onClick={toggleShowRequiredMessages}>
+                  {isShowRequiredMessages ? "Show all messages" : "Show required messages"}
+                </button>
             </div>
             <div>{children}</div>
         </div>;
@@ -360,17 +367,23 @@ const ChannelHeader = ({ children }) => {
 
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
-    return messages.map(message => {
-        return (
-            <div key={message.messageId} className="oc-message-item">
-                <Message
-                    handleDeleteMessage={handleDeleteMessage}
-                    updateMessage={updateMessage}
-                    message={message}
-                />
-            </div>);
-    })
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, isShowRequiredMessages }) => {
+    return <div className="message-list">
+       {
+         messages
+         .filter(message => isShowRequiredMessages ? message.metaArrays.length > 0 : message)
+         .map(message => {
+             return (
+                 <div key={message.messageId} className="oc-message-item">
+                     <Message
+                         handleDeleteMessage={handleDeleteMessage}
+                         updateMessage={updateMessage}
+                         message={message}
+                     />
+                 </div>);
+             })
+       }
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
@@ -401,8 +414,6 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-
-
         </div >
     );
 
@@ -547,9 +558,12 @@ const joinChannel = async (channel) => {
     try {
         await channel.enter();
         //list all messages
-        const messageListParams = new MessageListParams();
-        messageListParams.nextResultSize = 20;
-        const messages = await channel.getMessagesByTimestamp(0, messageListParams);
+        const listQuery = channel.createPreviousMessageListQuery();
+        listQuery.limit = 20;
+        listQuery.includeMetaArray = true;
+
+        const messages = await listQuery.load();
+
         return [channel, messages, null];
     } catch (error) {
         return [null, null, error]
