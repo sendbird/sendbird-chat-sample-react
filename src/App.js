@@ -47,6 +47,7 @@ import GroupChannelRetrieveAListOfBannedOrMutedUsers from './samples/GroupChanne
 import GroupChannelUserProfileUpdate from './samples/GroupChannelUserProfileUpdate';
 import GroupChannelRetrieveNumberOfMembersHaventReadMessage from './samples/GroupChannelRetrieveNumberOfMembersHaventReadMessage';
 import GroupChannelUserDoNotDisturbOrSnooze from './samples/GroupChannelUserDoNotDisturbOrSnooze';
+import GroupChannelStructuredData from './samples/GroupChannelStructuredData';
 
 const App = () => {
   return (
@@ -94,6 +95,7 @@ const App = () => {
         <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
         <Route path='/group-channel-user-do-not-disturb-or-snooze' element={<GroupChannelUserDoNotDisturbOrSnooze />} />
         <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
+        <Route path='/group-channel-structured-data' element={<GroupChannelStructuredData />} />
       </Routes>
     </div>
   );
