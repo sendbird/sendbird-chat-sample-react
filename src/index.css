@@ -55,6 +55,14 @@ code {
   color: #6210CC;
 }
 
+.group-card {
+  width: fit-content;
+  padding: 15px;
+  margin-top: 20px;
+  border: 1px solid white;
+  border-radius: 10px;
+}
+
 .card {
   width: fit-content;
   padding: 15px;
