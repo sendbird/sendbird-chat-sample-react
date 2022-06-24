@@ -352,7 +352,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
     if (message.url) {
         return (
-          <Thumbnails createdAt={message.createdAt} sender={message.sender} thumbnails={message.thumbnails} />);
+          <Thumbnails createdAt={message.createdAt} sender={message.sender} message={message} thumbnails={message.thumbnails} />);
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
@@ -490,7 +490,7 @@ const CreateUserForm = ({
 
 }
 
-const Thumbnails = ({ createdAt, sender, thumbnails }) => {
+const Thumbnails = ({ createdAt, sender, thumbnails, message }) => {
     const thumbnail = thumbnails[0];
 
     return (
@@ -499,7 +499,7 @@ const Thumbnails = ({ createdAt, sender, thumbnails }) => {
 
           <div className="oc-message-sender-name">{sender.nickname}{' '}</div>
 
-          <img src={thumbnail.url} height={thumbnail.height} width={thumbnail.width} title="thumbnail" alt="thumbnail"  />
+          {thumbnail ? <img src={thumbnail.url} height={thumbnail.height} width={thumbnail.width} title="thumbnail" alt="thumbnail"  /> : <img src={message.url} height={message.height} width={message.width} title="message" alt="message"  />}
       </div >
     );
 };
