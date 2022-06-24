@@ -399,7 +399,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-            const data = JSON.parse(message.data);
+            const data = message.data ? JSON.parse(message.data) : "";
 
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>

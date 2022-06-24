@@ -365,7 +365,7 @@ const ChannelHeader = ({ children }) => {
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return messages.map(message => {
-        const data = JSON.parse(message.data);
+        const data = message.data ? JSON.parse(message.data) : "";
 
         return (
             <div key={message.messageId} className="oc-message-item">
