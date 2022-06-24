@@ -206,15 +206,18 @@ const BasicOpenChannelSample = (props) => {
             modules: [new OpenChannelModule()]
         });
 
+        try {
+            await sendbirdChat.connect(userIdInputValue);
+        } catch (e) {
+            console.log("error", e)
+        }
 
-
-        await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
         const userUpdateParams = {};
         userUpdateParams.nickname = userNameInputValue;
         userUpdateParams.userId = userIdInputValue;
-        await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+        await sendbirdChat.updateCurrentUserInfo(userUpdateParams).then(data => console.log(data));
 
         sb = sendbirdChat;
         updateState({ ...state, loading: true });

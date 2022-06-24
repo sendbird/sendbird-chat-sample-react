@@ -714,11 +714,11 @@ const getAllApplicationUsers = async () => {
 
 const getParamsForThreading = async (parentsMessage, currentlyJoinedChannel) => {
 
-  const params = new MessageRetrievalParams({
+  const params = {
     messageId: parentsMessage.messageId,
     channelType: "group", // Acceptable values are open and group.
     channelUrl: currentlyJoinedChannel.url,
-  });
+  };
 
   const paramsThreadedMessageListParams = {
     prevResultSize: 10,

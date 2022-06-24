@@ -207,9 +207,11 @@ const OpenChannelThumbnails = (props) => {
             modules: [new OpenChannelModule()]
         });
 
-
-
-        await sendbirdChat.connect(userIdInputValue);
+        try {
+            await sendbirdChat.connect(userIdInputValue);
+        } catch (e) {
+            console.log("error", e)
+        }
         await sendbirdChat.setChannelInvitationPreference(true);
 
         const userUpdateParams = {};
