@@ -216,8 +216,8 @@ const BasicGroupChannelSample = (props) => {
         await sendbirdChat.setChannelInvitationPreference(true);
 
         const userUpdateParams = {};
-        userUpdateParams.nickname = userNameInputValue,
-        userUpdateParams.userId = userIdInputValue
+        userUpdateParams.nickname = userNameInputValue;
+        userUpdateParams.userId = userIdInputValue;
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
 
         sb = sendbirdChat;
@@ -562,8 +562,8 @@ const inviteUsersToChannel = async (channel, userIds) => {
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
         const groupChannelParams = {};
-        groupChannelParams.addUserIds = userIdsToInvite,
-        groupChannelParams.name = channelName,
+        groupChannelParams.addUserIds = userIdsToInvite
+        groupChannelParams.name = channelName
         groupChannelParams.operatorUserIds = userIdsToInvite
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
         return [groupChannel, null];
