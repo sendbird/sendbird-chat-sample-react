@@ -144,8 +144,8 @@ const BasicGroupChannelSample = (props) => {
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
-            const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            const userMessageParams = {};
+            userMessageParams.message = state.messageInputValue
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
