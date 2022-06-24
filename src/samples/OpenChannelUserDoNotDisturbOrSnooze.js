@@ -7,7 +7,7 @@ import SendbirdChat from '@sendbird/chat';
 import {
     OpenChannelModule,
     OpenChannelHandler,
-} from '@sendbird/chat/openChannel';;
+} from '@sendbird/chat/openChannel';
 
 let sb;
 
@@ -212,9 +212,11 @@ const OpenChannelUserDoNotDisturbOrSnooze = (props) => {
             modules: [new OpenChannelModule()]
         });
 
-
-
-        await sendbirdChat.connect(userIdInputValue);
+        try {
+            await sendbirdChat.connect(userIdInputValue);
+        } catch (e) {
+            console.log("error", e)
+        }
         await sendbirdChat.setChannelInvitationPreference(true);
 
         const userUpdateParams = {};
