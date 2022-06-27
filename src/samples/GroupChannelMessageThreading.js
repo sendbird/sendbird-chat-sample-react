@@ -1,21 +1,11 @@
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
-import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
+import SendbirdChat from '@sendbird/chat';
 
 import {
   GroupChannelHandler,
   GroupChannelModule,
-  GroupChannelCreateParams,
 } from '@sendbird/chat/groupChannel';
-
-import {
-  UserMessageCreateParams,
-  MessageListParams,
-  UserMessageUpdateParams,
-  FileMessageCreateParams,
-  MessageRetrievalParams,
-  ThreadedMessageListParams
-} from '@sendbird/chat/message';
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
@@ -183,14 +173,14 @@ const GroupChannelMessageThreading = (props) => {
   const sendMessage = async () => {
     const { messageToUpdate, currentlyJoinedChannel, messages } = state;
     if (messageToUpdate) {
-      const userMessageUpdateParams = new UserMessageUpdateParams();
+      const userMessageUpdateParams = {};
       userMessageUpdateParams.message = state.messageInputValue;
       const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
       const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
       messages[messageIndex] = updatedMessage;
       updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
     } else {
-      const userMessageParams = new UserMessageCreateParams();
+      const userMessageParams = {};
 
       userMessageParams.message = state.messageInputValue;
 
@@ -200,7 +190,7 @@ const GroupChannelMessageThreading = (props) => {
 
   const sendThreadMessage = async () => {
     const { threadMessages, threadParentsMessage } = state;
-    const userMessageParams = new UserMessageCreateParams({ parentMessageId: threadParentsMessage.messageId });
+    const userMessageParams = { parentMessageId: threadParentsMessage.messageId };
 
     userMessageParams.message = state.threadMessageInputValue;
 
@@ -230,7 +220,7 @@ const GroupChannelMessageThreading = (props) => {
   const onFileInputChange = async (e) => {
     if (e.currentTarget.files && e.currentTarget.files.length > 0) {
       const { messages } = state;
-      const fileMessageParams = new FileMessageCreateParams();
+      const fileMessageParams = {};
       
       fileMessagesHandler(fileMessageParams, messages, false, e);
     }
@@ -239,7 +229,7 @@ const GroupChannelMessageThreading = (props) => {
   const onFileThreadInputChange = async (e) => {
     if (e.currentTarget.files && e.currentTarget.files.length > 0) {
       const { threadMessages, threadParentsMessage } = state;
-      const fileMessageParams = new FileMessageCreateParams({parentMessageId: threadParentsMessage.messageId});
+      const fileMessageParams = {parentMessageId: threadParentsMessage.messageId};
 
       fileMessagesHandler(fileMessageParams, threadMessages, true, e);
     }
@@ -293,7 +283,7 @@ const GroupChannelMessageThreading = (props) => {
     await sendbirdChat.connect(userIdInputValue);
     await sendbirdChat.setChannelInvitationPreference(true);
 
-    const userUpdateParams = new UserUpdateParams();
+    const userUpdateParams = {};
     userUpdateParams.nickname = userNameInputValue;
     userUpdateParams.userId = userIdInputValue;
     await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
@@ -672,7 +662,7 @@ const loadChannels = async () => {
 
 const joinChannel = async (channel) => {
   try {
-    const messageListParams = new MessageListParams();
+    const messageListParams = {};
     messageListParams.nextResultSize = 20;
     const messages = await channel.getMessagesByTimestamp(0, messageListParams);
     return [messages, null];
@@ -687,8 +677,8 @@ const inviteUsersToChannel = async (channel, userIds) => {
 
 const createChannel = async (channelName, userIdsToInvite) => {
   try {
-    const groupChannelParams = new GroupChannelCreateParams();
-    groupChannelParams.addUserIds(userIdsToInvite);
+    const groupChannelParams = {};
+    groupChannelParams.addUserIds = userIdsToInvite;
     groupChannelParams.name = channelName;
     groupChannelParams.operatorUserIds = userIdsToInvite;
     const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
@@ -724,19 +714,19 @@ const getAllApplicationUsers = async () => {
 
 const getParamsForThreading = async (parentsMessage, currentlyJoinedChannel) => {
 
-  const params = new MessageRetrievalParams({
+  const params = {
     messageId: parentsMessage.messageId,
     channelType: "group", // Acceptable values are open and group.
     channelUrl: currentlyJoinedChannel.url,
-  });
+  };
 
-  const paramsThreadedMessageListParams = new ThreadedMessageListParams({
+  const paramsThreadedMessageListParams = {
     prevResultSize: 10,
     nextResultSize: 10,
     isInclusive: true,
     reverse: false,
     includeParentMessageInfo: false,
-  })
+  }
 
   try {
     const { threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
