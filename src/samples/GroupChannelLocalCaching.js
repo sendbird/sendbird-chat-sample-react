@@ -1,22 +1,15 @@
 
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
-import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
+import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelHandler,
     GroupChannelModule,
-    GroupChannelCreateParams,
     GroupChannelFilter,
     GroupChannelListOrder,
     MessageFilter,
     MessageCollectionInitPolicy
 } from '@sendbird/chat/groupChannel';
-import {
-    UserMessageCreateParams,
-    MessageListParams,
-    UserMessageUpdateParams,
-    FileMessageCreateParams
-} from '@sendbird/chat/message';
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
@@ -148,14 +141,14 @@ const GroupChannelLocalCaching = (props) => {
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
-            const userMessageUpdateParams = new UserMessageUpdateParams();
+            const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
-            const userMessageParams = new UserMessageCreateParams();
+            const userMessageParams = {};
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
@@ -174,7 +167,7 @@ const GroupChannelLocalCaching = (props) => {
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             const { currentlyJoinedChannel, messages } = state;
-            const fileMessageParams = new FileMessageCreateParams();
+            const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
@@ -226,7 +219,7 @@ const GroupChannelLocalCaching = (props) => {
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
-        const userUpdateParams = new UserUpdateParams();
+        const userUpdateParams = {};
         userUpdateParams.nickname = userNameInputValue;
         userUpdateParams.userId = userIdInputValue;
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
@@ -624,8 +617,8 @@ const inviteUsersToChannel = async (channel, userIds) => {
 
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
-        const groupChannelParams = new GroupChannelCreateParams();
-        groupChannelParams.addUserIds(userIdsToInvite);
+        const groupChannelParams = {};
+        groupChannelParams.addUserIds = userIdsToInvite;
         groupChannelParams.name = channelName;
         groupChannelParams.operatorUserIds = userIdsToInvite;
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
