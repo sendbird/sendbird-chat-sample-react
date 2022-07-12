@@ -20,3 +20,9 @@ export const timestampToTime = (timestamp) => {
         ? moment.unix(timestamp.toString().length === 13 ? timestamp / 1000 : timestamp).format('HH:mm')
         : date;
 };
+
+export const handleKeyPress = (event, callback) => {
+    if (event.key === 'Enter') {
+        callback()
+    }
+}
