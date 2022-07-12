@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
@@ -8,7 +8,7 @@ import {
 } from '@sendbird/chat/groupChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime } from '../utils/messageUtils';
+import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
 const GroupChannelReportAMessageUserChannel = (props) => {
@@ -41,12 +41,32 @@ const GroupChannelReportAMessageUserChannel = (props) => {
     const stateRef = useRef();
     stateRef.current = state;
 
+    const channelRef = useRef();
+
+    const scrollToBottom = (item, smooth) => {
+        item?.scrollTo({
+            top: item.scrollHeight,
+            behavior: smooth
+        })
+    }
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current)
+    }, [state.currentlyJoinedChannel])
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current, 'smooth')
+    }, [state.messages])
+
     const onError = (error) => {
         updateState({ ...state, error: error.message });
         console.log(error);
     }
 
     const handleJoinChannel = async (channelUrl) => {
+        if (state.currentlyJoinedChannel?.url === channelUrl) {
+            return null;
+        }
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
@@ -63,7 +83,6 @@ const GroupChannelReportAMessageUserChannel = (props) => {
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -115,7 +134,6 @@ const GroupChannelReportAMessageUserChannel = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
-
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
@@ -123,7 +141,6 @@ const GroupChannelReportAMessageUserChannel = (props) => {
         }
         updateState({ ...state, applicationUsers: users });
     }
-
 
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
@@ -134,7 +151,6 @@ const GroupChannelReportAMessageUserChannel = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
-
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -156,9 +172,7 @@ const GroupChannelReportAMessageUserChannel = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -176,13 +190,11 @@ const GroupChannelReportAMessageUserChannel = (props) => {
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
                     console.log("failed")
                 });
-
         }
     }
 
@@ -207,7 +219,6 @@ const GroupChannelReportAMessageUserChannel = (props) => {
     const addToChannelMembersList = (userId) => {
         const groupChannelMembers = [...state.groupChannelMembers, userId];
         updateState({ ...state, groupChannelMembers: groupChannelMembers });
-
     }
 
     const setupUser = async () => {
@@ -217,7 +228,6 @@ const GroupChannelReportAMessageUserChannel = (props) => {
             localCacheEnabled: false,
             modules: [new GroupChannelModule()]
         });
-
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
@@ -238,45 +248,44 @@ const GroupChannelReportAMessageUserChannel = (props) => {
     }
 
     const toggleNotificationMessage = async (notification) => {
-      const { showNotification } = state;
-      updateState({ ...state, showNotification: !showNotification, isOpenReportModal: false, reportNotification: notification, reportObject: {}, reportKey: "" })
+        const { showNotification } = state;
+        updateState({ ...state, showNotification: !showNotification, isOpenReportModal: false, reportNotification: notification, reportObject: {}, reportKey: "" })
     }
 
     const toggleReportModal = (obj, key) => {
-      const { isOpenReportModal } = state;
-      updateState({ ...state, isOpenReportModal: !isOpenReportModal, reportObject: obj, reportKey: key })
+        const { isOpenReportModal } = state;
+        updateState({ ...state, isOpenReportModal: !isOpenReportModal, reportObject: obj, reportKey: key })
     }
 
     const onReportCategoriesInputChange = (e) => {
-      const reportCategoriesInputValue = e.currentTarget.value;
-      updateState({ ...state, reportCategoriesInputValue})
+        const reportCategoriesInputValue = e.currentTarget.value;
+        updateState({ ...state, reportCategoriesInputValue})
     }
 
     const onReportDescriptionInputChange = (e) => {
-      const reportDescriptionInputValue = e.currentTarget.value;
-      updateState({ ...state, reportDescriptionInputValue})
+        const reportDescriptionInputValue = e.currentTarget.value;
+        updateState({ ...state, reportDescriptionInputValue})
     }
 
     const sendReport = async () => {
-      const { currentlyJoinedChannel, reportCategoriesInputValue, reportDescriptionInputValue, reportObject, reportKey } = state;
-      switch(reportKey) {
-        case 'Message':
-          // Report a message.
-          await currentlyJoinedChannel.reportMessage(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
-          break;
-        case 'User':
-          // Report a user.
-          await currentlyJoinedChannel.reportUser(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
-          break;
-        case 'Channel':
-          // Report a channel.
-          await reportObject.report(reportCategoriesInputValue, reportDescriptionInputValue);
-          break;
-        default:
-          break;
-      }
-
-      toggleNotificationMessage(reportKey)
+        const { currentlyJoinedChannel, reportCategoriesInputValue, reportDescriptionInputValue, reportObject, reportKey } = state;
+        switch(reportKey) {
+            case 'Message':
+                // Report a message.
+                await currentlyJoinedChannel.reportMessage(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
+                break;
+            case 'User':
+                // Report a user.
+                await currentlyJoinedChannel.reportUser(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
+                break;
+            case 'Channel':
+                // Report a channel.
+                await reportObject.report(reportCategoriesInputValue, reportDescriptionInputValue);
+                break;
+            default:
+                break;
+        }
+        toggleNotificationMessage(reportKey)
     }
 
     if (state.loading) {
@@ -325,25 +334,27 @@ const GroupChannelReportAMessageUserChannel = (props) => {
               reportDescriptionInputValue={state.reportDescriptionInputValue}
               onReportDescriptionInputChange={onReportDescriptionInputChange}
             />
-
             <Channel
-              showNotification={state.showNotification}
-              reportNotification={state.reportNotification}
-              toggleNotificationMessage={toggleNotificationMessage}
-              currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+                showNotification={state.showNotification}
+                reportNotification={state.reportNotification}
+                toggleNotificationMessage={toggleNotificationMessage}
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+              >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                     toggleReportModal={toggleReportModal}
                 />
-
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
                     fileSelected={state.file}
-                    onFileInputChange={onFileInputChange} />
+                    onFileInputChange={onFileInputChange}
+                />
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
@@ -405,10 +416,9 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-
-const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, toggleNotificationMessage, showNotification, reportNotification }) => {
+const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, toggleNotificationMessage, showNotification, reportNotification, channelRef }) => {
     if (currentlyJoinedChannel) {
-        return <div className="channel">
+        return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             {showNotification && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{ `${reportNotification} was reported` }</div>}
             <div>
@@ -416,10 +426,8 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, toggleN
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
@@ -443,8 +451,6 @@ const MembersList = ({ channel, handleMemberInvite, toggleReportModal }) => {
     } else {
         return null;
     }
-
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleReportModal }) => {
@@ -461,7 +467,6 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleRepo
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-
                 </div>);
         })}
     </div >
@@ -496,10 +501,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </div>
             </div>
             <div>{message.message}</div>
-
         </div >
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -507,9 +510,7 @@ const ProfileImage = ({ user }) => {
         return <img className="profile-image" src={user.plainProfileUrl} />
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
-
     }
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
@@ -518,12 +519,12 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <input
                 placeholder="write a message"
                 value={value}
-                onChange={onChange} />
-
+                onChange={onChange}
+                onKeyDown={(event => handleEnterPress(event, sendMessage))}
+            />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -533,8 +534,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-
-        </div>);
+        </div>
+    );
 }
 
 const MembersSelect = ({
@@ -544,7 +545,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
 
     if (applicationUsers.length > 0) {
@@ -555,7 +555,6 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
@@ -568,7 +567,6 @@ const MembersSelect = ({
                         <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
-
             </div>
         </div >;
     }
@@ -576,36 +574,36 @@ const MembersSelect = ({
 }
 
 const ReportModal = ({ isOpenReportModal, toggleReportModal, sendReport, onReportCategoriesInputChange, reportDescriptionInputValue, onReportDescriptionInputChange }) => {
-  if(isOpenReportModal) {
-    return <div className="overlay">
-      <div className="overlay-content">
-        <h3>Report Modal</h3>
+    if(isOpenReportModal) {
+        return <div className="overlay">
+            <div className="overlay-content">
+                <h3>Report Modal</h3>
 
-        <label htmlFor="report_categories">Report categories: </label>
-        <select className="form-input" name="report_categories" id="report_categories" onChange={onReportCategoriesInputChange}>
-          <option value=""></option>
-          <option value="suspicious">Suspicious</option>
-          <option value="harassing">Harassing</option>
-          <option value="inappropriate">Inappropriate</option>
-          <option value="spam">Spam</option>
-        </select>
+                <label htmlFor="report_categories">Report categories: </label>
+                <select className="form-input" name="report_categories" id="report_categories" onChange={onReportCategoriesInputChange}>
+                    <option value=""></option>
+                    <option value="suspicious">Suspicious</option>
+                    <option value="harassing">Harassing</option>
+                    <option value="inappropriate">Inappropriate</option>
+                    <option value="spam">Spam</option>
+                </select>
 
-        <label htmlFor="report_description">Report Description: </label>
-        <textarea
-          onChange={onReportDescriptionInputChange}
-          className="form-input"
-          name="report_description"
-          id="report_description"
-          value={reportDescriptionInputValue} />
+                <label htmlFor="report_description">Report Description: </label>
+                <textarea
+                    onChange={onReportDescriptionInputChange}
+                    className="form-input"
+                    name="report_description"
+                    id="report_description"
+                    value={reportDescriptionInputValue} />
 
-        <div>
-          <button className="form-button" onClick={() => sendReport()}>Send</button>
-          <button className="form-button" onClick={() => toggleReportModal({}, "")}>Cancel</button>
+                <div>
+                    <button className="form-button" onClick={() => sendReport()}>Send</button>
+                    <button className="form-button" onClick={() => toggleReportModal({}, "")}>Cancel</button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  }
-  return null;
+    }
+    return null;
 }
 
 const CreateUserForm = ({
@@ -618,14 +616,12 @@ const CreateUserForm = ({
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
-            <div className="overlay-content">
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-
 
                 <div>User Nickname</div>
                 <input
@@ -638,12 +634,9 @@ const CreateUserForm = ({
                     onClick={setupUser}>Connect</button>
             </div>
         </div>
-
-
     } else {
         return null;
     }
-
 }
 
 // Helpful functions that call Sendbird
@@ -655,8 +648,6 @@ const loadChannels = async () => {
     } catch (error) {
         return [null, error];
     }
-
-
 }
 
 const joinChannel = async (channel) => {
@@ -668,13 +659,11 @@ const joinChannel = async (channel) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
-
 
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
@@ -687,7 +676,6 @@ const createChannel = async (channelName, userIdsToInvite) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -698,7 +686,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
@@ -712,9 +699,7 @@ const getAllApplicationUsers = async () => {
         return [users, null];
     } catch (error) {
         return [null, error];
-
     }
-
 }
 
 export default GroupChannelReportAMessageUserChannel;

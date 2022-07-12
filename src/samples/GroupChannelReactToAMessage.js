@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
@@ -8,7 +8,7 @@ import {
 } from '@sendbird/chat/groupChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime } from '../utils/messageUtils';
+import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
 const GroupChannelReactToAMessage = (props) => {
@@ -36,12 +36,32 @@ const GroupChannelReactToAMessage = (props) => {
     const stateRef = useRef();
     stateRef.current = state;
 
+    const channelRef = useRef();
+
+    const scrollToBottom = (item, smooth) => {
+        item?.scrollTo({
+            top: item.scrollHeight,
+            behavior: smooth
+        })
+    }
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current)
+    }, [state.currentlyJoinedChannel])
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current, 'smooth')
+    }, [state.messages])
+
     const onError = (error) => {
         updateState({ ...state, error: error.message });
         console.log(error);
     }
 
     const handleJoinChannel = async (channelUrl) => {
+        if (state.currentlyJoinedChannel?.url === channelUrl) {
+            return null;
+        }
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
@@ -157,9 +177,7 @@ const GroupChannelReactToAMessage = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -177,13 +195,11 @@ const GroupChannelReactToAMessage = (props) => {
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
                     console.log("failed")
                 });
-
         }
     }
 
@@ -197,39 +213,39 @@ const GroupChannelReactToAMessage = (props) => {
     }
 
     const updateMessageReactions = async (message) => {
-      const { messages, currentlyJoinedChannel } = state;
+        const { messages, currentlyJoinedChannel } = state;
 
-      const userMessageUpdateParams = {};
-      const updatedMessage = await currentlyJoinedChannel.updateUserMessage(message.messageId, userMessageUpdateParams)
-      const messageIndex = messages.findIndex((item => item.messageId === message.messageId));
-      messages[messageIndex] = updatedMessage;
+        const userMessageUpdateParams = {};
+        const updatedMessage = await currentlyJoinedChannel.updateUserMessage(message.messageId, userMessageUpdateParams)
+        const messageIndex = messages.findIndex((item => item.messageId === message.messageId));
+        messages[messageIndex] = updatedMessage;
 
-      updateState({ ...state, messages: messages, isReactions: false });
+        updateState({ ...state, messages: messages, isReactions: false });
     }
 
     const toggleReactions = async (message) => {
-      const { isReactions } = state;
-      updateState({ ...state, isReactions: !isReactions, currentMessage: message })
+        const { isReactions } = state;
+        updateState({ ...state, isReactions: !isReactions, currentMessage: message })
     }
 
     const addMessageReaction = async (message, e) => {
-      const { currentlyJoinedChannel } = state;
+        const { currentlyJoinedChannel } = state;
 
-      const emojiKey = e.target.innerText;
-      const reactionEvent = await currentlyJoinedChannel.addReaction(message, emojiKey);
-      message.applyReactionEvent(reactionEvent);
+        const emojiKey = e.target.innerText;
+        const reactionEvent = await currentlyJoinedChannel.addReaction(message, emojiKey);
+        message.applyReactionEvent(reactionEvent);
 
-      updateMessageReactions(message);
+        updateMessageReactions(message);
 
-      updateState({ ...state, isReactions: false, currentMessage: {} });
+        updateState({ ...state, isReactions: false, currentMessage: {} });
     }
 
     const removeMessageReaction = async (message, messageKey) => {
-      const { currentlyJoinedChannel } = state;
-      const reactionEvent = await currentlyJoinedChannel.deleteReaction(message, messageKey);
-      message.applyReactionEvent(reactionEvent);
+        const { currentlyJoinedChannel } = state;
+        const reactionEvent = await currentlyJoinedChannel.deleteReaction(message, messageKey);
+        message.applyReactionEvent(reactionEvent);
 
-      updateMessageReactions(message)
+        updateMessageReactions(message)
     }
 
     const handleLoadMemberSelectionList = async () => {
@@ -244,7 +260,6 @@ const GroupChannelReactToAMessage = (props) => {
     const addToChannelMembersList = (userId) => {
         const groupChannelMembers = [...state.groupChannelMembers, userId];
         updateState({ ...state, groupChannelMembers: groupChannelMembers });
-
     }
 
     const setupUser = async () => {
@@ -254,7 +269,6 @@ const GroupChannelReactToAMessage = (props) => {
             localCacheEnabled: false,
             modules: [new GroupChannelModule()]
         });
-
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
@@ -307,8 +321,11 @@ const GroupChannelReactToAMessage = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
-
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+            <Channel
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -319,13 +336,13 @@ const GroupChannelReactToAMessage = (props) => {
                     isReactions={state.isReactions}
                     currentMessage={state.currentMessage}
                 />
-
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
                     fileSelected={state.file}
-                    onFileInputChange={onFileInputChange} />
+                    onFileInputChange={onFileInputChange}
+                />
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
@@ -380,24 +397,21 @@ const ChannelName = ({ members }) => {
 }
 
 
-const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel }) => {
+const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
     if (currentlyJoinedChannel) {
-        return <div className="channel">
+        return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MembersList = ({ channel, handleMemberInvite }) => {
@@ -433,7 +447,6 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addMessage
                         currentMessage={currentMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-
                 </div>);
         })}
     </div >
@@ -469,34 +482,33 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             <div>{message.message}</div>
             {message.reactions.length > 0 && <div className='reactions'>
                 {message.reactions.map((react, i) => {
-                  return <span className="reactions-item" key={i + react.key} onClick={() => removeMessageReaction(message, react.key)}>{react.key}<sup className="reactions-item-inner">{react.userIds.length > 1 ? react.userIds.length : ""}</sup></span>
+                    return <span className="reactions-item" key={i + react.key} onClick={() => removeMessageReaction(message, react.key)}>{react.key}<sup className="reactions-item-inner">{react.userIds.length > 1 ? react.userIds.length : ""}</sup></span>
                 })}
               </div>}
             <div className="react-button-wrapper">
-              {showReactions && <ul className="reactions-list">
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128512;</button>
-                </li>
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128516;</button>
-                </li>
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128517;</button>
-                </li>
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128579;</button>
-                </li>
-                <li>
-                  <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128529;</button>
-                </li>
-              </ul>}
-              <button className="control-button react-button" onClick={() => toggleReactions(message)}>
-                <span className="message-icon react-button-img">&#128512;</span>
-              </button>
+                {showReactions && <ul className="reactions-list">
+                    <li>
+                        <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128512;</button>
+                    </li>
+                    <li>
+                        <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128516;</button>
+                    </li>
+                    <li>
+                        <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128517;</button>
+                    </li>
+                    <li>
+                        <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128579;</button>
+                    </li>
+                    <li>
+                        <button className="control-button" onClick={(e) => addMessageReaction(message, e)}>&#128529;</button>
+                    </li>
+                </ul>}
+                <button className="control-button react-button" onClick={() => toggleReactions(message)}>
+                    <span className="message-icon react-button-img">&#128512;</span>
+                </button>
             </div>
         </div >
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -504,9 +516,7 @@ const ProfileImage = ({ user }) => {
         return <img className="profile-image" src={user.plainProfileUrl} />
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
-
     }
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
@@ -515,12 +525,12 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <input
                 placeholder="write a message"
                 value={value}
-                onChange={onChange} />
-
+                onChange={onChange}
+                onKeyDown={(event => handleEnterPress(event, sendMessage))}
+            />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -530,7 +540,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-
         </div>);
 }
 
@@ -541,7 +550,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
 
     if (applicationUsers.length > 0) {
@@ -552,7 +560,6 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
@@ -565,7 +572,6 @@ const MembersSelect = ({
                         <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
-
             </div>
         </div >;
     }
@@ -582,14 +588,12 @@ const CreateUserForm = ({
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
-            <div className="overlay-content">
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-
 
                 <div>User Nickname</div>
                 <input
@@ -602,12 +606,9 @@ const CreateUserForm = ({
                     onClick={setupUser}>Connect</button>
             </div>
         </div>
-
-
     } else {
         return null;
     }
-
 }
 
 // Helpful functions that call Sendbird
@@ -619,8 +620,6 @@ const loadChannels = async () => {
     } catch (error) {
         return [null, error];
     }
-
-
 }
 
 const joinChannel = async (channel, updateMessageReactions) => {
@@ -640,7 +639,6 @@ const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
 
-
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
         const groupChannelParams = {};
@@ -652,7 +650,6 @@ const createChannel = async (channelName, userIdsToInvite) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -663,7 +660,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
@@ -677,9 +673,7 @@ const getAllApplicationUsers = async () => {
         return [users, null];
     } catch (error) {
         return [null, error];
-
     }
-
 }
 
 export default GroupChannelReactToAMessage;
