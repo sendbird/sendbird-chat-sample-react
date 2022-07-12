@@ -21,7 +21,7 @@ export const timestampToTime = (timestamp) => {
         : date;
 };
 
-export const handleKeyPress = (event, callback) => {
+export const handleEnterPress = (event, callback) => {
     if (event.key === 'Enter') {
         callback()
     }

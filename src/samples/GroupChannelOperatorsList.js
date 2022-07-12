@@ -8,7 +8,7 @@ import {
 } from '@sendbird/chat/groupChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime, handleKeyPress } from '../utils/messageUtils';
+import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
 const GroupChannelOperatorsList = (props) => {
@@ -255,12 +255,6 @@ const GroupChannelOperatorsList = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            sendMessage()
-        }
-    }
-
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -311,7 +305,7 @@ const GroupChannelOperatorsList = (props) => {
                     sendMessage={sendMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange}
-                    handleKeyDown={handleKeyDown} />
+                />
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
@@ -468,19 +462,18 @@ const ProfileImage = ({ user }) => {
     }
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleKeyDown }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
     return (
         <div className="message-input">
             <input
                 placeholder="write a message"
                 value={value}
                 onChange={onChange}
-                onKeyDown={handleKeyDown} />
-
+                onKeyDown={(event => handleEnterPress(event, sendMessage))}
+            />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -538,7 +531,7 @@ const CreateUserForm = ({
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
-            <div className="overlay-content" onKeyDown={(event) => handleKeyPress(event, setupUser)}>
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
                 <input
                     onChange={onUserIdInputChange}
