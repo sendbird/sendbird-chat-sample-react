@@ -8,7 +8,7 @@ import {
 } from '@sendbird/chat/openChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime, handleKeyPress } from '../utils/messageUtils';
+import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 
 let sb;
 
@@ -243,12 +243,6 @@ const OpenChannelSendAndReceiveVariousTypesOfFiles = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            sendMessage()
-        }
-    }
-
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -301,7 +295,7 @@ const OpenChannelSendAndReceiveVariousTypesOfFiles = (props) => {
                     sendMessage={sendMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange}
-                    handleKeyDown={handleKeyDown} />
+                />
             </Channel>
         </>
     );
@@ -408,14 +402,14 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
     );
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleKeyDown }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
     return (
         <div className="message-input">
             <input
                 placeholder="write a message"
                 value={value}
                 onChange={onChange}
-                onKeyDown={handleKeyDown}
+                onKeyDown={(event => handleEnterPress(event, sendMessage))}
             />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
@@ -465,7 +459,7 @@ const ChannelCreate = ({
                     <h3>Create Channel</h3>
                 </div>
                 <div>Name</div>
-                <input className="form-input" onChange={onChannelNamenIputChange} onKeyDown={(event) => handleKeyPress(event, handleCreateChannel)} />
+                <input className="form-input" onChange={onChannelNamenIputChange} onKeyDown={(event) => handleEnterPress(event, handleCreateChannel)} />
                 <div>
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
@@ -486,7 +480,7 @@ const CreateUserForm = ({
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
-            <div className="overlay-content" onKeyDown={(event) => handleKeyPress(event, setupUser)}>
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
                 <input
                     onChange={onUserIdInputChange}
