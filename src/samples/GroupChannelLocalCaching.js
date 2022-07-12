@@ -80,7 +80,6 @@ const GroupChannelLocalCaching = (props) => {
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -141,7 +140,6 @@ const GroupChannelLocalCaching = (props) => {
         updateState({ ...state, applicationUsers: users });
     }
 
-
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
         updateState({ ...state, userNameInputValue });
@@ -151,7 +149,6 @@ const GroupChannelLocalCaching = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
-
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -173,9 +170,7 @@ const GroupChannelLocalCaching = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -193,13 +188,11 @@ const GroupChannelLocalCaching = (props) => {
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
                     console.log("failed")
                 });
-
         }
     }
 
@@ -234,7 +227,6 @@ const GroupChannelLocalCaching = (props) => {
             localCacheEnabled: true,
             modules: [new GroupChannelModule()]
         });
-
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
@@ -294,14 +286,16 @@ const GroupChannelLocalCaching = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
-
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel} channelRef={channelRef}>
+            <Channel
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
-
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
@@ -362,7 +356,6 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-
 const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
@@ -372,15 +365,12 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MembersList = ({ channel, handleMemberInvite }) => {
@@ -394,8 +384,6 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     } else {
         return null;
     }
-
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
@@ -426,7 +414,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>);
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -446,7 +434,6 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             <div>{message.message}</div>
         </div >
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -454,9 +441,7 @@ const ProfileImage = ({ user }) => {
         return <img className="profile-image" src={user.plainProfileUrl} />
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
-
     }
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleKeyDown }) => {
@@ -481,7 +466,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleK
                     onClick={() => { }}
                 />
             </div>
-
         </div>);
 }
 
@@ -492,7 +476,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
 
     if (applicationUsers.length > 0) {
@@ -503,7 +486,6 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
@@ -516,7 +498,6 @@ const MembersSelect = ({
                         <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
-
             </div>
         </div >;
     }
@@ -535,12 +516,10 @@ const CreateUserForm = ({
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleKeyPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-
 
                 <div>User Nickname</div>
                 <input
@@ -553,12 +532,9 @@ const CreateUserForm = ({
                     onClick={setupUser}>Connect</button>
             </div>
         </div>
-
-
     } else {
         return null;
     }
-
 }
 
 // Helpful functions that call Sendbird
@@ -598,7 +574,6 @@ const loadCachedChannels = async () => {
 const loadCachedMessages = async (channel) => {
     const messageFilter = new MessageFilter();
 
-
     const collection = channel.createMessageCollection({
         filter: messageFilter,
     });
@@ -606,24 +581,24 @@ const loadCachedMessages = async (channel) => {
     collection.setMessageCollectionHandler();
 
     collection
-      .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
-      .onCacheResult((err, messages) => {
-          // Messages will be retrieved from the local cache.
-          if (err) {
-              console.log('Error', err)
-          }
-          return [messages, null];
-      })
-      .onApiResult((err, messages) => {
-          // Messages will be retrieved from Sendbird server through API.
-          // According to the InitPolicy.CACHE_AND_REPLACE_BY_API,
-          // the existing data source needs to be cleared
-          // before adding retrieved messages to the local cache.
-          if (err) {
-              console.log('Error', err)
-          }
-          return [messages, null];
-      });
+        .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
+        .onCacheResult((err, messages) => {
+            // Messages will be retrieved from the local cache.
+            if (err) {
+                console.log('Error', err)
+            }
+            return [messages, null];
+        })
+        .onApiResult((err, messages) => {
+            // Messages will be retrieved from Sendbird server through API.
+            // According to the InitPolicy.CACHE_AND_REPLACE_BY_API,
+            // the existing data source needs to be cleared
+            // before adding retrieved messages to the local cache.
+            if (err) {
+                console.log('Error', err)
+            }
+            return [messages, null];
+        });
 
     // Load next messages.
     if (collection.hasNext) {
@@ -642,7 +617,6 @@ const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
 
-
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
         const groupChannelParams = {};
@@ -654,7 +628,6 @@ const createChannel = async (channelName, userIdsToInvite) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -665,7 +638,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
@@ -679,7 +651,6 @@ const getAllApplicationUsers = async () => {
         return [users, null];
     } catch (error) {
         return [null, error];
-
     }
 
 }

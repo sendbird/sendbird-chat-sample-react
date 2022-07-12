@@ -72,7 +72,6 @@ const OpenChannelCategorizeMessagesByCustomType = (props) => {
         const [channel, messages, error] = await joinChannel(channelToJoin);
         if (error) {
             return onError(error);
-
         }
 
         //listen for incoming messages
@@ -102,9 +101,7 @@ const OpenChannelCategorizeMessagesByCustomType = (props) => {
     const handleLeaveChannel = async () => {
         const { currentlyJoinedChannel } = state;
         await currentlyJoinedChannel.exit();
-
         updateState({ ...state, currentlyJoinedChannel: null })
-
     }
 
     const handleCreateChannel = async () => {
@@ -228,7 +225,6 @@ const OpenChannelCategorizeMessagesByCustomType = (props) => {
                 console.log(error)
                 console.log("failed")
             });
-
         }
     }
 
@@ -240,7 +236,6 @@ const OpenChannelCategorizeMessagesByCustomType = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
             }).onFailed((error) => {
                 console.log(error)
                 console.log("failed")
@@ -251,7 +246,6 @@ const OpenChannelCategorizeMessagesByCustomType = (props) => {
     const handleDeleteMessage = async (messageToDelete) => {
         const { currentlyJoinedChannel } = state;
         await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
-
     }
 
     const updateMessage = async (message) => {
@@ -426,15 +420,12 @@ const Channel = ({ messages, currentlyJoinedChannel, handleLeaveChannel, selecte
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, selectedMessageCustomType }) => {
@@ -457,9 +448,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
-
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
-
                 <img src={message.url} />
             </div >);
     }
@@ -468,7 +457,6 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
-
             <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
             <div>{message.message}</div>
 
@@ -480,11 +468,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-
-
         </div >
     );
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleShowAddCustomTypeToMessage, handleKeyDown }) => {
@@ -494,13 +479,12 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleS
                 placeholder="write a message"
                 value={value}
                 onChange={onChange}
-                onKeyDown={handleKeyDown} />
-
+                onKeyDown={handleKeyDown}
+            />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
                 <label className="message-type-add" onClick={toggleShowAddCustomTypeToMessage}>Add custom type</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -510,7 +494,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleS
                     onClick={() => { }}
                 />
             </div>
-
         </div>);
 }
 
@@ -523,13 +506,10 @@ const ChannelDetails = ({
     if (currentlyUpdatingChannel) {
         return <div className="overlay">
             <div className="overlay-content">
-
                 <h3>Update Channel Details</h3>
                 <div> Channel name</div>
                 <input className="form-input" onChange={onChannelNamenIputChange} />
-
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
-
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
         </div >;
@@ -555,7 +535,6 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
-
             </div>
         </div >;
     }
@@ -574,31 +553,27 @@ const CreateUserForm = ({
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleKeyPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue} />
-
+                    type="text" value={userIdInputValue}
+                />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
                     type="text" value={userNameInputValue} />
-
                 <div>
-
                     <button
                         className="user-submit-button"
-                        onClick={setupUser}>Connect</button>
+                        onClick={setupUser}
+                    >Connect</button>
                 </div>
             </div>
-
         </div>
     } else {
         return null;
     }
-
 }
 
 const AddCustomTypeToMessage = ({
@@ -620,7 +595,6 @@ const AddCustomTypeToMessage = ({
                     <button className="form-button" onClick={handleAddCustomTypeToMessage}>Save</button>
                     <button className="form-button" onClick={toggleShowAddCustomTypeToMessage}>Cancel</button>
                 </div>
-
             </div>
         </div >;
     }
@@ -637,7 +611,6 @@ const loadChannels = async () => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const joinChannel = async (channel) => {
@@ -653,7 +626,6 @@ const joinChannel = async (channel) => {
     }
 }
 
-
 const createChannel = async (channelName) => {
     try {
         const openChannelParams = {};
@@ -664,7 +636,6 @@ const createChannel = async (channelName) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -675,7 +646,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) => {
@@ -683,9 +653,7 @@ const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) =>
         const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
         const openChannelParams = {};
         openChannelParams.name = channelNameInputValue;
-
         openChannelParams.operatorUserIds = [sb.currentUser.userId];
-
         const updatedChannel = await channel.updateChannel(openChannelParams);
         return [updatedChannel, null];
     } catch (error) {

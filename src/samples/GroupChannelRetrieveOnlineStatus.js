@@ -169,7 +169,6 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
         // Event should not be triggered if it is an update message in progress
         if (messageToUpdate === null) {
             messageInputValue !== "" ? currentlyJoinedChannel.startTyping() : currentlyJoinedChannel.endTyping();
-
         }
 
         updateState({ ...state, messageInputValue });
@@ -188,18 +187,16 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
             const userMessageParams = {};
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
-              .onSucceeded((message) => {
-                  const updatedMessages = [...messages, message];
+                .onSucceeded((message) => {
+                    const updatedMessages = [...messages, message];
+                    currentlyJoinedChannel.endTyping();
+                    updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
 
-                  currentlyJoinedChannel.endTyping();
-
-                  updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
-              })
-              .onFailed((error) => {
-                  console.log(error)
-                  console.log("failed")
-              });
+                })
+                .onFailed((error) => {
+                    console.log(error)
+                    console.log("failed")
+                });
         }
     }
 
@@ -209,16 +206,15 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
-              .onSucceeded((message) => {
-                  const updatedMessages = [...messages, message];
-                  updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
+                .onSucceeded((message) => {
+                    const updatedMessages = [...messages, message];
+                    updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
 
-              })
-              .onFailed((error) => {
-                  console.log(error)
-                  console.log("failed")
-              });
-
+                })
+                .onFailed((error) => {
+                    console.log(error)
+                    console.log("failed")
+                });
         }
     }
 
@@ -252,7 +248,6 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
             localCacheEnabled: false,
             modules: [new GroupChannelModule()]
         });
-
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
@@ -313,73 +308,75 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
     console.log(state);
 
     return (
-      <>
-          <CreateUserForm
-            setupUser={setupUser}
-            userNameInputValue={state.userNameInputValue}
-            userIdInputValue={state.userIdInputValue}
-            settingUpUser={state.settingUpUser}
-            onUserIdInputChange={onUserIdInputChange}
-            onUserNameInputChange={onUserNameInputChange} />
-          <ChannelList
-            channels={state.channels}
-            handleJoinChannel={handleJoinChannel}
-            handleCreateChannel={handleLoadMemberSelectionList}
-            handleDeleteChannel={handleDeleteChannel}
-            handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
-          <MembersSelect
-            applicationUsers={state.applicationUsers}
-            groupChannelMembers={state.groupChannelMembers}
-            currentlyJoinedChannel={state.currentlyJoinedChannel}
-            addToChannelMembersList={addToChannelMembersList}
-            handleCreateChannel={handleCreateChannel}
-            handleUpdateChannelMembersList={handleUpdateChannelMembersList}
-          />
-
-          <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel} channelRef={channelRef}>
-              <MessagesList
-                messages={state.messages}
-                handleDeleteMessage={handleDeleteMessage}
-                updateMessage={updateMessage}
-              />
-
-              {state.typingMembers.length > 0 && DisplayTypingIndicator(state.typingMembers)}
-
-              <MessageInput
-                value={state.messageInputValue}
-                onChange={onMessageInputChange}
-                sendMessage={sendMessage}
-                fileSelected={state.file}
-                onFileInputChange={onFileInputChange}
-                handleKeyDown={handleKeyDown} />
-          </Channel>
-          <MembersList
-            channel={state.currentlyJoinedChannel}
-            handleMemberInvite={handleMemberInvite}
-          />
-      </>
+        <>
+            <CreateUserForm
+                setupUser={setupUser}
+                userNameInputValue={state.userNameInputValue}
+                userIdInputValue={state.userIdInputValue}
+                settingUpUser={state.settingUpUser}
+                onUserIdInputChange={onUserIdInputChange}
+                onUserNameInputChange={onUserNameInputChange} />
+            <ChannelList
+                channels={state.channels}
+                handleJoinChannel={handleJoinChannel}
+                handleCreateChannel={handleLoadMemberSelectionList}
+                handleDeleteChannel={handleDeleteChannel}
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
+            <MembersSelect
+                applicationUsers={state.applicationUsers}
+                groupChannelMembers={state.groupChannelMembers}
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                addToChannelMembersList={addToChannelMembersList}
+                handleCreateChannel={handleCreateChannel}
+                handleUpdateChannelMembersList={handleUpdateChannelMembersList}
+            />
+                <Channel
+                    currentlyJoinedChannel={state.currentlyJoinedChannel}
+                    handleLeaveChannel={handleLeaveChannel}
+                    channelRef={channelRef}
+                >
+                <MessagesList
+                    messages={state.messages}
+                    handleDeleteMessage={handleDeleteMessage}
+                    updateMessage={updateMessage}
+                />
+                {state.typingMembers.length > 0 && DisplayTypingIndicator(state.typingMembers)}
+                <MessageInput
+                    value={state.messageInputValue}
+                    onChange={onMessageInputChange}
+                    sendMessage={sendMessage}
+                    fileSelected={state.file}
+                    onFileInputChange={onFileInputChange}
+                    handleKeyDown={handleKeyDown} />
+            </Channel>
+            <MembersList
+                channel={state.currentlyJoinedChannel}
+                handleMemberInvite={handleMemberInvite}
+            />
+        </>
     );
 };
 
 // Chat UI Components
 const ChannelList = ({
-                         channels,
-                         handleJoinChannel,
-                         handleDeleteChannel,
-                         handleLoadMemberSelectionList
-                     }) => {
+    channels,
+    handleJoinChannel,
+    handleDeleteChannel,
+    handleLoadMemberSelectionList
+}) => {
     return (
-      <div className='channel-list'>
-          <div className="channel-type">
-              <h1>Group Channels</h1>
-              <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
-          </div>
-          {channels.map(channel => {
-              return (
+        <div className='channel-list'>
+            <div className="channel-type">
+                <h1>Group Channels</h1>
+                <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
+            </div>
+            {channels.map(channel => {
+                return (
                 <div key={channel.url} className="channel-list-item" >
                     <div
-                      className="channel-list-item-name"
-                      onClick={() => { handleJoinChannel(channel.url) }}>
+                        className="channel-list-item-name"
+                        onClick={() => { handleJoinChannel(channel.url) }}
+                    >
                         <ChannelName members={channel.members} />
                         <div className="last-message">{channel.lastMessage?.message}</div>
                     </div>
@@ -389,8 +386,9 @@ const ChannelList = ({
                         </button>
                     </div>
                 </div>);
-          })}
-      </div >);
+            })}
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -405,7 +403,6 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-
 const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
@@ -415,10 +412,8 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel" />;
-
 }
 
 const ChannelHeader = ({ children }) => {
@@ -434,7 +429,6 @@ const MembersList = ({ channel, handleMemberInvite }) => {
             handleChannel(channel)
         }
     }, [channel]);
-
 
     return (
       currentChannel && (
@@ -461,7 +455,6 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                     updateMessage={updateMessage}
                     messageSentByYou={messageSentByYou} />
                   <ProfileImage user={message.sender} />
-
               </div>);
         })}
     </div >
@@ -505,7 +498,6 @@ const ProfileImage = ({ user }) => {
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
     }
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleKeyDown }) => {
@@ -530,20 +522,18 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleK
                 onClick={() => { }}
               />
           </div>
-
       </div>);
 }
 
 const MembersSelect = ({
-                           applicationUsers,
-                           groupChannelMembers,
-                           currentlyJoinedChannel,
-                           addToChannelMembersList,
-                           handleCreateChannel,
-                           handleUpdateChannelMembersList
+    applicationUsers,
+    groupChannelMembers,
+    currentlyJoinedChannel,
+    addToChannelMembersList,
+    handleCreateChannel,
+    handleUpdateChannelMembersList
 
-                       }) => {
-
+}) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -552,62 +542,55 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
                     const userSelected = groupChannelMembers.some((member) => member === user.userId);
                     return <div
-                      key={user.userId}
-                      className={`member-item ${userSelected ? 'member-selected' : ''}`}
-                      onClick={() => addToChannelMembersList(user.userId)}>
-                        <ProfileImage user={user} />
-                        <div className="member-item-name">{user.nickname}</div>
+                        key={user.userId}
+                        className={`member-item ${userSelected ? 'member-selected' : ''}`}
+                        onClick={() => addToChannelMembersList(user.userId)}>
+                            <ProfileImage user={user} />
+                            <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
-
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
 
 const CreateUserForm = ({
-                            setupUser,
-                            settingUpUser,
-                            userNameInputValue,
-                            userIdInputValue,
-                            onUserNameInputChange,
-                            onUserIdInputChange
-                        }) => {
+    setupUser,
+    settingUpUser,
+    userNameInputValue,
+    userIdInputValue,
+    onUserNameInputChange,
+    onUserIdInputChange
+}) => {
     if (settingUpUser) {
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleKeyPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
-                  onChange={onUserIdInputChange}
-                  className="form-input"
-                  type="text" value={userIdInputValue} />
-
+                    onChange={onUserIdInputChange}
+                    className="form-input"
+                    type="text" value={userIdInputValue} />
 
                 <div>User Nickname</div>
                 <input
-                  onChange={onUserNameInputChange}
-                  className="form-input"
-                  type="text" value={userNameInputValue} />
+                    onChange={onUserNameInputChange}
+                    className="form-input"
+                    type="text" value={userNameInputValue} />
 
                 <button
-                  className="user-submit-button"
-                  onClick={setupUser}>Connect</button>
+                    className="user-submit-button"
+                    onClick={setupUser}>Connect</button>
             </div>
         </div>
-
-
     } else {
         return null;
     }
-
 }
 
 const DisplayTypingIndicator = (typingMembers) => {
@@ -642,13 +625,11 @@ const joinChannel = async (channel) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
-
 
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
@@ -679,7 +660,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
@@ -694,7 +674,6 @@ const getAllApplicationUsers = async () => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 export default GroupChannelRetrieveOnlineStatus;
