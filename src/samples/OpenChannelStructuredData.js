@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 
 import SendbirdChat from '@sendbird/chat';
@@ -8,7 +8,7 @@ import {
 } from '@sendbird/chat/openChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime } from '../utils/messageUtils';
+import { timestampToTime, handleKeyPress } from '../utils/messageUtils';
 
 let sb;
 
@@ -37,6 +37,23 @@ const OpenChannelStructuredData = (props) => {
     const stateRef = useRef();
     stateRef.current = state;
 
+    const channelRef = useRef();
+
+    const scrollToBottom = (item, smooth) => {
+        item?.scrollTo({
+            top: item.scrollHeight,
+            behavior: smooth
+        })
+    }
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current)
+    }, [state.currentlyJoinedChannel])
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current, 'smooth')
+    }, [state.messages])
+
     const messageDataNameRef = useRef();
     const messageDataPriceRef = useRef();
     const messageDataImageRef = useRef();
@@ -47,6 +64,9 @@ const OpenChannelStructuredData = (props) => {
     }
 
     const handleJoinChannel = async (channelUrl) => {
+        if (state.currentlyJoinedChannel?.url === channelUrl) {
+            return null;
+        }
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channelToJoin = channels.find((channel) => channel.url === channelUrl);
@@ -247,6 +267,12 @@ const OpenChannelStructuredData = (props) => {
         updateState({ ...state, messageData: updatedMessageData, showAddDataToMessage: false });
     }
 
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            sendMessage()
+        }
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -283,7 +309,7 @@ const OpenChannelStructuredData = (props) => {
                 toggleShowCreateChannel={toggleShowCreateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel} channelRef={channelRef}>
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -295,7 +321,8 @@ const OpenChannelStructuredData = (props) => {
                     sendMessage={sendMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange}
-                    toggleShowAddDataToMessage={toggleShowAddDataToMessage} />
+                    toggleShowAddDataToMessage={toggleShowAddDataToMessage}
+                    handleKeyDown={handleKeyDown} />
             </Channel>
             <AddDataToMessage
                 showAddDataToMessage={state.showAddDataToMessage}
@@ -343,9 +370,9 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
 }
 
 
-const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children }) => {
+const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channelRef }) => {
     if (currentlyJoinedChannel) {
-        return <div className="channel">
+        return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
@@ -420,13 +447,14 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
 
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleShowAddDataToMessage }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleShowAddDataToMessage, handleKeyDown }) => {
     return (
         <div className="message-input">
             <input
                 placeholder="write a message"
                 value={value}
-                onChange={onChange} />
+                onChange={onChange}
+                onKeyDown={handleKeyDown} />
 
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
@@ -482,7 +510,7 @@ const ChannelCreate = ({
                     <h3>Create Channel</h3>
                 </div>
                 <div>Name</div>
-                <input className="form-input" onChange={onChannelNamenIputChange} />
+                <input className="form-input" onChange={onChannelNamenIputChange} onKeyDown={(event) => handleKeyPress(event, handleCreateChannel)} />
                 <div>
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
@@ -504,7 +532,7 @@ const CreateUserForm = ({
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
-            <div className="overlay-content">
+            <div className="overlay-content" onKeyDown={(event) => handleKeyPress(event, setupUser)}>
                 <div>User ID</div>
 
                 <input
