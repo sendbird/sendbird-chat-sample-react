@@ -82,7 +82,6 @@ const GroupChannelStructuredData = (props) => {
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -112,7 +111,6 @@ const GroupChannelStructuredData = (props) => {
         if (error) {
             return onError(error);
         }
-
         const updatedChannels = [groupChannel, ...state.channels];
         updateState({ ...state, channels: updatedChannels, applicationUsers: [] });
     }
@@ -142,7 +140,6 @@ const GroupChannelStructuredData = (props) => {
         }
         updateState({ ...state, applicationUsers: users });
     }
-
 
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
@@ -180,9 +177,7 @@ const GroupChannelStructuredData = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "", messageData: {} });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -200,13 +195,11 @@ const GroupChannelStructuredData = (props) => {
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
                     console.log("failed")
                 });
-
         }
     }
 
@@ -241,7 +234,6 @@ const GroupChannelStructuredData = (props) => {
             localCacheEnabled: false,
             modules: [new GroupChannelModule()]
         });
-
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
@@ -311,13 +303,16 @@ const GroupChannelStructuredData = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
 
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel} channelRef={channelRef}>
+            <Channel
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
-
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
@@ -386,7 +381,6 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-
 const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
@@ -396,15 +390,12 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MembersList = ({ channel, handleMemberInvite }) => {
@@ -418,8 +409,6 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     } else {
         return null;
     }
-
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
@@ -479,7 +468,6 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             }
         </div >
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -487,9 +475,7 @@ const ProfileImage = ({ user }) => {
         return <img className="profile-image" src={user.plainProfileUrl} />
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
-
     }
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleShowAddDataToMessage, handleKeyDown }) => {
@@ -515,7 +501,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleS
                     onClick={() => { }}
                 />
             </div>
-
         </div>);
 }
 
@@ -526,7 +511,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
 
     if (applicationUsers.length > 0) {
@@ -537,7 +521,6 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
@@ -550,7 +533,6 @@ const MembersSelect = ({
                         <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
-
             </div>
         </div >;
     }
@@ -569,12 +551,10 @@ const CreateUserForm = ({
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleKeyPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-
 
                 <div>User Nickname</div>
                 <input
@@ -587,12 +567,9 @@ const CreateUserForm = ({
                     onClick={setupUser}>Connect</button>
             </div>
         </div>
-
-
     } else {
         return null;
     }
-
 }
 
 const AddDataToMessage = ({
@@ -640,8 +617,6 @@ const loadChannels = async () => {
     } catch (error) {
         return [null, error];
     }
-
-
 }
 
 const joinChannel = async (channel) => {
@@ -653,13 +628,11 @@ const joinChannel = async (channel) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
-
 
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
@@ -672,7 +645,6 @@ const createChannel = async (channelName, userIdsToInvite) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -683,7 +655,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
@@ -697,9 +668,7 @@ const getAllApplicationUsers = async () => {
         return [users, null];
     } catch (error) {
         return [null, error];
-
     }
-
 }
 
 export default GroupChannelStructuredData;

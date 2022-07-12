@@ -84,7 +84,6 @@ const GroupChannelBanUnbanUsers = (props) => {
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -180,7 +179,6 @@ const GroupChannelBanUnbanUsers = (props) => {
                     const updatedMessages = [...messages, message];
 
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -198,13 +196,11 @@ const GroupChannelBanUnbanUsers = (props) => {
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
                     console.log("failed")
                 });
-
         }
     }
 
@@ -229,7 +225,6 @@ const GroupChannelBanUnbanUsers = (props) => {
     const addToChannelMembersList = (userId) => {
         const groupChannelMembers = [...state.groupChannelMembers, userId];
         updateState({ ...state, groupChannelMembers: groupChannelMembers });
-
     }
 
     const setupUser = async () => {
@@ -239,7 +234,6 @@ const GroupChannelBanUnbanUsers = (props) => {
             localCacheEnabled: false,
             modules: [new GroupChannelModule()]
         });
-
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
@@ -345,13 +339,16 @@ const GroupChannelBanUnbanUsers = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
 
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel} channelRef={channelRef}>
+            <Channel
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
-
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
@@ -430,12 +427,10 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
 
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator, userIsOperator, userIdInputValue, banUnbanUser, bannedMembers }) => {
@@ -477,8 +472,6 @@ const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator
     } else {
         return null;
     }
-
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
@@ -494,7 +487,6 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-
                 </div>);
         })}
     </div >
@@ -537,9 +529,7 @@ const ProfileImage = ({ user }) => {
         return <img className="profile-image" src={user.plainProfileUrl} />
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
-
     }
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleKeyDown }) => {
@@ -564,7 +554,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleK
                     onClick={() => { }}
                 />
             </div>
-
         </div>);
 }
 
@@ -577,7 +566,6 @@ const MembersSelect = ({
     handleUpdateChannelMembersList
 
 }) => {
-
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -586,7 +574,6 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
@@ -624,7 +611,6 @@ const CreateUserForm = ({
                     className="form-input"
                     type="text" value={userIdInputValue} />
 
-
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
@@ -653,8 +639,6 @@ const loadChannels = async () => {
     } catch (error) {
         return [null, error];
     }
-
-
 }
 
 const joinChannel = async (channel) => {
@@ -666,13 +650,11 @@ const joinChannel = async (channel) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
-
 
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
@@ -685,7 +667,6 @@ const createChannel = async (channelName, userIdsToInvite) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -696,7 +677,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
@@ -710,16 +690,14 @@ const getAllApplicationUsers = async () => {
         return [users, null];
     } catch (error) {
         return [null, error];
-
     }
-
 }
 
 const getBannedMembers = async (channel) => {
   try {
     const listQuery = channel.createBannedUserListQuery();
     const bannedMembers = await listQuery.next();
-    
+
     return bannedMembers;
   } catch (error) {
     console.log("Error");

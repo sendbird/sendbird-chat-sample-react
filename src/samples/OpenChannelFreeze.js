@@ -67,7 +67,6 @@ const OpenChannelFreeze = (props) => {
         const [channel, messages, error] = await joinChannel(channelToJoin);
         if (error) {
             return onError(error);
-
         }
 
         //listen for incoming messages
@@ -77,7 +76,6 @@ const OpenChannelFreeze = (props) => {
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -95,7 +93,6 @@ const OpenChannelFreeze = (props) => {
         await currentlyJoinedChannel.exit();
 
         updateState({ ...state, currentlyJoinedChannel: null })
-
     }
 
     const handleCreateChannel = async () => {
@@ -184,7 +181,6 @@ const OpenChannelFreeze = (props) => {
                 console.log(error)
                 console.log("failed")
             });
-
         }
     }
 
@@ -196,7 +192,6 @@ const OpenChannelFreeze = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
             }).onFailed((error) => {
                 console.log(error)
                 console.log("failed")
@@ -211,7 +206,6 @@ const OpenChannelFreeze = (props) => {
             return message.messageId !== messageToDelete.messageId;
         });
         updateState({ ...state, messages: updatedMessages });
-
     }
 
     const updateMessage = async (message) => {
@@ -289,7 +283,11 @@ const OpenChannelFreeze = (props) => {
                 toggleShowCreateChannel={toggleShowCreateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel} channelRef={channelRef}>
+            <Channel
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 {state.currentlyJoinedChannel?.isFrozen && DisplayFreezeMessage()}
                 <MessagesList
                     messages={state.messages}
@@ -330,19 +328,17 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                                 <div>
                                     <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
                                         <img className="channel-icon" src='/icon_edit.png' />
-
                                     </button>
                                     <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
                                         <img className="channel-icon" src='/icon_delete.png' />
-
                                     </button>
                                 </div>}
-                        </div>);
+                        </div>
+                    );
                 })
             }
         </div >);
 }
-
 
 const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channelRef }) => {
     if (currentlyJoinedChannel) {
@@ -353,15 +349,12 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channel
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
@@ -382,9 +375,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
-
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
-
                 <img src={message.url} />
             </div >);
     }
@@ -393,7 +384,6 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
-
             <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
             <div>{message.message}</div>
 
@@ -405,11 +395,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-
-
         </div >
     );
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleKeyDown }) => {
@@ -419,12 +406,11 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleK
                 placeholder="write a message"
                 value={value}
                 onChange={onChange}
-                onKeyDown={handleKeyDown} />
-
+                onKeyDown={handleKeyDown}
+            />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -434,7 +420,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, handleK
                     onClick={() => { }}
                 />
             </div>
-
         </div>);
 }
 
@@ -447,13 +432,10 @@ const ChannelDetails = ({
     if (currentlyUpdatingChannel) {
         return <div className="overlay">
             <div className="overlay-content">
-
                 <h3>Update Channel Details</h3>
                 <div> Channel name</div>
                 <input className="form-input" onChange={onChannelNamenIputChange} />
-
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
-
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
         </div >;
@@ -479,7 +461,6 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
-
             </div>
         </div >;
     }
@@ -498,31 +479,28 @@ const CreateUserForm = ({
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleKeyPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue} />
-
+                    type="text" value={userIdInputValue}
+                />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue} />
-
+                    type="text" value={userNameInputValue}
+                />
                 <div>
-
                     <button
                         className="user-submit-button"
-                        onClick={setupUser}>Connect</button>
+                        onClick={setupUser}
+                    >Connect</button>
                 </div>
             </div>
-
         </div>
     } else {
         return null;
     }
-
 }
 
 const DisplayFreezeMessage = () => (
@@ -535,11 +513,9 @@ const loadChannels = async () => {
         const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
         const channels = await openChannelQuery.next();
         return [channels, null];
-
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const joinChannel = async (channel) => {
@@ -555,7 +531,6 @@ const joinChannel = async (channel) => {
     }
 }
 
-
 const createChannel = async (channelName) => {
     try {
         const openChannelParams = {};
@@ -566,7 +541,6 @@ const createChannel = async (channelName) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -577,7 +551,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) => {
@@ -585,9 +558,7 @@ const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) =>
         const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
         const openChannelParams = {};
         openChannelParams.name = channelNameInputValue;
-
         openChannelParams.operatorUserIds = [sb.currentUser.userId];
-
         const updatedChannel = await channel.updateChannel(openChannelParams);
         return [updatedChannel, null];
     } catch (error) {
