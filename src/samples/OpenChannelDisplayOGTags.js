@@ -12,7 +12,7 @@ import { timestampToTime } from '../utils/messageUtils';
 
 let sb;
 
-const BasicOpenChannelSample = (props) => {
+const OpenChannelDisplayOGTags = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
@@ -573,4 +573,4 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default BasicOpenChannelSample;
+export default OpenChannelDisplayOGTags;
