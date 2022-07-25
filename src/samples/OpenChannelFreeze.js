@@ -326,12 +326,14 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                                     <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
                                         <img className="channel-icon" src='/icon_delete.png' />
                                     </button>
-                                </div>}
+                                </div>
+                            }
                         </div>
                     );
                 })
             }
-        </div >);
+        </div>
+    );
 }
 
 const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channelRef }) => {
@@ -360,7 +362,8 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                     updateMessage={updateMessage}
                     message={message}
                 />
-            </div>);
+            </div>
+        );
     })
 }
 
@@ -389,7 +392,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-        </div >
+        </div>
     );
 }
 
@@ -433,7 +436,7 @@ const ChannelDetails = ({
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -457,7 +460,7 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }

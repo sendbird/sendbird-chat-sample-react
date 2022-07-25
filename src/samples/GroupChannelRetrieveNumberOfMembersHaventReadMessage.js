@@ -346,9 +346,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -410,9 +412,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUn
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, numberOfUnreadMembers, getNumberOfUnreadMembers, currentMessage, closeNumberOfUnreadMembers }) => {
@@ -431,7 +434,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </div>
                 <img src={message.url} />
                 {showNumberOfUnreadMembers && <div className="number-of-undelivered-members">Number of members unread a message: {numberOfUnreadMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUnreadMembers}>&#10006;</span></div>}
-            </div>);
+            </div>
+        );
     }
 
     return (
@@ -446,11 +450,12 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
                         <button className="control-button number-of-undelivered-message-btn" data-title="Get number of unread members" onClick={() => getNumberOfUnreadMembers(message)}><img className="message-icon" src='/unread_icon.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
             {showNumberOfUnreadMembers && <div className="number-of-undelivered-members">Number of members unread a message: {numberOfUnreadMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUnreadMembers}>&#10006;</span></div>}
-        </div >
+        </div>
     );
 }
 
@@ -495,7 +500,6 @@ const MembersSelect = ({
     handleCreateChannel,
     handleUpdateChannelMembersList
 }) => {
-
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -547,7 +551,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

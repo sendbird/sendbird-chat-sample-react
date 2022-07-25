@@ -377,9 +377,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -430,24 +432,23 @@ const MembersList = ({ channel, members, sortMembers, handleMemberInvite, regist
                         <div key={member.userId}>
                         {userIsOperator && <div key={member.userId} className="member-item-wrapper">
                             <div className="member-item">
-                            {member.nickname}
-                            {isOperator && <img className="message-icon" src='/operator_icon.png' />}
+                                {member.nickname}
+                                {isOperator && <img className="message-icon" src='/operator_icon.png' />}
                             </div>
                             {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
-                            {isOperator ? "Unregister as operator" : "Register as operator"}
+                                {isOperator ? "Unregister as operator" : "Register as operator"}
                             </button>}
                         </div>}
-                            {!userIsOperator &&
-                                <div className="member-item-wrapper">
-                                    <div className="member-item">
-                                        {member.nickname}
-                                        {isOperator && <img className="message-icon" src='/operator_icon.png' />}
-                                    </div>
+                            {!userIsOperator && <div className="member-item-wrapper">
+                                <div className="member-item">
+                                    {member.nickname}
+                                    {isOperator && <img className="message-icon" src='/operator_icon.png' />}
                                 </div>
-                            }
+                            </div>}
                         </div>
                     )
-            })}
+                })
+            }
         </div>;
     } else {
         return null;
@@ -467,9 +468,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -492,14 +494,13 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                {messageSentByCurrentUser &&
-                    <div>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                {messageSentByCurrentUser && <div>
+                    <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
+                    <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                </div>}
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
 }
 
@@ -544,7 +545,6 @@ const MembersSelect = ({
     handleCreateChannel,
     handleUpdateChannelMembersList
 }) => {
-
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -566,7 +566,7 @@ const MembersSelect = ({
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -596,7 +596,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

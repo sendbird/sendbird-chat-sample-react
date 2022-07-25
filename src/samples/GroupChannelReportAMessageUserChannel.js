@@ -399,9 +399,11 @@ const ChannelList = ({
                             </button>
                         </div>
                         <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -440,12 +442,12 @@ const MembersList = ({ channel, handleMemberInvite, toggleReportModal }) => {
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
             {channel.members.map((member) => {
-              return(
-                  <div className="member-item" key={member.userId}>
-                    {member.nickname}
-                    <button className="control-button" onClick={() => toggleReportModal(member, "User")}><img className="message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-                  </div>
-              )
+                return (
+                    <div className="member-item" key={member.userId}>
+                        {member.nickname}
+                        <button className="control-button" onClick={() => toggleReportModal(member, "User")}><img className="message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                    </div>
+                )
             })}
         </div>;
     } else {
@@ -467,9 +469,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleRepo
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, toggleReportModal }) => {
@@ -482,7 +485,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </div>
                 <img src={message.url} />
                 <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -494,14 +498,17 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <div>
-                  {messageSentByCurrentUser && <>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button> </>}
-                  <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                    {messageSentByCurrentUser &&
+                        <>
+                            <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
+                            <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                        </>
+                    }
+                    <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
                 </div>
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
 }
 
@@ -568,7 +575,7 @@ const MembersSelect = ({
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -631,7 +638,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {
