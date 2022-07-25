@@ -131,7 +131,6 @@ const GroupChannelOperatorsList = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
-
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
@@ -148,7 +147,6 @@ const GroupChannelOperatorsList = (props) => {
         return operators
     }
 
-
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
         updateState({ ...state, userNameInputValue });
@@ -158,7 +156,6 @@ const GroupChannelOperatorsList = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
-
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -343,9 +340,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -417,9 +416,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -431,7 +431,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -446,12 +447,12 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -483,7 +484,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-        </div>);
+        </div>
+    );
 }
 
 const MembersSelect = ({
@@ -516,7 +518,7 @@ const MembersSelect = ({
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -546,7 +548,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

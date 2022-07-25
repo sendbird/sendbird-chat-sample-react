@@ -136,7 +136,6 @@ const GroupChannelBanUnbanUsers = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
-
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
@@ -144,7 +143,6 @@ const GroupChannelBanUnbanUsers = (props) => {
         }
         updateState({ ...state, applicationUsers: users });
     }
-
 
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
@@ -155,7 +153,6 @@ const GroupChannelBanUnbanUsers = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
-
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -291,7 +288,6 @@ const GroupChannelBanUnbanUsers = (props) => {
             console.log("Error");
             console.log(error);
         }
-
         const bannedMembers = await getBannedMembers(currentlyJoinedChannel);
 
         updateState({ ...state, bannedMembers: bannedMembers, members: updateMembers });
@@ -332,7 +328,6 @@ const GroupChannelBanUnbanUsers = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
-
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
                 handleLeaveChannel={handleLeaveChannel}
@@ -391,9 +386,10 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>);
 }
 
 const ChannelName = ({ members }) => {
@@ -408,7 +404,6 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-
 const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
@@ -418,7 +413,6 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
 }
@@ -432,35 +426,38 @@ const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
             {members.map((member, index) => {
-              const isOperator = (member.role === "operator");
-              const memberIsSender = (member.userId !== userIdInputValue);
-              return(
-                <div key={member.userId}>
-                  {userIsOperator && <div key={member.userId} className="member-item-wrapper">
-                    <div className="member-item">
-                      {member.nickname}
-                      {isOperator && <img className="message-icon" src='/operator_icon.png' />}
+                const isOperator = (member.role === "operator");
+                const memberIsSender = (member.userId !== userIdInputValue);
+                return (
+                    <div key={member.userId}>
+                        {userIsOperator && <div key={member.userId} className="member-item-wrapper">
+                            <div className="member-item">
+                                {member.nickname}
+                                {isOperator && <img className="message-icon" src='/operator_icon.png' />}
+                            </div>
+                            {memberIsSender &&
+                                <>
+                                    <button className="member-list-btn" onClick={() => registerUnregisterAnOperator(member)}>
+                                        {isOperator ? "Unregister as operator" : "Register as operator"}
+                                    </button>
+                                    <button className="member-list-btn" onClick={() => banUnbanUser(member, index, "ban")}>Ban</button>
+                                </>
+                            }
+                        </div>}
+                        {!userIsOperator && <div className="member-item">{member.nickname}</div>}
                     </div>
-                    {memberIsSender &&
-                      <>
-                        <button className="member-list-btn" onClick={() => registerUnregisterAnOperator(member)}>
-                          {isOperator ? "Unregister as operator" : "Register as operator"}
-                        </button>
-                        <button className="member-list-btn" onClick={() => banUnbanUser(member, index, "ban")}>Ban</button>
-                      </>}
-                  </div>}
-                  {!userIsOperator && <div className="member-item">{member.nickname}</div>}
-                </div>
-              )
+                )
             })}
             {(bannedMembers.length !== 0) && <div>
-              <h3>Banned users</h3>
-              {bannedMembers.map((member, index) => {
-                return(<div key={member.userId} className="member-item-wrapper">
-                  <div className="member-item">{member.nickname}</div>
-                  <button className="member-list-btn" onClick={() => banUnbanUser(member, index, "unban")}>Unban</button>
-                </div>)
-              })}
+                <h3>Banned users</h3>
+                {bannedMembers.map((member, index) => {
+                    return (
+                        <div key={member.userId} className="member-item-wrapper">
+                            <div className="member-item">{member.nickname}</div>
+                            <button className="member-list-btn" onClick={() => banUnbanUser(member, index, "unban")}>Unban</button>
+                        </div>
+                    )
+                })}
             </div>}
         </div>;
     } else {
@@ -481,9 +478,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -495,7 +493,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -510,12 +509,12 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -580,9 +579,8 @@ const MembersSelect = ({
                         <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
-
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -599,7 +597,6 @@ const CreateUserForm = ({
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
@@ -613,15 +610,13 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
-
-
     } else {
         return null;
     }
-
 }
 
 // Helpful functions that call Sendbird

@@ -359,9 +359,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -435,9 +437,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, currentlyJ
                         currentlyJoinedChannel={currentlyJoinedChannel}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, currentlyJoinedChannel }) => {
@@ -449,7 +452,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const showAdditionalMessageControls = message.sender.userId === sb.currentUser.userId || currentlyJoinedChannel.myRole === 'operator';
 
@@ -464,10 +468,11 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
 }
 
@@ -512,7 +517,6 @@ const MembersSelect = ({
     handleCreateChannel,
     handleUpdateChannelMembersList
 }) => {
-
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -534,7 +538,7 @@ const MembersSelect = ({
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -564,7 +568,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

@@ -328,9 +328,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -408,7 +410,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
 
     if(message.messageType === "admin") {
@@ -427,16 +430,17 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
 }
 
 const ProfileImage = ({ user }) => {
     if(!user) {
-      return null
+        return null
     }
     if (user.plainProfileUrl) {
         return <img className="profile-image" src={user.plainProfileUrl} />
@@ -494,13 +498,14 @@ const MembersSelect = ({
                     return <div
                         key={user.userId}
                         className={`member-item ${userSelected ? 'member-selected' : ''}`}
-                        onClick={() => addToChannelMembersList(user.userId)}>
+                        onClick={() => addToChannelMembersList(user.userId)}
+                    >
                         <ProfileImage user={user} />
                         <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -530,7 +535,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

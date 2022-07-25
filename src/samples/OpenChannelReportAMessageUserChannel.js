@@ -365,29 +365,29 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
             </div>
             {showNotification && !currentlyJoinedChannel && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{ `${reportNotification} was reported` }</div>}
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}>
-                                {channel.name}
-                            </div>
-                            {userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-                                    </button>
-                                </div>}
-                            <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-                        </div>);
-                })
-            }
-        </div >);
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
+                        </div>
+                        {userIsOperator &&
+                            <div>
+                                <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                    <img className="channel-icon" src='/icon_edit.png' />
+                                </button>
+                                <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                    <img className="channel-icon" src='/icon_delete.png' />
+                                </button>
+                            </div>}
+                        <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
 const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, toggleNotificationMessage, showNotification, reportNotification, channelRef }) => {
@@ -418,7 +418,8 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleRepo
                     message={message}
                     toggleReportModal={toggleReportModal}
                 />
-            </div>);
+            </div>
+        );
     })
 }
 
@@ -430,7 +431,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, toggleReportModa
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
                 <img src={message.url} />
                 <button className="control-button" onClick={() => toggleReportModal(message)}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-            </div >);
+            </div>
+        );
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
@@ -449,7 +451,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, toggleReportModa
                 </button>
             </>}
             <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-        </div >
+        </div>
     );
 }
 
@@ -474,7 +476,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-        </div>);
+        </div>
+    );
 }
 
 const ChannelDetails = ({
@@ -492,7 +495,7 @@ const ChannelDetails = ({
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -547,7 +550,7 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -610,7 +613,6 @@ const joinChannel = async (channel) => {
         return [null, null, error]
     }
 }
-
 
 const createChannel = async (channelName) => {
     try {

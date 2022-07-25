@@ -341,32 +341,32 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                 <h1>Open Channels</h1>
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
             </div>
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}>
-                                {channel.name}
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
+                        </div>
+                        {userIsOperator &&
+                            <div>
+                                <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                    <img className="channel-icon" src='/icon_edit.png' />
+
+                                </button>
+                                <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                    <img className="channel-icon" src='/icon_delete.png' />
+
+                                </button>
                             </div>
-                            {userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-
-                                    </button>
-                                </div>}
-                        </div>);
-                })
-            }
-        </div >);
+                        }
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
-
 
 const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channelRef }) => {
     if (currentlyJoinedChannel) {
@@ -395,7 +395,8 @@ const MessagesList = ({ messages, handleDeleteMessage, handleCopyMessage, update
                     updateMessage={updateMessage}
                     message={message}
                 />
-            </div>);
+            </div>
+        );
     })
 }
 
@@ -436,7 +437,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessag
             <button className="control-button" onClick={() => handleCopyMessage(message)}>
                 <img className="oc-message-icon" src='/icon_copy.png' />
             </button>
-        </div >
+        </div>
     );
 }
 
@@ -462,8 +463,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isCopie
                     onClick={() => { }}
                 />
             </div>
-
-        </div>);
+        </div>
+    );
 }
 
 const ChannelDetails = ({
@@ -481,7 +482,7 @@ const ChannelDetails = ({
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -505,7 +506,7 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }

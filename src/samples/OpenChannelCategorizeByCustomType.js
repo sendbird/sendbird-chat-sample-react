@@ -351,10 +351,12 @@ const ChannelList = ({ channels, currentCustomType, handleChangeCustomType, hand
                                         <img className="channel-icon" src='/icon_delete.png' />
                                     </button>
                                 </div>}
-                        </div>);
+                        </div>
+                    );
                 })
             }
-        </div>);
+        </div>
+    );
 }
 
 const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channelRef }) => {
@@ -383,7 +385,8 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                     updateMessage={updateMessage}
                     message={message}
                 />
-            </div>);
+            </div>
+        );
     })
 }
 
@@ -394,7 +397,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                 <div>{timestampToTime(message.createdAt)}</div>
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
@@ -413,7 +417,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-        </div >
+        </div>
     );
 }
 
@@ -457,7 +461,7 @@ const ChannelDetails = ({
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -480,9 +484,8 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
-
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -523,22 +526,10 @@ const CreateUserForm = ({
     }
 }
 
-
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
     try {
         const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
-        const channels = await openChannelQuery.next();
-        return [channels, null];
-    } catch (error) {
-        return [null, error];
-    }
-}
-
-const loadChannelsByCustomType = async (type) => {
-    try {
-        const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
-        openChannelQuery.customTypes = [type];
         const channels = await openChannelQuery.next();
         return [channels, null];
     } catch (error) {

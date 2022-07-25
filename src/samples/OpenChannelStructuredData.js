@@ -333,31 +333,25 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                 <h1>Open Channels</h1>
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
             </div>
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}>
-                                {channel.name}
-                            </div>
-                            {userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-
-                                    </button>
-                                </div>
-                            }
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
                         </div>
-                    );
-                })
-            }
+                        {userIsOperator && <div>
+                            <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                <img className="channel-icon" src='/icon_edit.png' />
+                            </button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                        </div>}
+                    </div>
+                );
+            })}
         </div>
     );
 }
@@ -397,7 +391,8 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         <div>{data.price}</div>
                     </div>
                 }
-            </div>);
+            </div>
+        );
     })
 }
 
@@ -408,7 +403,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                 <div>{timestampToTime(message.createdAt)}</div>
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
@@ -472,7 +468,7 @@ const ChannelDetails = ({
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -496,7 +492,7 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -566,7 +562,7 @@ const AddDataToMessage = ({
                     <button className="form-button" onClick={toggleShowAddDataToMessage}>Cancel</button>
                 </div>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -594,7 +590,6 @@ const joinChannel = async (channel) => {
         return [null, null, error]
     }
 }
-
 
 const createChannel = async (channelName) => {
     try {

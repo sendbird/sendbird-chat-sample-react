@@ -364,33 +364,28 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
                 <button className="channel-create-button" style={{ marginTop: "5px" }} onClick={() => toggleNotificationsSettingModal()}>Notification Setting</button>
             </div>
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}>
-                                {channel.name}
-                            </div>
-                            {userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-                                    </button>
-                                </div>
-                            }
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
                         </div>
-                    );
-                })
-            }
+                        {userIsOperator && <div>
+                            <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                <img className="channel-icon" src='/icon_edit.png' />
+                            </button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                        </div>}
+                    </div>
+                );
+            })}
         </div>
     );
 }
-
 
 const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channelRef }) => {
     if (currentlyJoinedChannel) {
@@ -570,96 +565,96 @@ const NotificationsSettingModal = ({
     addNotificationsSnooze
 }) => {
     if (isShowNotificationsSettingModal) {
-        return(
-        <div className="overlay">
-            <div className="overlay-content notifications-overlay-content">
-                <div className="do-not-disturb-wrapper">
-                    <h3>Don't disturb</h3>
-                    <div><b>Start:</b></div>
-                    <div className="do-not-disturb-start-wrapper">
-                    <label className="notification-modal-label" htmlFor="start-hours">Hours</label>
-                    <input
-                        className="notification-modal-input"
-                        type="number"
-                        id="start-hours"
-                        name="start-hours"
-                        onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbStartHoursInputValue")}}
-                        value={doNotDisturbStartHoursInputValue}
-                        placeholder="min: 0, max: 24"
-                        min="0"
-                        max="24"
-                    />
-                    <label className="notification-modal-label" htmlFor="start-minutes">Minutes</label>
-                    <input
-                        className="notification-modal-input"
-                        type="number"
-                        id="start-minutes"
-                        name="start-minutes"
-                        onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbStartMinutesInputValue")}}
-                        value={doNotDisturbStartMinutesInputValue}
-                        placeholder="min: 0, max: 59"
-                        min="0"
-                        max="59"
-                    />
-                    </div>
-                    <div><b>End:</b></div>
-                    <div className="do-not-disturb-end-wrapper">
-                    <label className="notification-modal-label" htmlFor="end-hours">Hours</label>
-                    <input
-                        className="notification-modal-input"
-                        type="number"
-                        id="end-hours"
-                        name="end-hours"
-                        onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbEndHoursInputValue")}}
-                        value={doNotDisturbEndHoursInputValue}
-                        placeholder="min: 0, max: 24"
-                        min="0"
-                        max="24"
-                    />
-                    <label className="notification-modal-label" htmlFor="end-minutes">Minutes</label>
-                    <input
-                        className="notification-modal-input"
-                        type="number"
-                        id="end-minutes"
-                        name="end-minutes"
-                        onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbEndMinutesInputValue")}}
-                        value={doNotDisturbEndMinutesInputValue}
-                        placeholder="min: 0, max: 59"
-                        min="0"
-                        max="59"
-                    />
-                    </div>
-                    <button className="channel-create-button" onClick={addDoNotDisturb}>Add</button>
-                </div>
-                <div className="notifications-snooze-wrapper">
-                    <h3>Notifications snooze</h3>
-                    <div className="notifications-snooze-input-wrapper">
-                    <label className="notification-modal-label" htmlFor="start-snooze">Start</label>
+        return (
+            <div className="overlay">
+                <div className="overlay-content notifications-overlay-content">
+                    <div className="do-not-disturb-wrapper">
+                        <h3>Don't disturb</h3>
+                        <div><b>Start:</b></div>
+                        <div className="do-not-disturb-start-wrapper">
+                        <label className="notification-modal-label" htmlFor="start-hours">Hours</label>
                         <input
-                        className="notification-modal-input"
-                        type="date"
-                        id="start-snooze"
-                        name="start-snooze"
-                        onChange={(e) => {onNotificationModalInputChange(e, "snoozeStartInputValue")}}
-                        value={snoozeStartInputValue}
-                        min="0"
+                            className="notification-modal-input"
+                            type="number"
+                            id="start-hours"
+                            name="start-hours"
+                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbStartHoursInputValue")}}
+                            value={doNotDisturbStartHoursInputValue}
+                            placeholder="min: 0, max: 24"
+                            min="0"
+                            max="24"
                         />
-                    <label className="notification-modal-label" htmlFor="end-snooze">End</label>
+                        <label className="notification-modal-label" htmlFor="start-minutes">Minutes</label>
                         <input
-                        className="notification-modal-input"
-                        type="date"
-                        id="end-snooze"
-                        name="end-snooze"
-                        onChange={(e) => {onNotificationModalInputChange(e, "snoozeEndInputValue")}}
-                        value={snoozeEndInputValue}
-                        min="0"
+                            className="notification-modal-input"
+                            type="number"
+                            id="start-minutes"
+                            name="start-minutes"
+                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbStartMinutesInputValue")}}
+                            value={doNotDisturbStartMinutesInputValue}
+                            placeholder="min: 0, max: 59"
+                            min="0"
+                            max="59"
                         />
+                        </div>
+                        <div><b>End:</b></div>
+                        <div className="do-not-disturb-end-wrapper">
+                        <label className="notification-modal-label" htmlFor="end-hours">Hours</label>
+                        <input
+                            className="notification-modal-input"
+                            type="number"
+                            id="end-hours"
+                            name="end-hours"
+                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbEndHoursInputValue")}}
+                            value={doNotDisturbEndHoursInputValue}
+                            placeholder="min: 0, max: 24"
+                            min="0"
+                            max="24"
+                        />
+                        <label className="notification-modal-label" htmlFor="end-minutes">Minutes</label>
+                        <input
+                            className="notification-modal-input"
+                            type="number"
+                            id="end-minutes"
+                            name="end-minutes"
+                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbEndMinutesInputValue")}}
+                            value={doNotDisturbEndMinutesInputValue}
+                            placeholder="min: 0, max: 59"
+                            min="0"
+                            max="59"
+                        />
+                        </div>
+                        <button className="channel-create-button" onClick={addDoNotDisturb}>Add</button>
                     </div>
-                    <button className="channel-create-button" onClick={addNotificationsSnooze}>Add</button>
+                    <div className="notifications-snooze-wrapper">
+                        <h3>Notifications snooze</h3>
+                        <div className="notifications-snooze-input-wrapper">
+                        <label className="notification-modal-label" htmlFor="start-snooze">Start</label>
+                            <input
+                            className="notification-modal-input"
+                            type="date"
+                            id="start-snooze"
+                            name="start-snooze"
+                            onChange={(e) => {onNotificationModalInputChange(e, "snoozeStartInputValue")}}
+                            value={snoozeStartInputValue}
+                            min="0"
+                            />
+                        <label className="notification-modal-label" htmlFor="end-snooze">End</label>
+                            <input
+                            className="notification-modal-input"
+                            type="date"
+                            id="end-snooze"
+                            name="end-snooze"
+                            onChange={(e) => {onNotificationModalInputChange(e, "snoozeEndInputValue")}}
+                            value={snoozeEndInputValue}
+                            min="0"
+                            />
+                        </div>
+                        <button className="channel-create-button" onClick={addNotificationsSnooze}>Add</button>
+                    </div>
+                    <button onClick={toggleNotificationsSettingModal}>Cancel</button>
                 </div>
-                <button onClick={toggleNotificationsSettingModal}>Cancel</button>
             </div>
-        </div>
         )
     }
     return null;

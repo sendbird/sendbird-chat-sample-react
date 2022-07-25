@@ -327,9 +327,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -387,9 +389,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -401,7 +404,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -416,7 +420,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
             {message.ogMetaData && <div className='message-og-tags'>
@@ -492,7 +497,7 @@ const MembersSelect = ({
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -509,12 +514,10 @@ const CreateUserForm = ({
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-
 
                 <div>User Nickname</div>
                 <input
@@ -524,7 +527,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

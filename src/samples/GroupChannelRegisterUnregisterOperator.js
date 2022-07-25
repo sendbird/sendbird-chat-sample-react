@@ -361,7 +361,8 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -400,7 +401,7 @@ const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator
             {members.map((member) => {
                 const isOperator = (member.role === "operator");
                 const memberIsSender = (member.userId !== userIdInputValue);
-                return(
+                return (
                     <div key={member.userId}>
                         {userIsOperator && <div key={member.userId} className="member-item-wrapper">
                             <div className="member-item">
@@ -434,9 +435,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -448,7 +450,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -466,7 +469,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
 }
 
@@ -563,7 +566,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

@@ -345,9 +345,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -409,7 +411,8 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUn
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
     </div>
 }
@@ -422,15 +425,16 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
                 <div className="message-info">
-                  <div className="message-user-info">
-                      <div className="message-sender-name">{message.sender.nickname}{' '}</div>
-                      <div>{timestampToTime(message.createdAt)}</div>
-                  </div>
-                  {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of undelivered members"  onClick={() => getNumberOfUndeliveredMembers(message)}><img className="message-icon" src='/icon_not_delivered.png' /></button></div>}
+                    <div className="message-user-info">
+                        <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                        <div>{timestampToTime(message.createdAt)}</div>
+                    </div>
+                    {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of undelivered members"  onClick={() => getNumberOfUndeliveredMembers(message)}><img className="message-icon" src='/icon_not_delivered.png' /></button></div>}
                 </div>
                 <img src={message.url} />
                 {showNumberOfUndeliveredMembers && <div className="number-of-undelivered-members">Number of members unreceived a message: {numberOfUndeliveredMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUndeliveredMembers}>&#10006;</span></div>}
-            </div>);
+            </div>
+        );
     }
 
     return (
@@ -449,7 +453,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             </div>
             <div>{message.message}</div>
             {showNumberOfUndeliveredMembers && <div className="number-of-undelivered-members">Number of members unreceived a message: {numberOfUndeliveredMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUndeliveredMembers}>&#10006;</span></div>}
-        </div >
+        </div>
     );
 }
 
@@ -494,7 +498,6 @@ const MembersSelect = ({
     handleCreateChannel,
     handleUpdateChannelMembersList
 }) => {
-
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -516,7 +519,7 @@ const MembersSelect = ({
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -546,7 +549,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

@@ -413,7 +413,6 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-
 const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, sortChannels, channelRef }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
@@ -463,9 +462,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
 
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -477,7 +477,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -488,16 +489,14 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                {messageSentByCurrentUser &&
-                    <div>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                {messageSentByCurrentUser && <div>
+                    <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
+                    <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                </div>}
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -529,7 +528,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-        </div>);
+        </div>
+    );
 }
 
 const MembersSelect = ({
@@ -550,7 +550,6 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
@@ -564,7 +563,7 @@ const MembersSelect = ({
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -581,12 +580,10 @@ const CreateUserForm = ({
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-
 
                 <div>User Nickname</div>
                 <input
@@ -596,7 +593,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {
@@ -637,7 +635,6 @@ const joinChannel = async (channel) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {

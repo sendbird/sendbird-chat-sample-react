@@ -384,9 +384,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -410,7 +412,6 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
 }
@@ -426,25 +427,25 @@ const MembersList = ({ members, currentlyJoinedChannel, handleMemberInvite, regi
             {members.map((member) => {
                 const isOperator = (member.role === "operator");
                 const memberIsSender = (member.userId !== userIdInputValue);
-                return(
+                return (
                     <div key={member.userId}>
-                    {userIsOperator && <div key={member.userId} className="member-item-wrapper">
-                        <div className="member-item">
-                        {member.nickname}
-                        {isOperator && <img className="message-icon" src='/operator_icon.png' />}
-                        </div>
-                        {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
-                        {isOperator ? "Unregister as operator" : "Register as operator"}
-                        </button>}
-                        {memberIsSender &&
-                            <button className="mute-button" onClick={() => muteUnmuteUser(currentlyJoinedChannel, member)}>
-                                {member.isMuted ? "Unmute" : "Mute"}
-                            </button>
-                        }
-                    </div>}
-                    {!userIsOperator && <div className="member-item">{member.nickname}</div>}
+                        {userIsOperator && <div key={member.userId} className="member-item-wrapper">
+                            <div className="member-item">
+                                {member.nickname}
+                                {isOperator && <img className="message-icon" src='/operator_icon.png' />}
+                            </div>
+                            {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
+                                {isOperator ? "Unregister as operator" : "Register as operator"}
+                            </button>}
+                            {memberIsSender &&
+                                <button className="mute-button" onClick={() => muteUnmuteUser(currentlyJoinedChannel, member)}>
+                                    {member.isMuted ? "Unmute" : "Mute"}
+                                </button>
+                            }
+                        </div>}
+                        {!userIsOperator && <div className="member-item">{member.nickname}</div>}
                     </div>
-              )
+                )
             })}
         </div>;
     } else {
@@ -465,9 +466,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -479,7 +481,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -494,7 +497,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
         </div>
@@ -598,7 +602,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

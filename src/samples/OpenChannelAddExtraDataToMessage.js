@@ -349,11 +349,14 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                                     <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
                                         <img className="channel-icon" src='/icon_delete.png' />
                                     </button>
-                                </div>}
-                        </div>);
+                                </div>
+                            }
+                        </div>
+                    );
                 })
             }
-        </div >);
+        </div>
+    );
 }
 
 const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, toggleShowRequiredMessages, isShowRequiredMessages, channelRef }) => {
@@ -378,20 +381,20 @@ const ChannelHeader = ({ children }) => {
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, isShowRequiredMessages }) => {
     return <div className="message-list">
-       {
-         messages
-         .filter(message => isShowRequiredMessages ? message.metaArrays.length > 0 : message)
-         .map(message => {
-             return (
-                 <div key={message.messageId} className="oc-message-item">
-                     <Message
-                         handleDeleteMessage={handleDeleteMessage}
-                         updateMessage={updateMessage}
-                         message={message}
-                     />
-                 </div>);
-             })
-       }
+        {messages
+            .filter(message => isShowRequiredMessages ? message.metaArrays.length > 0 : message)
+            .map(message => {
+                return (
+                    <div key={message.messageId} className="oc-message-item">
+                        <Message
+                            handleDeleteMessage={handleDeleteMessage}
+                            updateMessage={updateMessage}
+                            message={message}
+                        />
+                    </div>
+                );
+            })
+        }
     </div>
 }
 
@@ -402,7 +405,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                 <div>{timestampToTime(message.createdAt)}</div>
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
@@ -421,9 +425,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-        </div >
+        </div>
     );
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, onMessageExtraDataInputValue }) => {
@@ -499,9 +502,8 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
-
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }

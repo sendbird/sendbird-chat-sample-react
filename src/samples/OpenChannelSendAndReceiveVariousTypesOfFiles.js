@@ -376,8 +376,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                 <div>{timestampToTime(message.createdAt)}</div>
                 <div className="oc-message-sender-name">{message.sender.nickname}{': '}</div>
                 {isImageMessage ? <img src={message.url} /> : <a className="oc-document-message" href={message.url} download={message.name}>
-                  <img className="oc-document-message-icon" src='/document_icon.png' />
-                  {message.name}
+                    <img className="oc-document-message-icon" src='/document_icon.png' />
+                    {message.name}
                 </a>}
             </div>
         );
@@ -398,7 +398,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-        </div >
+        </div>
     );
 }
 
@@ -423,7 +423,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-        </div>);
+        </div>
+    );
 }
 
 const ChannelDetails = ({
@@ -465,7 +466,7 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -504,7 +505,6 @@ const CreateUserForm = ({
         return null;
     }
 }
-
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {

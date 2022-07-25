@@ -222,8 +222,8 @@ const GroupChannelMarkMessagesAsRead = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -242,7 +242,6 @@ const GroupChannelMarkMessagesAsRead = (props) => {
     const addToChannelMembersList = (userId) => {
         const groupChannelMembers = [...state.groupChannelMembers, userId];
         updateState({ ...state, groupChannelMembers: groupChannelMembers });
-
     }
 
     const setupUser = async () => {
@@ -362,9 +361,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -455,17 +456,16 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
-            {
-                messageSentByYou && messageMarkAsDelivered && (
-                    <div>
-                        <img className={`message-icon double_tick-icon ${isMessagesRead && "double_tick-icon-read"}`} src={isMessagesRead ? '/double_tick_as_read.png' : '/double_tick.png'} />
-                    </div>
-                )
-            }
-        </div >
+            {messageSentByYou && messageMarkAsDelivered && (
+                <div>
+                    <img className={`message-icon double_tick-icon ${isMessagesRead && "double_tick-icon-read"}`} src={isMessagesRead ? '/double_tick_as_read.png' : '/double_tick.png'} />
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -532,7 +532,7 @@ const MembersSelect = ({
                     </div>
                 })}
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -562,7 +562,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {

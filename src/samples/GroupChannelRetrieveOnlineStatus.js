@@ -366,20 +366,21 @@ const ChannelList = ({
             </div>
             {channels.map(channel => {
                 return (
-                <div key={channel.url} className="channel-list-item" >
-                    <div
-                        className="channel-list-item-name"
-                        onClick={() => { handleJoinChannel(channel.url) }}
-                    >
-                        <ChannelName members={channel.members} />
-                        <div className="last-message">{channel.lastMessage?.message}</div>
+                    <div key={channel.url} className="channel-list-item" >
+                        <div
+                            className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}
+                        >
+                            <ChannelName members={channel.members} />
+                            <div className="last-message">{channel.lastMessage?.message}</div>
+                        </div>
+                        <div>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                            <img className="channel-icon" src='/icon_delete.png' />
-                        </button>
-                    </div>
-                </div>);
+                );
             })}
         </div>
     );
@@ -425,14 +426,14 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     }, [channel]);
 
     return (
-      currentChannel && (
-        <div className="members-list">
-            <button onClick={handleMemberInvite}>Invite</button>
-            {currentChannel.members.map((member) =>
-              <div className="member-item" key={member.userId}>{member.nickname}<span>{ member.connectionStatus }</span></div>
-            )}
-        </div>
-      )
+        currentChannel && (
+            <div className="members-list">
+                <button onClick={handleMemberInvite}>Invite</button>
+                {currentChannel.members.map((member) =>
+                    <div className="member-item" key={member.userId}>{member.nickname}<span>{ member.connectionStatus }</span></div>
+                )}
+            </div>
+        )
     )
 }
 
@@ -442,48 +443,49 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
 
             return (
-              <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
-                  <Message
-                    message={message}
-                    handleDeleteMessage={handleDeleteMessage}
-                    updateMessage={updateMessage}
-                    messageSentByYou={messageSentByYou} />
-                  <ProfileImage user={message.sender} />
-              </div>);
+                <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
+                    <Message
+                        message={message}
+                        handleDeleteMessage={handleDeleteMessage}
+                        updateMessage={updateMessage}
+                        messageSentByYou={messageSentByYou} />
+                    <ProfileImage user={message.sender} />
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
     if (message.url) {
         return (
-          <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
-              <div className="message-user-info">
-                  <div className="message-sender-name">{message.sender.nickname}{' '}</div>
-                  <div>{timestampToTime(message.createdAt)}</div>
-              </div>
-              <img src={message.url} />
-          </div >);
+            <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div>{timestampToTime(message.createdAt)}</div>
+                </div>
+                <img src={message.url} />
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
     return (
-      <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
-          <div className="message-info">
-              <div className="message-user-info">
-                  <div className="message-sender-name">{message.sender.nickname}{' '}</div>
-                  <div>{timestampToTime(message.createdAt)}</div>
-              </div>
-              {messageSentByCurrentUser &&
-              <div>
-                  <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                  <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-              </div>}
-          </div>
-          <div>{message.message}</div>
-      </div >
+        <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+            <div className="message-info">
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div>{timestampToTime(message.createdAt)}</div>
+                </div>
+                {messageSentByCurrentUser &&
+                <div>
+                    <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
+                    <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                </div>}
+            </div>
+            <div>{message.message}</div>
+        </div>
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -526,7 +528,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">

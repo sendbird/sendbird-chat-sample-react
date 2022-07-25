@@ -132,7 +132,6 @@ const GroupChannelCategorizeMessagesByCustomType = (props) => {
         updateState({ ...state, channels: updatedChannels });
     }
 
-
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
         if (error) {
@@ -183,7 +182,6 @@ const GroupChannelCategorizeMessagesByCustomType = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
-
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -385,9 +383,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div>);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -427,7 +427,6 @@ const Channel = ({ messages, currentlyJoinedChannel, children, handleLeaveChanne
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
 }
@@ -464,9 +463,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, selectedMe
                             updateMessage={updateMessage}
                             messageSentByYou={messageSentByYou} />
                         <ProfileImage user={message.sender} />
-                    </div>);
+                    </div>
+                );
             })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -563,9 +563,8 @@ const MembersSelect = ({
                         <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
-
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -582,7 +581,6 @@ const CreateUserForm = ({
         return <div className="overlay">
             <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
@@ -596,7 +594,8 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
     } else {
@@ -624,7 +623,7 @@ const AddCustomTypeToMessage = ({
                     <button className="form-button" onClick={toggleShowAddCustomTypeToMessage}>Cancel</button>
                 </div>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }

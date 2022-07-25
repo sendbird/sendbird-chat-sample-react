@@ -333,7 +333,8 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                     );
                 })
             }
-      </div >);
+        </div>
+    );
 }
 
 const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channelRef }) => {
@@ -466,9 +467,8 @@ const ChannelCreate = ({
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
-
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }

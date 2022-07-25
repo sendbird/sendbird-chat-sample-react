@@ -402,28 +402,29 @@ const ChannelList = ({
 }) => {
     return (
         <div className='channel-list'>
-        <div className="channel-type">
-            <h1>Group Channels</h1>
-            <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
+            <div className="channel-type">
+                <h1>Group Channels</h1>
+                <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
+            </div>
+            {channels.map(channel => {
+                return (
+                <div key={channel.url} className="channel-list-item" >
+                    <div
+                        className="channel-list-item-name"
+                        onClick={() => { handleJoinChannel(channel.url) }}
+                    >
+                        <ChannelName members={channel.members} />
+                        <div className="last-message">{channel.lastMessage?.message}</div>
+                    </div>
+                    <div>
+                        <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                            <img className="channel-icon" src='/icon_delete.png' />
+                        </button>
+                    </div>
+                </div>);
+            })}
         </div>
-        {channels.map(channel => {
-            return (
-            <div key={channel.url} className="channel-list-item" >
-                <div
-                    className="channel-list-item-name"
-                    onClick={() => { handleJoinChannel(channel.url) }}
-                >
-                    <ChannelName members={channel.members} />
-                    <div className="last-message">{channel.lastMessage?.message}</div>
-                </div>
-                <div>
-                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                        <img className="channel-icon" src='/icon_delete.png' />
-                    </button>
-                </div>
-            </div>);
-        })}
-        </div>);
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -492,19 +493,20 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread, isOpenThread }) => {
     return <div className="message-list">
         {messages.map(message => {
-        const messageSentByYou = message.sender.userId === sb.currentUser.userId;
+            const messageSentByYou = message.sender.userId === sb.currentUser.userId;
 
-        return (
-            <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
-                <Message
-                    isOpenThread={isOpenThread}
-                    message={message}
-                    openThread={openThread}
-                    handleDeleteMessage={handleDeleteMessage}
-                    updateMessage={updateMessage}
-                    messageSentByYou={messageSentByYou} />
-                <ProfileImage user={message.sender} />
-            </div>);
+            return (
+                <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
+                    <Message
+                        isOpenThread={isOpenThread}
+                        message={message}
+                        openThread={openThread}
+                        handleDeleteMessage={handleDeleteMessage}
+                        updateMessage={updateMessage}
+                        messageSentByYou={messageSentByYou} />
+                    <ProfileImage user={message.sender} />
+                </div>
+            );
         })}
     </div>
 }
@@ -512,17 +514,18 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, openThread, isOpenThread }) => {
     if (message.url) {
         return (
-        <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
-            <div className="message-user-info">
-                <div className="message-sender-name">{message.sender.nickname}{' '}</div>
-                <div>{timestampToTime(message.createdAt)}</div>
+            <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div>{timestampToTime(message.createdAt)}</div>
+                </div>
+                <img src={message.url} />
+                {!isOpenThread &&
+                    <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => openThread(message)}>
+                        <img className="message-icon" src='/icon_thread.png' />
+                    </button>}
             </div>
-            <img src={message.url} />
-            {!isOpenThread &&
-                <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => openThread(message)}>
-                    <img className="message-icon" src='/icon_thread.png' />
-                </button>}
-        </div >);
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -553,7 +556,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </button>}
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
 }
 
@@ -645,19 +648,20 @@ const CreateUserForm = ({
         <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
             <div>User ID</div>
             <input
-            onChange={onUserIdInputChange}
-            className="form-input"
-            type="text" value={userIdInputValue} />
+                onChange={onUserIdInputChange}
+                className="form-input"
+                type="text" value={userIdInputValue} />
 
             <div>User Nickname</div>
             <input
-            onChange={onUserNameInputChange}
-            className="form-input"
-            type="text" value={userNameInputValue} />
+                onChange={onUserNameInputChange}
+                className="form-input"
+                type="text" value={userNameInputValue} />
 
             <button
-            className="user-submit-button"
-            onClick={setupUser}>Connect</button>
+                className="user-submit-button"
+                onClick={setupUser}
+            >Connect</button>
         </div>
         </div>
     } else {
