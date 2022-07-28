@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
@@ -8,7 +8,7 @@ import {
 } from '@sendbird/chat/groupChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime } from '../utils/messageUtils';
+import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
 const GroupChannelCategorizeByCustomType = (props) => {
@@ -35,12 +35,32 @@ const GroupChannelCategorizeByCustomType = (props) => {
     const stateRef = useRef();
     stateRef.current = state;
 
+    const channelRef = useRef();
+
+    const scrollToBottom = (item, smooth) => {
+        item?.scrollTo({
+            top: item.scrollHeight,
+            behavior: smooth
+        })
+    }
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current)
+    }, [state.currentlyJoinedChannel])
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current, 'smooth')
+    }, [state.messages])
+
     const onError = (error) => {
         updateState({ ...state, error: error.message });
         console.log(error);
     }
 
     const handleJoinChannel = async (channelUrl) => {
+        if (state.currentlyJoinedChannel?.url === channelUrl) {
+            return null;
+        }
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
@@ -57,7 +77,6 @@ const GroupChannelCategorizeByCustomType = (props) => {
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
-
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
@@ -121,7 +140,6 @@ const GroupChannelCategorizeByCustomType = (props) => {
         updateState({ ...state, applicationUsers: users });
     }
 
-
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
         updateState({ ...state, userNameInputValue });
@@ -131,7 +149,6 @@ const GroupChannelCategorizeByCustomType = (props) => {
         const userIdInputValue = e.currentTarget.value;
         updateState({ ...state, userIdInputValue });
     }
-
 
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
@@ -153,9 +170,7 @@ const GroupChannelCategorizeByCustomType = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -173,13 +188,11 @@ const GroupChannelCategorizeByCustomType = (props) => {
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
                     console.log("failed")
                 });
-
         }
     }
 
@@ -204,7 +217,6 @@ const GroupChannelCategorizeByCustomType = (props) => {
     const addToChannelMembersList = (userId) => {
         const groupChannelMembers = [...state.groupChannelMembers, userId];
         updateState({ ...state, groupChannelMembers: groupChannelMembers });
-
     }
 
     const setupUser = async () => {
@@ -214,7 +226,6 @@ const GroupChannelCategorizeByCustomType = (props) => {
             localCacheEnabled: false,
             modules: [new GroupChannelModule()]
         });
-
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
@@ -271,19 +282,23 @@ const GroupChannelCategorizeByCustomType = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
 
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+            <Channel
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
-
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
                     fileSelected={state.file}
-                    onFileInputChange={onFileInputChange} />
+                    onFileInputChange={onFileInputChange}
+                />
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
@@ -337,9 +352,12 @@ const ChannelList = ({
                                     <img className="channel-icon" src='/icon_delete.png' />
                                 </button>
                             </div>
-                        </div>);
-            })}
-        </div >);
+                        </div>
+                    );
+                })
+            }
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -354,25 +372,21 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-
-const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel }) => {
+const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
     if (currentlyJoinedChannel) {
-        return <div className="channel">
+        return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MembersList = ({ channel, handleMemberInvite }) => {
@@ -386,8 +400,6 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     } else {
         return null;
     }
-
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
@@ -403,10 +415,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -418,7 +430,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -433,12 +446,12 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -446,9 +459,7 @@ const ProfileImage = ({ user }) => {
         return <img className="profile-image" src={user.plainProfileUrl} />
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
-
     }
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
@@ -457,12 +468,12 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <input
                 placeholder="write a message"
                 value={value}
-                onChange={onChange} />
-
+                onChange={onChange}
+                onKeyDown={(event => handleEnterPress(event, sendMessage))}
+            />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -472,8 +483,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-
-        </div>);
+        </div>
+    );
 }
 
 const MembersSelect = ({
@@ -485,7 +496,6 @@ const MembersSelect = ({
     handleUpdateChannelMembersList
 
 }) => {
-
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -494,7 +504,6 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
@@ -507,7 +516,6 @@ const MembersSelect = ({
                         <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
-
             </div>
         </div >;
     }
@@ -524,14 +532,12 @@ const CreateUserForm = ({
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
-            <div className="overlay-content">
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-
 
                 <div>User Nickname</div>
                 <input
@@ -541,15 +547,13 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
-
-
     } else {
         return null;
     }
-
 }
 
 // Helpful functions that call Sendbird
@@ -561,8 +565,6 @@ const loadChannels = async () => {
     } catch (error) {
         return [null, error];
     }
-
-
 }
 
 const joinChannel = async (channel) => {
@@ -574,13 +576,11 @@ const joinChannel = async (channel) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
-
 
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
@@ -593,7 +593,6 @@ const createChannel = async (channelName, userIdsToInvite) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -604,7 +603,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
@@ -618,9 +616,7 @@ const getAllApplicationUsers = async () => {
         return [users, null];
     } catch (error) {
         return [null, error];
-
     }
-
 }
 
 export default GroupChannelCategorizeByCustomType;
