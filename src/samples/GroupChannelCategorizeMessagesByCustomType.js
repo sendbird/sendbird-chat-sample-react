@@ -20,6 +20,7 @@ const GroupChannelCategorizeMessagesByCustomType = (props) => {
         messages: [],
         channels: [],
         showAddCustomTypeToMessage: false,
+        showCustomTypeMessages: false,
         currentMessageCustomType: null,
         selectedMessageCustomType: 'all',
         messageInputValue: "",
@@ -165,8 +166,12 @@ const GroupChannelCategorizeMessagesByCustomType = (props) => {
         }
     }
 
-    const handleChangeSelectedMessageCustomType = (e) => {
-        updateState({ ...state, selectedMessageCustomType: e.target.value });
+    const hideShowCustomTypeMessages = () => {
+        updateState({ ...state, showCustomTypeMessages: false })
+    }
+
+    const toggleShowCustomTypeMessages = (event) => {
+        updateState({ ...state, showCustomTypeMessages: !state.showCustomTypeMessages, selectedMessageCustomType: event.target.value });
     }
 
     const toggleShowAddCustomTypeToMessage = () => {
@@ -322,16 +327,14 @@ const GroupChannelCategorizeMessagesByCustomType = (props) => {
             <Channel
                 messages={state.messages}
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
-                selectedMessageCustomType={state.selectedMessageCustomType}
                 handleLeaveChannel={handleLeaveChannel}
-                handleChangeSelectedMessageCustomType={handleChangeSelectedMessageCustomType}
                 channelRef={channelRef}
+                toggleShowCustomTypeMessages={toggleShowCustomTypeMessages}
             >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
-                    selectedMessageCustomType={state.selectedMessageCustomType}
                 />
                 <MessageInput
                     value={state.messageInputValue}
@@ -352,6 +355,15 @@ const GroupChannelCategorizeMessagesByCustomType = (props) => {
                 currentMessageCustomType={state.currentMessageCustomType}
                 toggleShowAddCustomTypeToMessage={toggleShowAddCustomTypeToMessage}
                 handleAddCustomTypeToMessage={handleAddCustomTypeToMessage} />
+            <CustomTypeMessages
+                messages={state.messages}
+                showSelectedMessageCustomType={state.showSelectedMessageCustomType}
+                handleDeleteMessage={handleDeleteMessage}
+                updateMessage={updateMessage}
+                showCustomTypeMessages={state.showCustomTypeMessages}
+                selectedMessageCustomType={state.selectedMessageCustomType}
+                hideShowCustomTypeMessages={hideShowCustomTypeMessages}
+            />
         </>
     );
 };
@@ -403,30 +415,35 @@ const ChannelName = ({ members }) => {
 }
 
 
-const Channel = ({ messages, currentlyJoinedChannel, children, handleLeaveChannel, selectedMessageCustomType, handleChangeSelectedMessageCustomType, channelRef }) => {
+const Channel = ({ messages, currentlyJoinedChannel, children, handleLeaveChannel, channelRef, toggleShowCustomTypeMessages }) => {
     if (currentlyJoinedChannel) {
-        return <div className="channel" ref={channelRef}>
-            <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
-            <div>
-                <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
-                <span className="message-type-label">Sort messages by custom type:</span>
-                <select
-                    onChange={(e) => handleChangeSelectedMessageCustomType(e)}
-                    value={selectedMessageCustomType}
-                    className="message-type-select"
-                >
-                    <option value="all">all</option>
-                    {
-                        [...new Set(messages
-                            .map(message => message.customType)
-                            .filter(message => message))
-                        ].map(item =>
-                            <option value={item} key={item}>{item}</option>)
-                    }
-                </select>
+        return (
+            <div className="channel channel-fixed-header" ref={channelRef}>
+                <div className="channel-header-wrapper">
+                    <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
+                    <div>
+                        <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
+                        <div>
+                            {
+                                [...new Set(messages
+                                    .map(message => message.customType)
+                                    .filter(message => message))
+                                ].map(item =>
+                                    <button
+                                        className="custom-type-button"
+                                        value={item}
+                                        key={item}
+                                        onClick={(event) => toggleShowCustomTypeMessages(event)}
+                                    >
+                                        {item}
+                                    </button>)
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div>{children}</div>
             </div>
-            <div>{children}</div>
-        </div>;
+        )
     }
     return <div className="channel"></div>;
 }
@@ -448,10 +465,9 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     }
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, selectedMessageCustomType }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages
-            .filter(message => selectedMessageCustomType === 'all' ? message : message.customType === selectedMessageCustomType)
             .map(message => {
                 const messageSentByYou = message.sender.userId === sb.currentUser.userId;
 
@@ -622,6 +638,40 @@ const AddCustomTypeToMessage = ({
                     <button className="form-button" onClick={handleAddCustomTypeToMessage}>Save</button>
                     <button className="form-button" onClick={toggleShowAddCustomTypeToMessage}>Cancel</button>
                 </div>
+            </div>
+        </div>;
+    }
+    return null;
+}
+
+const CustomTypeMessages = ({
+    messages,
+    selectedMessageCustomType,
+    handleDeleteMessage,
+    updateMessage,
+    showCustomTypeMessages,
+    hideShowCustomTypeMessages
+}) => {
+    if (showCustomTypeMessages) {
+        return <div className="custom-type-messages">
+            <div className="custom-type-messages-content">
+                {messages
+                    .filter(message => message.customType === selectedMessageCustomType)
+                    .map(message => {
+                        const messageSentByYou = message.sender.userId === sb.currentUser.userId;
+
+                        return (
+                            <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
+                                <Message
+                                    message={message}
+                                    handleDeleteMessage={handleDeleteMessage}
+                                    updateMessage={updateMessage}
+                                    messageSentByYou={messageSentByYou} />
+                                <ProfileImage user={message.sender} />
+                            </div>
+                        );
+                    })}
+                <button onClick={hideShowCustomTypeMessages}>Close</button>
             </div>
         </div>;
     }
