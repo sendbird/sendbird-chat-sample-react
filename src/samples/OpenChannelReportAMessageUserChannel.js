@@ -259,17 +259,17 @@ const OpenChannelReportAMessageUserChannel = (props) => {
 
     const onReportCategoriesInputChange = (e) => {
         const reportCategoriesInputValue = e.currentTarget.value;
-        updateState({ ...state, reportCategoriesInputValue})
+        updateState({ ...state, reportCategoriesInputValue })
     }
 
     const onReportDescriptionInputChange = (e) => {
         const reportDescriptionInputValue = e.currentTarget.value;
-        updateState({ ...state, reportDescriptionInputValue})
+        updateState({ ...state, reportDescriptionInputValue })
     }
 
     const sendReport = async () => {
         const { currentlyJoinedChannel, reportCategoriesInputValue, reportDescriptionInputValue, reportObject, reportKey } = state;
-        switch(reportKey) {
+        switch (reportKey) {
             case 'Message':
                 // Report a message.
                 await currentlyJoinedChannel.reportMessage(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
@@ -364,7 +364,7 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                 <h1>Open Channels</h1>
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
             </div>
-            {showNotification && !currentlyJoinedChannel && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{ `${reportNotification} was reported` }</div>}
+            {showNotification && !currentlyJoinedChannel && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{`${reportNotification} was reported`}</div>}
             {channels.map(channel => {
                 const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
                 return (
@@ -382,7 +382,7 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                                     <img className="channel-icon" src='/icon_delete.png' />
                                 </button>
                             </div>}
-                        <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                        <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
                     </div>
                 );
             })}
@@ -394,7 +394,7 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, toggleN
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
-            {showNotification && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{ `${reportNotification} was reported` }</div>}
+            {showNotification && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{`${reportNotification} was reported`}</div>}
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
             </div>
@@ -424,13 +424,14 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleRepo
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, toggleReportModal }) => {
+    if (!message.sender) return null;
     if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
                 <img src={message.url} />
-                <button className="control-button" onClick={() => toggleReportModal(message)}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                <button className="control-button" onClick={() => toggleReportModal(message)}><img className="oc-message-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
             </div>
         );
     }
@@ -450,7 +451,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, toggleReportModa
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-            <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+            <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="oc-message-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
         </div>
     );
 }
@@ -501,7 +502,7 @@ const ChannelDetails = ({
 }
 
 const ReportModal = ({ isOpenReportModal, toggleReportModal, sendReport, onReportCategoriesInputChange, reportDescriptionInputValue, onReportDescriptionInputChange }) => {
-    if(isOpenReportModal) {
+    if (isOpenReportModal) {
         return <div className="overlay">
             <div className="overlay-content">
                 <h3>Report Modal</h3>

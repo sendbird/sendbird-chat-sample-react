@@ -193,8 +193,8 @@ const GroupChannelUsersOnlineStatus = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -242,7 +242,7 @@ const GroupChannelUsersOnlineStatus = (props) => {
     }
 
     const showUsersStatus = () => {
-      updateState({ ...state, isUsersStatus: !state.isUsersStatus });
+        updateState({ ...state, isUsersStatus: !state.isUsersStatus });
     }
 
     if (state.loading) {
@@ -375,7 +375,7 @@ const MembersList = ({ channel, handleMemberInvite, isUsersStatus, showUsersStat
         return <div className="members-list">
             <button className="members-invite-btn" onClick={handleMemberInvite}>Invite</button>
             <button className="show-users-status-btn" onClick={showUsersStatus}>
-              {isUsersStatus ? "Hide users status" : "Show users status"}
+                {isUsersStatus ? "Hide users status" : "Show users status"}
             </button>
             {channel.members.map((member) =>
                 <div className="member-item" key={member.userId}>{member.nickname}{isUsersStatus && <span>{member.connectionStatus}</span>}</div>
@@ -389,8 +389,8 @@ const MembersList = ({ channel, handleMemberInvite, isUsersStatus, showUsersStat
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message

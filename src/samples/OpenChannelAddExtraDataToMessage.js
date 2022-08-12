@@ -172,8 +172,8 @@ const OpenChannelAddExtraDataToMessage = (props) => {
     }
 
     const onMessageExtraDataInputValue = (e) => {
-      const isMessageExtraData = e.currentTarget.checked;
-      updateState({ ...state, isMessageExtraData });
+        const isMessageExtraData = e.currentTarget.checked;
+        updateState({ ...state, isMessageExtraData });
     }
 
     const sendMessage = async () => {
@@ -188,9 +188,9 @@ const OpenChannelAddExtraDataToMessage = (props) => {
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            if(isMessageExtraData) {
-              const meta = new MessageMetaArray({ key: "required", value: ["true"] });
-              userMessageParams.metaArrays = [meta];
+            if (isMessageExtraData) {
+                const meta = new MessageMetaArray({ key: "required", value: ["true"] });
+                userMessageParams.metaArrays = [meta];
             }
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded(async (message) => {
@@ -259,7 +259,7 @@ const OpenChannelAddExtraDataToMessage = (props) => {
     }
 
     const toggleShowRequiredMessages = () => {
-      updateState({ ...state, isShowRequiredMessages: !state.isShowRequiredMessages })
+        updateState({ ...state, isShowRequiredMessages: !state.isShowRequiredMessages })
     }
 
     if (state.loading) {
@@ -366,7 +366,7 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, toggleS
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
                 <button className="leave-channel" onClick={toggleShowRequiredMessages}>
-                  {isShowRequiredMessages ? "Show all messages" : "Show required messages"}
+                    {isShowRequiredMessages ? "Show all messages" : "Show required messages"}
                 </button>
             </div>
             <div>{children}</div>
@@ -399,7 +399,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, isShowRequ
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
@@ -439,13 +439,13 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, onMessa
                 onKeyDown={(event => handleEnterPress(event, sendMessage))}
             />
             <div>
-              <input
-                type="checkbox"
-                id="extra-data"
-                name="extra-data"
-                onChange={onMessageExtraDataInputValue}
-               />
-              <label htmlFor="extra-data">Add extra data</label>
+                <input
+                    type="checkbox"
+                    id="extra-data"
+                    name="extra-data"
+                    onChange={onMessageExtraDataInputValue}
+                />
+                <label htmlFor="extra-data">Add extra data</label>
             </div>
 
             <div className="message-input-buttons">

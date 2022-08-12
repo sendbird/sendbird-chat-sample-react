@@ -194,13 +194,13 @@ const OpenChannelSendAndReceiveVariousTypesOfFiles = (props) => {
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
-              message.type = fileMessageParams.mimeType;
-              const updatedMessages = [...messages, message];
-              updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
+                message.type = fileMessageParams.mimeType;
+                const updatedMessages = [...messages, message];
+                updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
             }).onFailed((error) => {
                 console.log(error)
                 console.log("failed")
-                updateState({ ...state, isImageSizeError: true})
+                updateState({ ...state, isImageSizeError: true })
             });
         }
     }
@@ -280,10 +280,10 @@ const OpenChannelSendAndReceiveVariousTypesOfFiles = (props) => {
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
             <Channel
-              currentlyJoinedChannel={state.currentlyJoinedChannel}
-              handleLeaveChannel={handleLeaveChannel}
-              isImageSizeError={state.isImageSizeError}
-              channelRef={channelRef}
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                isImageSizeError={state.isImageSizeError}
+                channelRef={channelRef}
             >
                 <MessagesList
                     messages={state.messages}
@@ -369,7 +369,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         const isImageMessage = message.type.includes("image");
         return (
             <div className="oc-message">

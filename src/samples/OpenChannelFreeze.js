@@ -368,7 +368,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
@@ -502,7 +502,7 @@ const CreateUserForm = ({
 }
 
 const DisplayFreezeMessage = () => (
-  <div className='frozen-toast'>Channel Frozen </div>
+    <div className='frozen-toast'>Channel Frozen </div>
 )
 
 // Helpful functions that call Sendbird

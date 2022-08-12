@@ -252,8 +252,8 @@ const OpenChannelUserDoNotDisturbOrSnooze = (props) => {
     }
 
     const onNotificationModalInputChange = (e, stateKey) => {
-      const updateStateKeyValue = e.currentTarget.value;
-      updateState({ ...state, [stateKey]: updateStateKeyValue });
+        const updateStateKeyValue = e.currentTarget.value;
+        updateState({ ...state, [stateKey]: updateStateKeyValue });
     }
 
     const addDoNotDisturb = async () => {
@@ -270,17 +270,17 @@ const OpenChannelUserDoNotDisturbOrSnooze = (props) => {
     }
 
     const addNotificationsSnooze = async () => {
-      const { snoozeStartInputValue, snoozeEndInputValue } = state;
-      const snoozeStart = snoozeStartInputValue.split("-").join('') + "00000";
-      const snoozeEnd = snoozeStartInputValue.split("-").join('') + "00000";
+        const { snoozeStartInputValue, snoozeEndInputValue } = state;
+        const snoozeStart = snoozeStartInputValue.split("-").join('') + "00000";
+        const snoozeEnd = snoozeStartInputValue.split("-").join('') + "00000";
 
-      if (snoozeStartInputValue && snoozeEndInputValue) {
-        await sb.setSnoozePeriod(true, +snoozeStart, +snoozeEnd);
+        if (snoozeStartInputValue && snoozeEndInputValue) {
+            await sb.setSnoozePeriod(true, +snoozeStart, +snoozeEnd);
 
-        alert("Mute notifications enabled");
-      } else {
-        alert("Fill in all fields");
-      }
+            alert("Mute notifications enabled");
+        } else {
+            alert("Fill in all fields");
+        }
     }
 
     if (state.loading) {
@@ -419,7 +419,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
@@ -572,82 +572,82 @@ const NotificationsSettingModal = ({
                         <h3>Don't disturb</h3>
                         <div><b>Start:</b></div>
                         <div className="do-not-disturb-start-wrapper">
-                        <label className="notification-modal-label" htmlFor="start-hours">Hours</label>
-                        <input
-                            className="notification-modal-input"
-                            type="number"
-                            id="start-hours"
-                            name="start-hours"
-                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbStartHoursInputValue")}}
-                            value={doNotDisturbStartHoursInputValue}
-                            placeholder="min: 0, max: 24"
-                            min="0"
-                            max="24"
-                        />
-                        <label className="notification-modal-label" htmlFor="start-minutes">Minutes</label>
-                        <input
-                            className="notification-modal-input"
-                            type="number"
-                            id="start-minutes"
-                            name="start-minutes"
-                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbStartMinutesInputValue")}}
-                            value={doNotDisturbStartMinutesInputValue}
-                            placeholder="min: 0, max: 59"
-                            min="0"
-                            max="59"
-                        />
+                            <label className="notification-modal-label" htmlFor="start-hours">Hours</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="start-hours"
+                                name="start-hours"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbStartHoursInputValue") }}
+                                value={doNotDisturbStartHoursInputValue}
+                                placeholder="min: 0, max: 24"
+                                min="0"
+                                max="24"
+                            />
+                            <label className="notification-modal-label" htmlFor="start-minutes">Minutes</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="start-minutes"
+                                name="start-minutes"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbStartMinutesInputValue") }}
+                                value={doNotDisturbStartMinutesInputValue}
+                                placeholder="min: 0, max: 59"
+                                min="0"
+                                max="59"
+                            />
                         </div>
                         <div><b>End:</b></div>
                         <div className="do-not-disturb-end-wrapper">
-                        <label className="notification-modal-label" htmlFor="end-hours">Hours</label>
-                        <input
-                            className="notification-modal-input"
-                            type="number"
-                            id="end-hours"
-                            name="end-hours"
-                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbEndHoursInputValue")}}
-                            value={doNotDisturbEndHoursInputValue}
-                            placeholder="min: 0, max: 24"
-                            min="0"
-                            max="24"
-                        />
-                        <label className="notification-modal-label" htmlFor="end-minutes">Minutes</label>
-                        <input
-                            className="notification-modal-input"
-                            type="number"
-                            id="end-minutes"
-                            name="end-minutes"
-                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbEndMinutesInputValue")}}
-                            value={doNotDisturbEndMinutesInputValue}
-                            placeholder="min: 0, max: 59"
-                            min="0"
-                            max="59"
-                        />
+                            <label className="notification-modal-label" htmlFor="end-hours">Hours</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="end-hours"
+                                name="end-hours"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbEndHoursInputValue") }}
+                                value={doNotDisturbEndHoursInputValue}
+                                placeholder="min: 0, max: 24"
+                                min="0"
+                                max="24"
+                            />
+                            <label className="notification-modal-label" htmlFor="end-minutes">Minutes</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="end-minutes"
+                                name="end-minutes"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbEndMinutesInputValue") }}
+                                value={doNotDisturbEndMinutesInputValue}
+                                placeholder="min: 0, max: 59"
+                                min="0"
+                                max="59"
+                            />
                         </div>
                         <button className="channel-create-button" onClick={addDoNotDisturb}>Add</button>
                     </div>
                     <div className="notifications-snooze-wrapper">
                         <h3>Notifications snooze</h3>
                         <div className="notifications-snooze-input-wrapper">
-                        <label className="notification-modal-label" htmlFor="start-snooze">Start</label>
+                            <label className="notification-modal-label" htmlFor="start-snooze">Start</label>
                             <input
-                            className="notification-modal-input"
-                            type="date"
-                            id="start-snooze"
-                            name="start-snooze"
-                            onChange={(e) => {onNotificationModalInputChange(e, "snoozeStartInputValue")}}
-                            value={snoozeStartInputValue}
-                            min="0"
+                                className="notification-modal-input"
+                                type="date"
+                                id="start-snooze"
+                                name="start-snooze"
+                                onChange={(e) => { onNotificationModalInputChange(e, "snoozeStartInputValue") }}
+                                value={snoozeStartInputValue}
+                                min="0"
                             />
-                        <label className="notification-modal-label" htmlFor="end-snooze">End</label>
+                            <label className="notification-modal-label" htmlFor="end-snooze">End</label>
                             <input
-                            className="notification-modal-input"
-                            type="date"
-                            id="end-snooze"
-                            name="end-snooze"
-                            onChange={(e) => {onNotificationModalInputChange(e, "snoozeEndInputValue")}}
-                            value={snoozeEndInputValue}
-                            min="0"
+                                className="notification-modal-input"
+                                type="date"
+                                id="end-snooze"
+                                name="end-snooze"
+                                onChange={(e) => { onNotificationModalInputChange(e, "snoozeEndInputValue") }}
+                                value={snoozeEndInputValue}
+                                min="0"
                             />
                         </div>
                         <button className="channel-create-button" onClick={addNotificationsSnooze}>Add</button>

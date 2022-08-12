@@ -366,7 +366,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
@@ -395,8 +395,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
             </div>
             {message.ogMetaData && <div className='oc-message-og-tags'>
                 <a className='og-tags-url' href={message.ogMetaData.url}>{message.ogMetaData.url}</a>
-                <h3 className='og-tags-title'>{ message.ogMetaData.title }</h3>
-                <p className='og-tags-description'>{ message.ogMetaData.description }</p>
+                <h3 className='og-tags-title'>{message.ogMetaData.title}</h3>
+                <p className='og-tags-description'>{message.ogMetaData.description}</p>
                 <img className='og-tags-img' src={message.ogMetaData.defaultImage.url} />
             </div>}
         </>

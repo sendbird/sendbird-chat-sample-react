@@ -363,7 +363,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
@@ -421,7 +421,7 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
 const ChannelDetails = ({
     currentlyUpdatingChannel,
     toggleChannelDetails,
-    handleUpdateChannel, 
+    handleUpdateChannel,
     onChannelNamenIputChange
 }) => {
     if (currentlyUpdatingChannel) {
