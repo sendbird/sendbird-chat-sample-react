@@ -81,7 +81,7 @@ const BasicOpenChannelSample = (props) => {
             updateState({ ...stateRef.current, applicationUsers: updatedUsers });
         }
         channelHandler.onUserExited = (channel, user) => {
-          const userIndex = stateRef.current.applicationUsers.findIndex((item => item.userId == user.userId));
+            const userIndex = stateRef.current.applicationUsers.findIndex((item => item.userId == user.userId));
             const updatedUsers = [...stateRef.current.applicationUsers];
             updatedUsers[userIndex].connectionStatus = "offline"
             updateState({ ...stateRef.current, applicationUsers: updatedUsers });
@@ -259,7 +259,7 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const showUsersStatus = async () => {
-      updateState({ ...state, isUsersStatus: !state.isUsersStatus });
+        updateState({ ...state, isUsersStatus: !state.isUsersStatus });
     }
 
     if (state.loading) {
@@ -360,7 +360,7 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, showUse
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={showUsersStatus}>
-                  {isUsersStatus ? "Hide users status" : "Show users status"}
+                    {isUsersStatus ? "Hide users status" : "Show users status"}
                 </button>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
             </div>
@@ -391,6 +391,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, isUsersSta
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, isUsersStatus, applicationUsers }) => {
+    if (!message.sender) return null;
     const user = applicationUsers.find((item) => item.userId === message.sender.userId);
 
     if (message.url) {

@@ -195,8 +195,8 @@ const GroupChannelRetrieveNumberOfMembersHaventReceivedMessage = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -289,7 +289,7 @@ const GroupChannelRetrieveNumberOfMembersHaventReceivedMessage = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
             <Channel
-              currentlyJoinedChannel={state.currentlyJoinedChannel}
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
                 handleLeaveChannel={handleLeaveChannel}
                 channelRef={channelRef}
             >
@@ -397,8 +397,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUndeliveredMembers, getNumberOfUndeliveredMembers, currentMessage, closeNumberOfUndeliveredMembers }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -429,7 +429,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                         <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                         <div>{timestampToTime(message.createdAt)}</div>
                     </div>
-                    {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of undelivered members"  onClick={() => getNumberOfUndeliveredMembers(message)}><img className="message-icon" src='/icon_not_delivered.png' /></button></div>}
+                    {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of undelivered members" onClick={() => getNumberOfUndeliveredMembers(message)}><img className="message-icon" src='/icon_not_delivered.png' /></button></div>}
                 </div>
                 <img src={message.url} />
                 {showNumberOfUndeliveredMembers && <div className="number-of-undelivered-members">Number of members unreceived a message: {numberOfUndeliveredMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUndeliveredMembers}>&#10006;</span></div>}
@@ -448,7 +448,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                        <button className="control-button number-of-undelivered-message-btn" data-title="Get number of undelivered members"  onClick={() => getNumberOfUndeliveredMembers(message)}><img className="message-icon" src='/icon_not_delivered.png' /></button>
+                        <button className="control-button number-of-undelivered-message-btn" data-title="Get number of undelivered members" onClick={() => getNumberOfUndeliveredMembers(message)}><img className="message-icon" src='/icon_not_delivered.png' /></button>
                     </div>}
             </div>
             <div>{message.message}</div>

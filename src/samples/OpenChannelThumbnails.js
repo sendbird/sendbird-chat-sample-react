@@ -192,7 +192,7 @@ const OpenChannelThumbnails = (props) => {
             const { currentlyJoinedChannel, messages } = state;
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
-            fileMessageParams.thumbnailSizes = [{maxWidth: 100, maxHeight: 100}, {maxWidth: 200, maxHeight: 200}];
+            fileMessageParams.thumbnailSizes = [{ maxWidth: 100, maxHeight: 100 }, { maxWidth: 200, maxHeight: 200 }];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
@@ -363,9 +363,9 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
-          <Thumbnails createdAt={message.createdAt} sender={message.sender} message={message} thumbnails={message.thumbnails} />);
+            <Thumbnails createdAt={message.createdAt} sender={message.sender} message={message} thumbnails={message.thumbnails} />);
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
@@ -494,11 +494,11 @@ const Thumbnails = ({ createdAt, sender, thumbnails, message }) => {
     const thumbnail = thumbnails[0];
 
     return (
-      <div className="oc-message">
-          <div>{timestampToTime(createdAt)}</div>
-          <div className="oc-message-sender-name">{sender.nickname}{' '}</div>
-          {thumbnail ? <img src={thumbnail.url} height={thumbnail.height} width={thumbnail.width} title="thumbnail" alt="thumbnail"  /> : <img src={message.url} height={message.height} width={message.width} title="message" alt="message"  />}
-      </div >
+        <div className="oc-message">
+            <div>{timestampToTime(createdAt)}</div>
+            <div className="oc-message-sender-name">{sender.nickname}{' '}</div>
+            {thumbnail ? <img src={thumbnail.url} height={thumbnail.height} width={thumbnail.width} title="thumbnail" alt="thumbnail" /> : <img src={message.url} height={message.height} width={message.width} title="message" alt="message" />}
+        </div >
     );
 };
 

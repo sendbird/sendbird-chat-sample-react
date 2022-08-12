@@ -63,7 +63,7 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             try {
                 await channel.markAsRead();
                 updateState({ ...stateRef.current, isMessagesRead: true });
-            } catch(error) {
+            } catch (error) {
                 console.log("error", error);
             }
         }
@@ -106,7 +106,7 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             try {
                 await channel.markAsDelivered()
                 const updatedMessages = [...stateRef.current.messages, message];
-                updateState({ ...stateRef.current, messages: updatedMessages, messageMarkAsDelivered: true})
+                updateState({ ...stateRef.current, messages: updatedMessages, messageMarkAsDelivered: true })
             } catch (error) {
                 console.log(error)
                 console.log("error")
@@ -195,7 +195,7 @@ const GroupChannelMarkMessagesAsRead = (props) => {
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
-                    updateState({ ...state, messages: updatedMessages, messageInputValue: ""})
+                    updateState({ ...state, messages: updatedMessages, messageInputValue: "" })
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -414,8 +414,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, messageMarkAsDelivered, currentlyJoinedChannel, isMessagesRead }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message

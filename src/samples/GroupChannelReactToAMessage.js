@@ -204,8 +204,8 @@ const GroupChannelReactToAMessage = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -431,8 +431,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, addMessageReaction, toggleReactions, isReactions, currentMessage, removeMessageReaction }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -486,7 +486,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 {message.reactions.map((react, i) => {
                     return <span className="reactions-item" key={i + react.key} onClick={() => removeMessageReaction(message, react.key)}>{react.key}<sup className="reactions-item-inner">{react.userIds.length > 1 ? react.userIds.length : ""}</sup></span>
                 })}
-              </div>}
+            </div>}
             <div className="react-button-wrapper">
                 {showReactions && <ul className="reactions-list">
                     <li>

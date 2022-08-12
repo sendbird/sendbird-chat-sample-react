@@ -26,7 +26,7 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
-        typingMembers:[],
+        typingMembers: [],
         loading: false,
         error: false
     });
@@ -89,10 +89,10 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
         channelHandler.onTypingStatusUpdated = (groupChannel) => {
             if (groupChannel.url === channel.url) {
                 const members = groupChannel.getTypingUsers();
-                updateState({ ...stateRef.current, typingMembers: members})
+                updateState({ ...stateRef.current, typingMembers: members })
             } else {
                 const members = []
-                updateState({ ...stateRef.current, typingMembers: members})
+                updateState({ ...stateRef.current, typingMembers: members })
             }
         }
 
@@ -266,7 +266,7 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
             }
         }
 
-        connectionHandler.onDisconnected =() => {
+        connectionHandler.onDisconnected = () => {
             if (state.currentlyJoinedChannel) {
                 handleChannelUpdate(state.currentlyJoinedChannel)
             }
@@ -324,11 +324,11 @@ const GroupChannelRetrieveOnlineStatus = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
-                <Channel
-                    currentlyJoinedChannel={state.currentlyJoinedChannel}
-                    handleLeaveChannel={handleLeaveChannel}
-                    channelRef={channelRef}
-                >
+            <Channel
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -430,7 +430,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
             <div className="members-list">
                 <button onClick={handleMemberInvite}>Invite</button>
                 {currentChannel.members.map((member) =>
-                    <div className="member-item" key={member.userId}>{member.nickname}<span>{ member.connectionStatus }</span></div>
+                    <div className="member-item" key={member.userId}>{member.nickname}<span>{member.connectionStatus}</span></div>
                 )}
             </div>
         )
@@ -440,8 +440,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -478,10 +478,10 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 {messageSentByCurrentUser &&
-                <div>
-                    <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                    <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                </div>}
+                    <div>
+                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
+                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                    </div>}
             </div>
             <div>{message.message}</div>
         </div>
@@ -545,8 +545,8 @@ const MembersSelect = ({
                         key={user.userId}
                         className={`member-item ${userSelected ? 'member-selected' : ''}`}
                         onClick={() => addToChannelMembersList(user.userId)}>
-                            <ProfileImage user={user} />
-                            <div className="member-item-name">{user.nickname}</div>
+                        <ProfileImage user={user} />
+                        <div className="member-item-name">{user.nickname}</div>
                     </div>
                 })}
             </div>
@@ -592,11 +592,11 @@ const DisplayTypingIndicator = (typingMembers) => {
     let typingIndicatorText = ""
 
     typingMembers.length === 1 ? typingIndicatorText = typingMembers[0].nickname + " is typing..." :
-      typingMembers.length === 2 ? typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " are typing..." :
-        typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " and others are typing..."
+        typingMembers.length === 2 ? typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " are typing..." :
+            typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " and others are typing..."
 
     return (
-      <div className='typing-indicator'>{typingIndicatorText}</div>
+        <div className='typing-indicator'>{typingIndicatorText}</div>
     )
 }
 
