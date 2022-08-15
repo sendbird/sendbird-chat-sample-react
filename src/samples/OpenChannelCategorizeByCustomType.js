@@ -391,7 +391,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>

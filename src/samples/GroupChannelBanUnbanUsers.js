@@ -98,7 +98,7 @@ const GroupChannelBanUnbanUsers = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
         sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
-        
+
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false, members: channel.members, userIsOperator: userIsOperator, bannedMembers: bannedMembers });
     }
 
@@ -202,8 +202,8 @@ const GroupChannelBanUnbanUsers = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -263,7 +263,7 @@ const GroupChannelBanUnbanUsers = (props) => {
     }
 
     const registerUnregisterAnOperator = (member) => {
-        if(member.role === "operator") {
+        if (member.role === "operator") {
             handleOperator("removeOperators", member);
             alert("Operator was unregister");
         } else {
@@ -273,25 +273,25 @@ const GroupChannelBanUnbanUsers = (props) => {
     }
 
     const banUnbanUser = async (member, index, callbackName) => {
-      const { currentlyJoinedChannel, members } = state;
-      const updateMembers = members.slice();
+        const { currentlyJoinedChannel, members } = state;
+        const updateMembers = members.slice();
 
-      if(currentlyJoinedChannel.myRole === "operator") {
-        try {
-          if(callbackName === "ban") {
-            await currentlyJoinedChannel.banUser(member, 1000000, "just banned");
-            updateMembers.splice(index, 1)
-          } else {
-            await currentlyJoinedChannel.unbanUser(member);
-          }
-        } catch (error) {
-            console.log("Error");
-            console.log(error);
+        if (currentlyJoinedChannel.myRole === "operator") {
+            try {
+                if (callbackName === "ban") {
+                    await currentlyJoinedChannel.banUser(member, 1000000, "just banned");
+                    updateMembers.splice(index, 1)
+                } else {
+                    await currentlyJoinedChannel.unbanUser(member);
+                }
+            } catch (error) {
+                console.log("Error");
+                console.log(error);
+            }
+            const bannedMembers = await getBannedMembers(currentlyJoinedChannel);
+
+            updateState({ ...state, bannedMembers: bannedMembers, members: updateMembers });
         }
-        const bannedMembers = await getBannedMembers(currentlyJoinedChannel);
-
-        updateState({ ...state, bannedMembers: bannedMembers, members: updateMembers });
-      }
     }
 
     if (state.loading) {
@@ -468,8 +468,8 @@ const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -683,15 +683,15 @@ const getAllApplicationUsers = async () => {
 }
 
 const getBannedMembers = async (channel) => {
-  try {
-    const listQuery = channel.createBannedUserListQuery();
-    const bannedMembers = await listQuery.next();
+    try {
+        const listQuery = channel.createBannedUserListQuery();
+        const bannedMembers = await listQuery.next();
 
-    return bannedMembers;
-  } catch (error) {
-    console.log("Error");
-    console.log(error);
-  }
+        return bannedMembers;
+    } catch (error) {
+        console.log("Error");
+        console.log(error);
+    }
 }
 
 export default GroupChannelBanUnbanUsers;

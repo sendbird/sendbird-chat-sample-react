@@ -199,8 +199,8 @@ const GroupChannelReportAMessageUserChannel = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -259,17 +259,17 @@ const GroupChannelReportAMessageUserChannel = (props) => {
 
     const onReportCategoriesInputChange = (e) => {
         const reportCategoriesInputValue = e.currentTarget.value;
-        updateState({ ...state, reportCategoriesInputValue})
+        updateState({ ...state, reportCategoriesInputValue })
     }
 
     const onReportDescriptionInputChange = (e) => {
         const reportDescriptionInputValue = e.currentTarget.value;
-        updateState({ ...state, reportDescriptionInputValue})
+        updateState({ ...state, reportDescriptionInputValue })
     }
 
     const sendReport = async () => {
         const { currentlyJoinedChannel, reportCategoriesInputValue, reportDescriptionInputValue, reportObject, reportKey } = state;
-        switch(reportKey) {
+        switch (reportKey) {
             case 'Message':
                 // Report a message.
                 await currentlyJoinedChannel.reportMessage(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
@@ -327,12 +327,12 @@ const GroupChannelReportAMessageUserChannel = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
             <ReportModal
-              isOpenReportModal={state.isOpenReportModal}
-              toggleReportModal={toggleReportModal}
-              sendReport={sendReport}
-              onReportCategoriesInputChange={onReportCategoriesInputChange}
-              reportDescriptionInputValue={state.reportDescriptionInputValue}
-              onReportDescriptionInputChange={onReportDescriptionInputChange}
+                isOpenReportModal={state.isOpenReportModal}
+                toggleReportModal={toggleReportModal}
+                sendReport={sendReport}
+                onReportCategoriesInputChange={onReportCategoriesInputChange}
+                reportDescriptionInputValue={state.reportDescriptionInputValue}
+                onReportDescriptionInputChange={onReportDescriptionInputChange}
             />
             <Channel
                 showNotification={state.showNotification}
@@ -341,7 +341,7 @@ const GroupChannelReportAMessageUserChannel = (props) => {
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
                 handleLeaveChannel={handleLeaveChannel}
                 channelRef={channelRef}
-              >
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
@@ -383,7 +383,7 @@ const ChannelList = ({
                 <h1>Group Channels</h1>
                 <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
             </div>
-            {showNotification && !currentlyJoinedChannel && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{ `${reportNotification} was reported` }</div>}
+            {showNotification && !currentlyJoinedChannel && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{`${reportNotification} was reported`}</div>}
             {channels.map(channel => {
                 return (
                     <div key={channel.url} className="channel-list-item" >
@@ -398,7 +398,7 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                        <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                        <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
                     </div>
                 );
             })}
@@ -422,7 +422,7 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, toggleN
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
-            {showNotification && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{ `${reportNotification} was reported` }</div>}
+            {showNotification && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{`${reportNotification} was reported`}</div>}
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
             </div>
@@ -445,7 +445,7 @@ const MembersList = ({ channel, handleMemberInvite, toggleReportModal }) => {
                 return (
                     <div className="member-item" key={member.userId}>
                         {member.nickname}
-                        <button className="control-button" onClick={() => toggleReportModal(member, "User")}><img className="message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                        <button className="control-button" onClick={() => toggleReportModal(member, "User")}><img className="message-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
                     </div>
                 )
             })}
@@ -458,8 +458,8 @@ const MembersList = ({ channel, handleMemberInvite, toggleReportModal }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleReportModal }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -484,7 +484,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-                <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="message-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
             </div>
         );
     }
@@ -504,7 +504,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                             <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
                         </>
                     }
-                    <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
+                    <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="message-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
                 </div>
             </div>
             <div>{message.message}</div>
@@ -581,7 +581,7 @@ const MembersSelect = ({
 }
 
 const ReportModal = ({ isOpenReportModal, toggleReportModal, sendReport, onReportCategoriesInputChange, reportDescriptionInputValue, onReportDescriptionInputChange }) => {
-    if(isOpenReportModal) {
+    if (isOpenReportModal) {
         return <div className="overlay">
             <div className="overlay-content">
                 <h3>Report Modal</h3>

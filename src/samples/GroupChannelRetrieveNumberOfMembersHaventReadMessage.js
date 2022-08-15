@@ -195,8 +195,8 @@ const GroupChannelRetrieveNumberOfMembersHaventReadMessage = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -244,14 +244,14 @@ const GroupChannelRetrieveNumberOfMembersHaventReadMessage = (props) => {
     }
 
     const getNumberOfUnreadMembers = (message) => {
-      const { currentlyJoinedChannel } = state;
-      const numberOfUnreadMembers = currentlyJoinedChannel.getUnreadMemberCount(message);
+        const { currentlyJoinedChannel } = state;
+        const numberOfUnreadMembers = currentlyJoinedChannel.getUnreadMemberCount(message);
 
-      updateState({ ...state, numberOfUnreadMembers, currentMessage: message })
+        updateState({ ...state, numberOfUnreadMembers, currentMessage: message })
     }
 
     const closeNumberOfUnreadMembers = () => {
-      updateState({ ...state, numberOfUnreadMembers: null })
+        updateState({ ...state, numberOfUnreadMembers: null })
     }
 
     if (state.loading) {
@@ -365,7 +365,7 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel,channelRef }) => {
+const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
@@ -398,8 +398,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, numberOfUnreadMembers, getNumberOfUnreadMembers, currentMessage, closeNumberOfUnreadMembers }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message

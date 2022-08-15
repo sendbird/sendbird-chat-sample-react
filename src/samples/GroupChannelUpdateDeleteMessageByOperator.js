@@ -198,8 +198,8 @@ const GroupChannelUpdateDeleteMessageByOperator = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -259,7 +259,7 @@ const GroupChannelUpdateDeleteMessageByOperator = (props) => {
     }
 
     const registerUnregisterAnOperator = (member) => {
-        if(member.role === "operator") {
+        if (member.role === "operator") {
             handleOperator("removeOperators", member);
             alert("Operator was unregister");
         } else {
@@ -402,7 +402,7 @@ const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator
             {members.map((member) => {
                 const isOperator = (member.role === "operator");
                 const memberIsSender = (member.userId !== userIdInputValue);
-                return(
+                return (
                     <div key={member.userId}>
                         {userIsOperator && <div key={member.userId} className="member-item-wrapper">
                             <div className="member-item">
@@ -426,8 +426,8 @@ const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, currentlyJoinedChannel }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message

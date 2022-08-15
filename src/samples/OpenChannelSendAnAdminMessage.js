@@ -379,7 +379,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
         );
     }
 
-    if(message.messageType === "admin") {
+    if (message.messageType === "admin") {
         return <AdminMessage message={message} />
     }
 
@@ -486,8 +486,8 @@ const CreateUserForm = ({
             <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
                 <input
-                  onChange={onUserIdInputChange}
-                  className="form-input"
+                    onChange={onUserIdInputChange}
+                    className="form-input"
                     type="text" value={userIdInputValue}
                 />
                 <div>User Nickname</div>
@@ -498,7 +498,7 @@ const CreateUserForm = ({
                 />
                 <div>
                     <button
-                      className="user-submit-button"
+                        className="user-submit-button"
                         onClick={setupUser}
                     >Connect</button>
                 </div>
@@ -510,11 +510,11 @@ const CreateUserForm = ({
 }
 
 const AdminMessage = ({ message }) => (
-  <div className="oc-message admin-message">
-      <div>{timestampToTime(message.createdAt)}</div>
-      <div className="oc-message-sender-name">{message.messageType}{':'}</div>
-      <div>{message.message}</div>
-  </div >
+    <div className="oc-message admin-message">
+        <div>{timestampToTime(message.createdAt)}</div>
+        <div className="oc-message-sender-name">{message.messageType}{':'}</div>
+        <div>{message.message}</div>
+    </div >
 )
 
 // Helpful functions that call Sendbird
