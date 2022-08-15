@@ -194,8 +194,8 @@ const GroupChannelUserProfileUpdate = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -247,30 +247,30 @@ const GroupChannelUserProfileUpdate = (props) => {
     }
 
     const toggleUserProfileModal = () => {
-      updateState({ ...state, isUserProfileModal: !state.isUserProfileModal });
+        updateState({ ...state, isUserProfileModal: !state.isUserProfileModal });
     }
 
     const onProfileImageInputChange = async (e) => {
-      const { currentUser } = state;
+        const { currentUser } = state;
 
-      if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-        const updatedUser = await updateUserProfile(currentUser.nickname, e.currentTarget.files[0]);
-        updateState({ ...state, currentUser: updatedUser });
-      }
+        if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+            const updatedUser = await updateUserProfile(currentUser.nickname, e.currentTarget.files[0]);
+            updateState({ ...state, currentUser: updatedUser });
+        }
     }
 
     const onProfileNicknameInputChange = (e) => {
-      const userProfileNicknameInputValue = e.currentTarget.value;
-      updateState({ ...state, userProfileNicknameInputValue })
+        const userProfileNicknameInputValue = e.currentTarget.value;
+        updateState({ ...state, userProfileNicknameInputValue })
     }
 
     const updateUserProfileNickname = async () => {
-      const { userProfileNicknameInputValue, currentUser } = state;
+        const { userProfileNicknameInputValue, currentUser } = state;
 
-      if(userProfileNicknameInputValue) {
-        const updatedUser = await updateUserProfile(userProfileNicknameInputValue, null, currentUser.profileUrl);
-        updateState({ ...state, currentUser: updatedUser, userProfileNicknameInputValue: "" });
-      }
+        if (userProfileNicknameInputValue) {
+            const updatedUser = await updateUserProfile(userProfileNicknameInputValue, null, currentUser.profileUrl);
+            updateState({ ...state, currentUser: updatedUser, userProfileNicknameInputValue: "" });
+        }
     }
 
     if (state.error) {
@@ -305,13 +305,13 @@ const GroupChannelUserProfileUpdate = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
             <UserProfileModal
-              isUserProfileModal={state.isUserProfileModal}
-              currentUser={state.currentUser}
-              userProfileNicknameInputValue={state.userProfileNicknameInputValue}
-              toggleUserProfileModal={toggleUserProfileModal}
-              onProfileImageInputChange={onProfileImageInputChange}
-              onProfileNicknameInputChange={onProfileNicknameInputChange}
-              updateUserProfileNickname={updateUserProfileNickname}
+                isUserProfileModal={state.isUserProfileModal}
+                currentUser={state.currentUser}
+                userProfileNicknameInputValue={state.userProfileNicknameInputValue}
+                toggleUserProfileModal={toggleUserProfileModal}
+                onProfileImageInputChange={onProfileImageInputChange}
+                onProfileNicknameInputChange={onProfileNicknameInputChange}
+                updateUserProfileNickname={updateUserProfileNickname}
             />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
@@ -352,7 +352,7 @@ const ChannelList = ({
             <div className="channel-type">
                 <h1>Group Channels</h1>
                 <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
-                <button className="channel-create-button" style={{ margin: "10px 0 0"}} onClick={toggleUserProfileModal}>Update Profile</button>
+                <button className="channel-create-button" style={{ margin: "10px 0 0" }} onClick={toggleUserProfileModal}>Update Profile</button>
             </div>
             {channels.map(channel => {
                 return (
@@ -420,8 +420,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -570,7 +570,7 @@ const CreateUserForm = ({
 }
 
 const UserProfileModal = ({ isUserProfileModal, toggleUserProfileModal, onProfileImageInputChange, onProfileNicknameInputChange, updateUserProfileNickname, currentUser, userProfileNicknameInputValue }) => {
-    if(isUserProfileModal) {
+    if (isUserProfileModal) {
         return (
             <div className="overlay">
                 <div className="overlay-content">

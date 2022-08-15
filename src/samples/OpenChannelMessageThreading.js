@@ -3,8 +3,8 @@ import { v4 as uuid } from 'uuid';
 
 import SendbirdChat from '@sendbird/chat';
 import {
-  OpenChannelModule,
-  OpenChannelHandler,
+    OpenChannelModule,
+    OpenChannelHandler,
 } from '@sendbird/chat/openChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
@@ -89,10 +89,10 @@ const OpenChannelMessageThreading = (props) => {
         };
 
         channelHandler.onMessageDeleted = (channel, message) => {
-        const updatedMessages = stateRef.current.messages.filter((messageObject) => {
-            return messageObject.messageId !== message;
-        });
-        updateState({ ...stateRef.current, messages: updatedMessages });
+            const updatedMessages = stateRef.current.messages.filter((messageObject) => {
+                return messageObject.messageId !== message;
+            });
+            updateState({ ...stateRef.current, messages: updatedMessages });
         }
         sb.openChannel.addOpenChannelHandler(uuid(), channelHandler);
         updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
@@ -185,13 +185,13 @@ const OpenChannelMessageThreading = (props) => {
         }
 
         currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
-        const updatedMessages = [...messages, message];
-        updateState(() => {
-            if (isThread) {
-                return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "" }
-            }
-            return { ...state, messages: updatedMessages, messageInputValue: "" }
-        });
+            const updatedMessages = [...messages, message];
+            updateState(() => {
+                if (isThread) {
+                    return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "" }
+                }
+                return { ...state, messages: updatedMessages, messageInputValue: "" }
+            });
 
         }).onFailed((error) => {
             console.log(error)
@@ -247,10 +247,10 @@ const OpenChannelMessageThreading = (props) => {
 
     const onFileThreadInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-        const { threadMessages, threadParentsMessage } = state;
-        const fileMessageParams = {parentMessageId: threadParentsMessage.messageId};
+            const { threadMessages, threadParentsMessage } = state;
+            const fileMessageParams = { parentMessageId: threadParentsMessage.messageId };
 
-        fileMessagesHandler(fileMessageParams, threadMessages, true, e);
+            fileMessagesHandler(fileMessageParams, threadMessages, true, e);
         }
     }
 
@@ -265,7 +265,7 @@ const OpenChannelMessageThreading = (props) => {
 
     const openThread = async (parentsMessage) => {
         const { currentlyJoinedChannel } = state;
-        const { params, threadedMessages} = await getParamsForThreading(parentsMessage, currentlyJoinedChannel);
+        const { params, threadedMessages } = await getParamsForThreading(parentsMessage, currentlyJoinedChannel);
         const message = await sb.message.getMessage(params);
         updateState({ ...state, isOpenThread: true, threadParentsMessage: message, threadMessages: threadedMessages })
     }
@@ -277,9 +277,9 @@ const OpenChannelMessageThreading = (props) => {
     const setupUser = async () => {
         const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
-        appId: SENDBIRD_INFO.appId,
-        localCacheEnabled: false,
-        modules: [new OpenChannelModule()]
+            appId: SENDBIRD_INFO.appId,
+            localCacheEnabled: false,
+            modules: [new OpenChannelModule()]
         });
 
         try {
@@ -298,7 +298,7 @@ const OpenChannelMessageThreading = (props) => {
         updateState({ ...state, loading: true });
         const [channels, error] = await loadChannels();
         if (error) {
-        return onError(error);
+            return onError(error);
         }
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
@@ -431,7 +431,7 @@ const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channel
     return <div className="channel"></div>;
 }
 
-const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, handleDeleteMessage, updateMessage}) => {
+const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, handleDeleteMessage, updateMessage }) => {
     return isOpenThread && (
         <div className="channel thread">
             <ChannelHeader>Thread</ChannelHeader>
@@ -451,7 +451,7 @@ const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, hand
 }
 
 const ChannelHeader = ({ children }) => {
-     return <div className="channel-header">{children}</div>;
+    return <div className="channel-header">{children}</div>;
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread, isOpenThread }) => {
@@ -471,6 +471,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, openThread, isOpenThread }) => {
+    if (!message.sender) return null;
     if (message.url) {
         return (
             <div className="oc-message">
@@ -517,22 +518,22 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenT
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 {isThread ? <><label className="file-upload-label" htmlFor="threadUpload" >Select File</label>
-                <input
-                    id="threadUpload"
-                    className="file-upload-button"
-                    type='file'
-                    hidden={true}
-                    onChange={onFileThreadInputChange}
-                    onClick={() => { }}
-                /></> : <><label className="file-upload-label" htmlFor="upload" >Select File</label>
-                <input
-                    id="upload"
-                    className="file-upload-button"
-                    type='file'
-                    hidden={true}
-                    onChange={onFileInputChange}
-                    onClick={() => { }}
-                /></>}
+                    <input
+                        id="threadUpload"
+                        className="file-upload-button"
+                        type='file'
+                        hidden={true}
+                        onChange={onFileThreadInputChange}
+                        onClick={() => { }}
+                    /></> : <><label className="file-upload-label" htmlFor="upload" >Select File</label>
+                    <input
+                        id="upload"
+                        className="file-upload-button"
+                        type='file'
+                        hidden={true}
+                        onChange={onFileInputChange}
+                        onClick={() => { }}
+                    /></>}
             </div>
         </div>
     );

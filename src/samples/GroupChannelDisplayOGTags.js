@@ -192,8 +192,8 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -379,8 +379,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -426,8 +426,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             <div>{message.message}</div>
             {message.ogMetaData && <div className='message-og-tags'>
                 <a className='og-tags-url' href={message.ogMetaData.url}>{message.ogMetaData.url}</a>
-                <h3 className='og-tags-title'>{ message.ogMetaData.title }</h3>
-                <p className='og-tags-description'>{ message.ogMetaData.description }</p>
+                <h3 className='og-tags-title'>{message.ogMetaData.title}</h3>
+                <p className='og-tags-description'>{message.ogMetaData.description}</p>
                 <img className='og-tags-img' src={message.ogMetaData.defaultImage.url} />
             </div>}
         </div>

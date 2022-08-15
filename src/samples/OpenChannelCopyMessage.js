@@ -226,7 +226,7 @@ const OpenChannelCopyMessage = (props) => {
         const copyMethod = messageToCopy.messageType === "file" ? "copyFileMessage" : "copyUserMessage";
 
         const response = await currentlyJoinedChannel[copyMethod](currentlyJoinedChannel, messageToCopy)
-          .catch((error) => console.log("Copy Error:", error));
+            .catch((error) => console.log("Copy Error:", error));
 
         if (response) {
             const updatedMessages = [...messages, response];
@@ -401,6 +401,7 @@ const MessagesList = ({ messages, handleDeleteMessage, handleCopyMessage, update
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, handleCopyMessage }) => {
+    if (!message.sender) return null;
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     if (message.url) {
         return (

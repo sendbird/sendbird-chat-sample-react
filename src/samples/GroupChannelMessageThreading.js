@@ -41,20 +41,20 @@ const GroupChannelMessageThreading = (props) => {
 
     const channelRef = useRef();
 
-        const scrollToBottom = (item, smooth) => {
-            item?.scrollTo({
-                top: item.scrollHeight,
-                behavior: smooth
-            })
-        }
+    const scrollToBottom = (item, smooth) => {
+        item?.scrollTo({
+            top: item.scrollHeight,
+            behavior: smooth
+        })
+    }
 
-        useEffect(() => {
-            scrollToBottom(channelRef.current)
-        }, [state.currentlyJoinedChannel])
+    useEffect(() => {
+        scrollToBottom(channelRef.current)
+    }, [state.currentlyJoinedChannel])
 
-        useEffect(() => {
-            scrollToBottom(channelRef.current, 'smooth')
-        }, [state.messages])
+    useEffect(() => {
+        scrollToBottom(channelRef.current, 'smooth')
+    }, [state.messages])
 
     const onError = (error) => {
         updateState({ ...state, error: error.message });
@@ -84,7 +84,7 @@ const GroupChannelMessageThreading = (props) => {
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
-            if(!message.parentMessageId) {
+            if (!message.parentMessageId) {
                 const updatedMessages = [...stateRef.current.messages, message];
                 updateState({ ...stateRef.current, messages: updatedMessages });
             } else {
@@ -173,13 +173,13 @@ const GroupChannelMessageThreading = (props) => {
         }
 
         currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
-        const updatedMessages = [...messages, message];
-        updateState(() => {
-            if (isThread) {
-                return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "" }
-            }
-            return { ...state, messages: updatedMessages, messageInputValue: "" }
-        });
+            const updatedMessages = [...messages, message];
+            updateState(() => {
+                if (isThread) {
+                    return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "" }
+                }
+                return { ...state, messages: updatedMessages, messageInputValue: "" }
+            });
 
         }).onFailed((error) => {
             console.log(error)
@@ -215,13 +215,13 @@ const GroupChannelMessageThreading = (props) => {
         fileMessageParams.file = event.currentTarget.files[0];
 
         currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
-        const updatedMessages = [...messages, message];
-        updateState(() => {
-            if (isThread) {
-                return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "", threadFile: null }
-            }
-            return { ...state, messages: updatedMessages, messageInputValue: "", file: null }
-        });
+            const updatedMessages = [...messages, message];
+            updateState(() => {
+                if (isThread) {
+                    return { ...state, threadMessages: updatedMessages, threadMessageInputValue: "", threadFile: null }
+                }
+                return { ...state, messages: updatedMessages, messageInputValue: "", file: null }
+            });
 
         }).onFailed((error) => {
             console.log(error)
@@ -240,7 +240,7 @@ const GroupChannelMessageThreading = (props) => {
     const onFileThreadInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             const { threadMessages, threadParentsMessage } = state;
-            const fileMessageParams = {parentMessageId: threadParentsMessage.messageId};
+            const fileMessageParams = { parentMessageId: threadParentsMessage.messageId };
             fileMessagesHandler(fileMessageParams, threadMessages, true, e);
         }
     }
@@ -257,7 +257,7 @@ const GroupChannelMessageThreading = (props) => {
     const openThread = async (parentsMessage) => {
         const { currentlyJoinedChannel } = state;
         const messageSentByYou = parentsMessage.sender.userId === sb.currentUser.userId;
-        const { params, threadedMessages} = await getParamsForThreading(parentsMessage, currentlyJoinedChannel)
+        const { params, threadedMessages } = await getParamsForThreading(parentsMessage, currentlyJoinedChannel)
         const message = await sb.message.getMessage(params);
         updateState({ ...state, isOpenThread: true, threadParentsMessage: message, threadMessages: threadedMessages, messageSentByYou: messageSentByYou })
     }
@@ -270,7 +270,7 @@ const GroupChannelMessageThreading = (props) => {
         updateState({ ...state, currentlyJoinedChannel: null });
         const [users, error] = await getAllApplicationUsers();
         if (error) {
-        return onError(error);
+            return onError(error);
         }
         updateState({ ...state, currentlyJoinedChannel: null, applicationUsers: users, groupChannelMembers: [sb.currentUser.userId] });
     }
@@ -283,9 +283,9 @@ const GroupChannelMessageThreading = (props) => {
     const setupUser = async () => {
         const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
-        appId: SENDBIRD_INFO.appId,
-        localCacheEnabled: false,
-        modules: [new GroupChannelModule()]
+            appId: SENDBIRD_INFO.appId,
+            localCacheEnabled: false,
+            modules: [new GroupChannelModule()]
         });
 
         await sendbirdChat.connect(userIdInputValue);
@@ -300,7 +300,7 @@ const GroupChannelMessageThreading = (props) => {
         updateState({ ...state, loading: true });
         const [channels, error] = await loadChannels();
         if (error) {
-        return onError(error);
+            return onError(error);
         }
 
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
@@ -408,20 +408,20 @@ const ChannelList = ({
             </div>
             {channels.map(channel => {
                 return (
-                <div key={channel.url} className="channel-list-item" >
-                    <div
-                        className="channel-list-item-name"
-                        onClick={() => { handleJoinChannel(channel.url) }}
-                    >
-                        <ChannelName members={channel.members} />
-                        <div className="last-message">{channel.lastMessage?.message}</div>
-                    </div>
-                    <div>
-                        <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                            <img className="channel-icon" src='/icon_delete.png' />
-                        </button>
-                    </div>
-                </div>);
+                    <div key={channel.url} className="channel-list-item" >
+                        <div
+                            className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}
+                        >
+                            <ChannelName members={channel.members} />
+                            <div className="last-message">{channel.lastMessage?.message}</div>
+                        </div>
+                        <div>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                        </div>
+                    </div>);
             })}
         </div>
     );
@@ -452,7 +452,7 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
     return <div className="channel"></div>;
 }
 
-const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, handleDeleteMessage, updateMessage, messageSentByYou}) => {
+const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, handleDeleteMessage, updateMessage, messageSentByYou }) => {
     return isOpenThread && (
         <div className="channel thread">
             <ChannelHeader>Thread</ChannelHeader>
@@ -474,7 +474,7 @@ const Thread = ({ isOpenThread, exitThread, children, threadParentsMessage, hand
 }
 
 const ChannelHeader = ({ children }) => {
-  return <div className="channel-header">{children}</div>;
+    return <div className="channel-header">{children}</div>;
 }
 
 const MembersList = ({ channel, handleMemberInvite }) => {
@@ -493,8 +493,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, openThread, isOpenThread }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -537,20 +537,20 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 {messageSentByCurrentUser &&
-                <div>
-                    <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => updateMessage(message)}>
-                        <img className="message-icon" src='/icon_edit.png' />
-                    </button>
-                    <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => handleDeleteMessage(message)}>
-                        <img className="message-icon" src='/icon_delete.png' />
-                    </button>
-                    {!isOpenThread &&
-                        <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => openThread(message)}>
-                            <img className="message-icon" src='/icon_thread.png' />
-                        </button>}
-                </div>}
+                    <div>
+                        <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => updateMessage(message)}>
+                            <img className="message-icon" src='/icon_edit.png' />
+                        </button>
+                        <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => handleDeleteMessage(message)}>
+                            <img className="message-icon" src='/icon_delete.png' />
+                        </button>
+                        {!isOpenThread &&
+                            <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => openThread(message)}>
+                                <img className="message-icon" src='/icon_thread.png' />
+                            </button>}
+                    </div>}
 
-                {!messageSentByCurrentUser && !isOpenThread && 
+                {!messageSentByCurrentUser && !isOpenThread &&
                     <button className={`control-button ${isOpenThread ? "display-none" : ""}`} onClick={() => openThread(message)}>
                         <img className="message-icon" src='/icon_thread.png' />
                     </button>}
@@ -580,22 +580,22 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, isOpenT
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 {isThread ? <><label className="file-upload-label" htmlFor="threadUpload" >Select File</label>
-                <input
-                    id="threadUpload"
-                    className="file-upload-button"
-                    type='file'
-                    hidden={true}
-                    onChange={onFileThreadInputChange}
-                    onClick={() => { }}
-                /></> : <><label className="file-upload-label" htmlFor="upload" >Select File</label>
-                <input
-                    id="upload"
-                    className="file-upload-button"
-                    type='file'
-                    hidden={true}
-                    onChange={onFileInputChange}
-                    onClick={() => { }}
-                /></>}
+                    <input
+                        id="threadUpload"
+                        className="file-upload-button"
+                        type='file'
+                        hidden={true}
+                        onChange={onFileThreadInputChange}
+                        onClick={() => { }}
+                    /></> : <><label className="file-upload-label" htmlFor="upload" >Select File</label>
+                    <input
+                        id="upload"
+                        className="file-upload-button"
+                        type='file'
+                        hidden={true}
+                        onChange={onFileInputChange}
+                        onClick={() => { }}
+                    /></>}
             </div>
         </div>);
 }
@@ -607,19 +607,19 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-    }) => {
+}) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
                 <button onClick={() => {
-                if (currentlyJoinedChannel) {
-                    handleUpdateChannelMembersList();
-                } else {
-                    handleCreateChannel();
-                }
+                    if (currentlyJoinedChannel) {
+                        handleUpdateChannelMembersList();
+                    } else {
+                        handleCreateChannel();
+                    }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
-                const userSelected = groupChannelMembers.some((member) => member === user.userId);
+                    const userSelected = groupChannelMembers.some((member) => member === user.userId);
                     return <div
                         key={user.userId}
                         className={`member-item ${userSelected ? 'member-selected' : ''}`}
@@ -642,27 +642,27 @@ const CreateUserForm = ({
     userIdInputValue,
     onUserNameInputChange,
     onUserIdInputChange
-    }) => {
+}) => {
     if (settingUpUser) {
         return <div className="overlay">
-        <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
-            <div>User ID</div>
-            <input
-                onChange={onUserIdInputChange}
-                className="form-input"
-                type="text" value={userIdInputValue} />
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
+                <div>User ID</div>
+                <input
+                    onChange={onUserIdInputChange}
+                    className="form-input"
+                    type="text" value={userIdInputValue} />
 
-            <div>User Nickname</div>
-            <input
-                onChange={onUserNameInputChange}
-                className="form-input"
-                type="text" value={userNameInputValue} />
+                <div>User Nickname</div>
+                <input
+                    onChange={onUserNameInputChange}
+                    className="form-input"
+                    type="text" value={userNameInputValue} />
 
-            <button
-                className="user-submit-button"
-                onClick={setupUser}
-            >Connect</button>
-        </div>
+                <button
+                    className="user-submit-button"
+                    onClick={setupUser}
+                >Connect</button>
+            </div>
         </div>
     } else {
         return null;
@@ -750,7 +750,7 @@ const getParamsForThreading = async (parentsMessage, currentlyJoinedChannel) => 
     try {
         const { threadedMessages } = await parentsMessage.getThreadedMessagesByTimestamp(30, paramsThreadedMessageListParams);
 
-        return {params: params, threadedMessages: threadedMessages}
+        return { params: params, threadedMessages: threadedMessages }
     } catch (e) {
         console.log('Error:', e);
     }

@@ -200,8 +200,8 @@ const GroupChannelUserDoNotDisturbOrSnooze = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -324,17 +324,17 @@ const GroupChannelUserDoNotDisturbOrSnooze = (props) => {
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
             <NotificationsSettingModal
-              isShowNotificationsSettingModal={state.isShowNotificationsSettingModal}
-              toggleNotificationsSettingModal={toggleNotificationsSettingModal}
-              onNotificationModalInputChange={onNotificationModalInputChange}
-              addDoNotDisturb={addDoNotDisturb}
-              doNotDisturbStartHoursInputValue={state.doNotDisturbStartHoursInputValue}
-              doNotDisturbStartMinutesInputValue={state.doNotDisturbStartMinutesInputValue}
-              doNotDisturbEndHoursInputValue={state.doNotDisturbEndHoursInputValue}
-              doNotDisturbEndMinutesInputValue={state.doNotDisturbEndMinutesInputValue}
-              snoozeStartInputValue={state.snoozeStartInputValue}
-              snoozeEndInputValue={state.snoozeEndInputValue}
-              addNotificationsSnooze={addNotificationsSnooze}
+                isShowNotificationsSettingModal={state.isShowNotificationsSettingModal}
+                toggleNotificationsSettingModal={toggleNotificationsSettingModal}
+                onNotificationModalInputChange={onNotificationModalInputChange}
+                addDoNotDisturb={addDoNotDisturb}
+                doNotDisturbStartHoursInputValue={state.doNotDisturbStartHoursInputValue}
+                doNotDisturbStartMinutesInputValue={state.doNotDisturbStartMinutesInputValue}
+                doNotDisturbEndHoursInputValue={state.doNotDisturbEndHoursInputValue}
+                doNotDisturbEndMinutesInputValue={state.doNotDisturbEndMinutesInputValue}
+                snoozeStartInputValue={state.snoozeStartInputValue}
+                snoozeEndInputValue={state.snoozeEndInputValue}
+                addNotificationsSnooze={addNotificationsSnooze}
             />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
@@ -443,8 +443,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -613,80 +613,80 @@ const NotificationsSettingModal = ({
                         <h3>Don't disturb</h3>
                         <div><b>Start:</b></div>
                         <div className="do-not-disturb-start-wrapper">
-                        <label className="notification-modal-label" htmlFor="start-hours">Hours</label>
-                        <input
-                            className="notification-modal-input"
-                            type="number"
-                            id="start-hours"
-                            name="start-hours"
-                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbStartHoursInputValue")}}
-                            value={doNotDisturbStartHoursInputValue}
-                            placeholder="min: 0, max: 24"
-                            min="0"
-                            max="24"
-                        />
-                        <label className="notification-modal-label" htmlFor="start-minutes">Minutes</label>
-                        <input
-                            className="notification-modal-input"
-                            type="number"
-                            id="start-minutes"
-                            name="start-minutes"
-                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbStartMinutesInputValue")}}
-                            value={doNotDisturbStartMinutesInputValue}
-                            placeholder="min: 0, max: 59"
-                            min="0"
-                            max="59"
-                        />
+                            <label className="notification-modal-label" htmlFor="start-hours">Hours</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="start-hours"
+                                name="start-hours"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbStartHoursInputValue") }}
+                                value={doNotDisturbStartHoursInputValue}
+                                placeholder="min: 0, max: 24"
+                                min="0"
+                                max="24"
+                            />
+                            <label className="notification-modal-label" htmlFor="start-minutes">Minutes</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="start-minutes"
+                                name="start-minutes"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbStartMinutesInputValue") }}
+                                value={doNotDisturbStartMinutesInputValue}
+                                placeholder="min: 0, max: 59"
+                                min="0"
+                                max="59"
+                            />
                         </div>
                         <div><b>End:</b></div>
                         <div className="do-not-disturb-end-wrapper">
-                        <label className="notification-modal-label" htmlFor="end-hours">Hours</label>
-                        <input
-                            className="notification-modal-input"
-                            type="number"
-                            id="end-hours"
-                            name="end-hours"
-                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbEndHoursInputValue")}}
-                            value={doNotDisturbEndHoursInputValue}
-                            placeholder="min: 0, max: 24"
-                            min="0"
-                            max="24"
-                        />
-                        <label className="notification-modal-label" htmlFor="end-minutes">Minutes</label>
-                        <input
-                            className="notification-modal-input"
-                            type="number"
-                            id="end-minutes"
-                            name="end-minutes"
-                            onChange={(e) => {onNotificationModalInputChange(e, "doNotDisturbEndMinutesInputValue")}}
-                            value={doNotDisturbEndMinutesInputValue}
-                            placeholder="min: 0, max: 59"
-                            min="0"
-                            max="59"
-                        />
+                            <label className="notification-modal-label" htmlFor="end-hours">Hours</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="end-hours"
+                                name="end-hours"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbEndHoursInputValue") }}
+                                value={doNotDisturbEndHoursInputValue}
+                                placeholder="min: 0, max: 24"
+                                min="0"
+                                max="24"
+                            />
+                            <label className="notification-modal-label" htmlFor="end-minutes">Minutes</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="end-minutes"
+                                name="end-minutes"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbEndMinutesInputValue") }}
+                                value={doNotDisturbEndMinutesInputValue}
+                                placeholder="min: 0, max: 59"
+                                min="0"
+                                max="59"
+                            />
                         </div>
                         <button className="channel-create-button" onClick={addDoNotDisturb}>Add</button>
                     </div>
                     <div className="notifications-snooze-wrapper">
                         <h3>Notifications snooze</h3>
                         <div className="notifications-snooze-input-wrapper">
-                        <label className="notification-modal-label" htmlFor="start-snooze">Start</label>
+                            <label className="notification-modal-label" htmlFor="start-snooze">Start</label>
                             <input
                                 className="notification-modal-input"
                                 type="date"
                                 id="start-snooze"
                                 name="start-snooze"
-                                onChange={(e) => {onNotificationModalInputChange(e, "snoozeStartInputValue")}}
+                                onChange={(e) => { onNotificationModalInputChange(e, "snoozeStartInputValue") }}
                                 value={snoozeStartInputValue}
                                 min="0"
                             />
-                        <label className="notification-modal-label" htmlFor="end-snooze">End</label>
+                            <label className="notification-modal-label" htmlFor="end-snooze">End</label>
                             <input
                                 className="notification-modal-input"
                                 type="date"
                                 id="end-snooze"
                                 name="end-snooze"
-                                onChange={(e) => {onNotificationModalInputChange(e, "snoozeEndInputValue")}}
+                                onChange={(e) => { onNotificationModalInputChange(e, "snoozeEndInputValue") }}
                                 value={snoozeEndInputValue}
                                 min="0"
                             />
@@ -698,7 +698,7 @@ const NotificationsSettingModal = ({
             </div>
         )
     }
-  return null;
+    return null;
 }
 
 // Helpful functions that call Sendbird

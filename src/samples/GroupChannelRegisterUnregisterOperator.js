@@ -198,8 +198,8 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -259,7 +259,7 @@ const GroupChannelRegisterUnregisterOperator = (props) => {
     }
 
     const registerUnregisterAnOperator = (member) => {
-        if(member.role === "operator") {
+        if (member.role === "operator") {
             handleOperator("removeOperators", member);
             alert("Operator was unregister");
         } else {
@@ -425,8 +425,8 @@ const MembersList = ({ members, handleMemberInvite, registerUnregisterAnOperator
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message

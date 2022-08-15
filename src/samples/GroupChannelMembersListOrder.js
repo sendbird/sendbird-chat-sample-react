@@ -201,8 +201,8 @@ const GroupChannelMembersListOrder = (props) => {
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-      const { currentlyJoinedChannel } = state;
-      await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state;
+        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
     }
 
     const updateMessage = async (message) => {
@@ -274,7 +274,7 @@ const GroupChannelMembersListOrder = (props) => {
     }
 
     const registerUnregisterAnOperator = (member) => {
-        if(member.role === "operator") {
+        if (member.role === "operator") {
             handleOperator("removeOperators", member);
             alert("Operator was unregister");
         } else {
@@ -428,17 +428,17 @@ const MembersList = ({ channel, members, sortMembers, handleMemberInvite, regist
                 ?.map((member) => {
                     const isOperator = (member.role === "operator");
                     const memberIsSender = (member.userId !== userIdInputValue);
-                    return(
+                    return (
                         <div key={member.userId}>
-                        {userIsOperator && <div key={member.userId} className="member-item-wrapper">
-                            <div className="member-item">
-                                {member.nickname}
-                                {isOperator && <img className="message-icon" src='/operator_icon.png' />}
-                            </div>
-                            {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
-                                {isOperator ? "Unregister as operator" : "Register as operator"}
-                            </button>}
-                        </div>}
+                            {userIsOperator && <div key={member.userId} className="member-item-wrapper">
+                                <div className="member-item">
+                                    {member.nickname}
+                                    {isOperator && <img className="message-icon" src='/operator_icon.png' />}
+                                </div>
+                                {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
+                                    {isOperator ? "Unregister as operator" : "Register as operator"}
+                                </button>}
+                            </div>}
                             {!userIsOperator && <div className="member-item-wrapper">
                                 <div className="member-item">
                                     {member.nickname}
@@ -458,8 +458,8 @@ const MembersList = ({ channel, members, sortMembers, handleMemberInvite, regist
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message

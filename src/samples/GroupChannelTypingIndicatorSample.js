@@ -26,7 +26,7 @@ const GroupChannelTypingIndicatorSample = (props) => {
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
-        typingMembers:[],
+        typingMembers: [],
         loading: false,
         error: false
     });
@@ -87,10 +87,10 @@ const GroupChannelTypingIndicatorSample = (props) => {
         channelHandler.onTypingStatusUpdated = (groupChannel) => {
             if (groupChannel.url === channel.url) {
                 const members = groupChannel.getTypingUsers();
-                updateState({ ...stateRef.current, typingMembers: members})
+                updateState({ ...stateRef.current, typingMembers: members })
             } else {
                 const members = []
-                updateState({ ...stateRef.current, typingMembers: members})
+                updateState({ ...stateRef.current, typingMembers: members })
             }
         }
 
@@ -401,8 +401,8 @@ const MembersList = ({ channel, handleMemberInvite }) => {
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -558,11 +558,11 @@ const DisplayTypingIndicator = (typingMembers) => {
     let typingIndicatorText = ""
 
     typingMembers.length === 1 ? typingIndicatorText = typingMembers[0].nickname + " is typing..." :
-      typingMembers.length === 2 ? typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " are typing..." :
-        typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " and others are typing..."
+        typingMembers.length === 2 ? typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " are typing..." :
+            typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " and others are typing..."
 
     return (
-      <div className='typing-indicator'>{typingIndicatorText}</div>
+        <div className='typing-indicator'>{typingIndicatorText}</div>
     )
 }
 
