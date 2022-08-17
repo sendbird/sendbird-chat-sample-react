@@ -408,10 +408,6 @@ const Channel = ({ messages, currentlyJoinedChannel, handleLeaveChannel, childre
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
-                {console.log([...new Set(messages
-                            .map(message => message.customType)
-                            .filter(message => message))
-                        ])}
                 <div>
                     {
                         [...new Set(messages
