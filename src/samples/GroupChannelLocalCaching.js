@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
-    GroupChannelHandler,
     GroupChannelModule,
     GroupChannelFilter,
     GroupChannelListOrder,
@@ -30,13 +29,79 @@ const GroupChannelLocalCaching = (props) => {
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
+        messageCollection: null,
         loading: false,
         error: false
     });
 
+
+
     //need to access state in message received callback
     const stateRef = useRef();
     stateRef.current = state;
+
+    const channelHandlers = {
+        onChannelsAdded: (context, channels) => {
+            const updatedChannels = [...channels, ...stateRef.current.channels];
+            updateState({ ...stateRef.current, channels: updatedChannels, applicationUsers: [] });
+        },
+        onChannelsDeleted: (context, channels) => {
+            const updatedChannels = stateRef.current.channels.filter((channel) => {
+                return !channels.includes(channel.url);
+            });
+            updateState({ ...stateRef.current, channels: updatedChannels });
+
+        },
+        onChannelsUpdated: (context, channels) => {
+            const updatedChannels = stateRef.current.channels.map((channel) => {
+                const updatedChannel = channels.find(incomingChannel => incomingChannel.url === channel.url);
+                if (updatedChannel) {
+                    return updatedChannel;
+                } else {
+                    return channel;
+                }
+            });
+
+            updateState({ ...stateRef.current, channels: updatedChannels });
+        },
+    }
+
+    const messageHandlers = {
+        onMessagesAdded: (context, channel, messages) => {
+            const updatedMessages = [...stateRef.current.messages, ...messages];
+
+            updateState({ ...stateRef.current, messages: updatedMessages });
+
+        },
+        onMessagesUpdated: (context, channel, messages) => {
+            const updatedMessages = stateRef.current.messages.map((message) => {
+                const messageWithMatchingId = messages.find(incomingMessage => incomingMessage.reqId === message.reqId);
+
+                if (messageWithMatchingId) {
+                    return messageWithMatchingId;
+                }
+                else {
+                    return message;
+                }
+            });
+
+            updateState({ ...stateRef.current, messages: updatedMessages });
+        },
+        onMessagesDeleted: (context, channel, messageIds) => {
+            const updateMessages = stateRef.current.messages.filter((message) => {
+                return !messageIds.includes(message.messageId);
+            });
+            updateState({ ...stateRef.current, messages: updateMessages });
+
+        },
+        onChannelUpdated: (context, channel) => {
+
+        },
+        onChannelDeleted: (context, channelUrl) => {
+        },
+        onHugeGapDetected: () => {
+        }
+    }
 
     const channelRef = useRef();
 
@@ -61,40 +126,31 @@ const GroupChannelLocalCaching = (props) => {
     }
 
     const handleJoinChannel = async (channelUrl) => {
+        if (state.messageCollection) {
+            state.messageCollection.dispose();
+        }
+
         if (state.currentlyJoinedChannel?.url === channelUrl) {
             return null;
         }
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
-        const [messages, error] = await loadCachedMessages(channel);
-        if (error) {
-            return onError(error);
-        }
-        // listen for incoming messages
-        const channelHandler = new GroupChannelHandler();
-        channelHandler.onUserJoined = () => { };
-        channelHandler.onChannelChanged = () => { };
-        channelHandler.onMessageUpdated = (channel, message) => {
-            const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
-            const updatedMessages = [...stateRef.current.messages];
-            updatedMessages[messageIndex] = message;
-            updateState({ ...stateRef.current, messages: updatedMessages });
+
+        const onCacheResult = (err, messages) => {
+            updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
+
         }
 
-        channelHandler.onMessageReceived = (channel, message) => {
-            const updatedMessages = [...stateRef.current.messages, message];
-            updateState({ ...stateRef.current, messages: updatedMessages });
-        };
+        const onApiResult = (err, messages) => {
+            updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
+        }
 
-        channelHandler.onMessageDeleted = (channel, message) => {
-            const updatedMessages = stateRef.current.messages.filter((messageObject) => {
-                return messageObject.messageId !== message;
-            });
-            updateState({ ...stateRef.current, messages: updatedMessages });
-        };
-        sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
+        const collection = loadMessages(channel, messageHandlers, onCacheResult, onApiResult);
+
+        updateState({ ...state, messageCollection: collection });
+
+
     }
 
     const handleLeaveChannel = async () => {
@@ -109,9 +165,6 @@ const GroupChannelLocalCaching = (props) => {
         if (error) {
             return onError(error);
         }
-
-        const updatedChannels = [groupChannel, ...state.channels];
-        updateState({ ...state, channels: updatedChannels, applicationUsers: [] });
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -125,10 +178,6 @@ const GroupChannelLocalCaching = (props) => {
         if (error) {
             return onError(error);
         }
-        const updatedChannels = state.channels.filter((channel) => {
-            return channel.url !== channelUrl;
-        });
-        updateState({ ...state, channels: updatedChannels });
     }
 
     const handleMemberInvite = async () => {
@@ -158,18 +207,17 @@ const GroupChannelLocalCaching = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue;
+            userMessageUpdateParams.message = state.messageInputValue
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue;
+            userMessageParams.message = state.messageInputValue
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-                    const updatedMessages = [...messages, message];
-                    updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
+                    updateState({ ...stateRef.current, messageInputValue: "" });
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -236,7 +284,8 @@ const GroupChannelLocalCaching = (props) => {
 
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
-        const [channels, error] = await loadChannels(true);
+
+        const [channels, error] = await loadChannels(channelHandlers);
         if (error) {
             return onError(error);
         }
@@ -263,13 +312,15 @@ const GroupChannelLocalCaching = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange} />
+                onUserNameInputChange={onUserNameInputChange}
+            />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
+            />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -334,8 +385,7 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div>
-    );
+        </div >);
 }
 
 const ChannelName = ({ members }) => {
@@ -344,7 +394,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname} </span>
+            return <span key={member.userId}>{member.nickname}</span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -408,7 +458,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div>);
+            </div >);
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -426,7 +476,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
 }
 
@@ -450,6 +500,7 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
+
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -470,6 +521,7 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
+
 }) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
@@ -512,18 +564,20 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue} />
-
+                    type="text" value={userIdInputValue}
+                />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue} />
-
+                    type="text" value={userNameInputValue}
+                />
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >Connect</button>
+                >
+                    Connect
+                </button>
             </div>
         </div>
     } else {
@@ -532,25 +586,7 @@ const CreateUserForm = ({
 }
 
 // Helpful functions that call Sendbird
-const loadChannels = async (isCaching) => {
-    if (isCaching) {
-        try {
-            loadCachedChannels()
-        } catch (error) {
-            console.log("Error", error)
-        }
-    }
-
-    try {
-        const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
-        const channels = await groupChannelQuery.next();
-        return [channels, null];
-    } catch (error) {
-        return [null, error];
-    }
-}
-
-const loadCachedChannels = async () => {
+const loadChannels = async (channelHandlers) => {
     const groupChannelFilter = new GroupChannelFilter();
     groupChannelFilter.includeEmpty = true;
 
@@ -559,52 +595,27 @@ const loadCachedChannels = async () => {
         order: GroupChannelListOrder.LATEST_LAST_MESSAGE,
     });
 
-    collection.setGroupChannelCollectionHandler();
+    collection.setGroupChannelCollectionHandler(channelHandlers);
 
     const channels = await collection.loadMore();
     return [channels, null];
 }
 
-const loadCachedMessages = async (channel) => {
+const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
     const messageFilter = new MessageFilter();
 
     const collection = channel.createMessageCollection({
         filter: messageFilter,
+        startingPoint: Date.now(),
+        limit: 100
     });
 
-    collection.setMessageCollectionHandler();
-
+    collection.setMessageCollectionHandler(messageHandlers);
     collection
         .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
-        .onCacheResult((err, messages) => {
-            // Messages will be retrieved from the local cache.
-            if (err) {
-                console.log('Error', err)
-            }
-            return [messages, null];
-        })
-        .onApiResult((err, messages) => {
-            // Messages will be retrieved from Sendbird server through API.
-            // According to the InitPolicy.CACHE_AND_REPLACE_BY_API,
-            // the existing data source needs to be cleared
-            // before adding retrieved messages to the local cache.
-            if (err) {
-                console.log('Error', err)
-            }
-            return [messages, null];
-        });
-
-    // Load next messages.
-    if (collection.hasNext) {
-        const messages = await collection.loadNext();
-        return [messages, null];
-    }
-
-    // Load previous messages.
-    if (collection.hasPrevious) {
-        const messages = await collection.loadPrevious();
-        return [messages, null];
-    }
+        .onCacheResult(onCacheResult)
+        .onApiResult(onApiResult);
+    return collection;
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
@@ -614,7 +625,7 @@ const inviteUsersToChannel = async (channel, userIds) => {
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
         const groupChannelParams = {};
-        groupChannelParams.addUserIds = userIdsToInvite;
+        groupChannelParams.invitedUserIds = userIdsToInvite;
         groupChannelParams.name = channelName;
         groupChannelParams.operatorUserIds = userIdsToInvite;
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
