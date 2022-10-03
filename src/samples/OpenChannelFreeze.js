@@ -79,7 +79,6 @@ const OpenChannelFreeze = (props) => {
         }
 
         channelHandler.onMessageReceived = (channel, message) => {
-            debugger;
             const updatedMessages = [...stateRef.current.messages, message];
             updateState({ ...stateRef.current, messages: updatedMessages });
         };
