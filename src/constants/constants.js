@@ -1,3 +1,3 @@
 export const SENDBIRD_INFO = {
-  appId: '{YOUR_SENDBIRD_APP_ID}'
+  appId: process.env.REACT_APP_SEND_BIRD_ID
 };
