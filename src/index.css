@@ -769,3 +769,148 @@ code {
 .notification-modal-input {
   width: 40%;
 }
+
+.open-poll-btn {
+  padding: 5px;
+  background: transparent;
+  color: black;
+  margin-left: 2px;
+}
+
+.create-poll-modal, .create-poll-modal_inputs {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-poll-modal {
+  position: relative;
+}
+
+.create-poll-modal input {
+  padding: 14px 32px 14px 6px;
+}
+
+.create-poll-modal_inputs {
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.create-poll-modal .input_wrapper {
+  margin-bottom: 5px;
+}
+
+.create-poll-modal .input_wrapper input[type="text"] {
+  width: 60%;
+}
+
+.create-poll-modal h3 {
+  text-align: center;
+}
+
+.option-add_btn {
+  border: 1px solid #cbcbcb;
+  border-radius: 0 4px 4px 0;
+  font-size: 14px;
+}
+
+.poll-close_btn {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  cursor: pointer;
+}
+
+.poll-create_btn {
+  margin: 0 auto;
+}
+
+.poll-options {
+  width: 100%;
+}
+
+.options_item {
+  padding: 0 4px;
+  margin-right: 4px;
+  background: #cbcbcb;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  transition: 1s;
+  pointer-events: none;
+  padding: 2px;
+  background-color: #424242;
+  border-radius: 4px;
+  font-size: 10px;
+  width: max-content;
+  z-index: 100;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  top: -1.5em;
+}
+
+.option-icon {
+  visibility:hidden;
+  width: 14px;
+  filter: brightness(0) invert(1);
+}
+
+.option_wrapper:hover .option-icon {
+  visibility: visible;
+}
+
+.create-poll-modal .option input[type="text"] {
+  width: 55%;
+}
+
+.add-new-option {
+  background: white;
+  border-radius: 4px;
+  color: black;
+  padding: 5px;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.poll-message {
+  position: relative;
+}
+
+.poll-status {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  font-size: 10px;
+  padding: 5px;
+}
+
+.option_wrapper label, .add-new-option {
+  margin-right: 10px;
+}
+
+.poll-status_wrapper {
+  width: 100%;
+  min-height: 25px;
+}
+
+.vote {
+  margin-right: 5px;
+  padding: 5px;
+  font-size: 10px;
+  background: white;
+  color: black;
+  border-radius: 50%;
+}

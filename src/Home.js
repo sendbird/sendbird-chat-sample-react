@@ -60,6 +60,7 @@ const Home = () => {
           <li><Link to="/group-channel-retrieve-number-of-members-havent-read-message">Group Channel Retrieve number of members haven't read message</Link></li>
           <li><Link to="/group-channel-user-do-not-disturb-or-snooze">Group Channel User do not disturb or snooze</Link></li>
           <li><Link to="/group-channel-structured-data">Group Channel Structured Data</Link></li>
+          <li><Link to="/group-channel-polls">Group Channel Polls</Link></li>
         </ul>
       </div>
     </div>
