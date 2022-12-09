@@ -742,7 +742,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
             {options.map((option, i) => {
               return (
                 <div key={option.id} className="freeze-channel input_wrapper option_wrapper">
-                  <span>{option.voteCount}</span>
+                  <span style={{ marginRight: "5px" }}>{option.voteCount}:</span>
                   {(status === "open") && 
                     <input
                       type={allowMultipleVotes ? "checkbox" : "radio"}
