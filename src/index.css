@@ -769,3 +769,70 @@ code {
 .notification-modal-input {
   width: 40%;
 }
+
+.scheduled-messages-list-modal {
+  position: relative;
+}
+
+.close-button {
+  background: none;
+  padding: 0;
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
+.update-input {
+  display: flex;
+}
+
+.update-input input {
+  width: 50%;
+}
+
+.scheduled-message-header {
+  font-weight: 800;
+  margin-bottom: 30px;
+}
+
+.schedule-message {
+  margin-top: 20px;
+}
+
+.cancel-button {
+  margin-right: 10px;
+}
+
+.scheduled-messages-settings-modal {
+  z-index: 2;
+}
+
+.settings-header {
+  margin-bottom: 30px;
+  font-weight: 800;
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  transition: 1s;
+  pointer-events: none;
+  padding: 2px;
+  background-color: #424242;
+  border-radius: 4px;
+  font-size: 10px;
+  width: max-content;
+  z-index: 100;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  top: -1.5em;
+}
