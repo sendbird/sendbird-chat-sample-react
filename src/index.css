@@ -812,6 +812,11 @@ code {
   font-weight: 800;
 }
 
+.schedule-message-error {
+  color: red;
+  margin-bottom: 20px;
+}
+
 [data-tooltip] {
   position: relative;
 }

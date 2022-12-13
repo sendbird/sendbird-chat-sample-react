@@ -38,6 +38,7 @@ const BasicGroupChannelSample = (props) => {
         scheduleTime: null,
         scheduleMessageInputValue: "",
         scheduleMessageToUpdate: null,
+        scheduleMessageRangeError: false,
     });
 
     //need to access state in message received callback
@@ -240,40 +241,52 @@ const BasicGroupChannelSample = (props) => {
 
     const sendScheduledMessage = async () => {
         const { scheduleMessageToUpdate, currentlyJoinedChannel, scheduledMessages } = state;
-        if (scheduleMessageToUpdate) {
-            const params = {
-                scheduledAt: Math.floor(new Date(state.scheduleDate + ' ' + state.scheduleTime).getTime())
-            };
-            if (state.scheduleMessageInputValue !== '') {
-                params.message = state.scheduleMessageInputValue
-            }
-            await currentlyJoinedChannel.updateScheduledUserMessage(
-                scheduleMessageToUpdate.scheduledInfo.scheduledMessageId,
-                params
-            );
-            const updatedMessages = await loadSchedulesMessages()
+        if (state.scheduleTime.replace(':', '') > getDate().min.slice(-5).replace(':', '')) {
+            if (scheduleMessageToUpdate) {
+                const params = {
+                    scheduledAt: Math.floor(new Date(state.scheduleDate + ' ' + state.scheduleTime).getTime())
+                };
+                if (state.scheduleMessageInputValue !== '') {
+                    params.message = state.scheduleMessageInputValue
+                }
+                await currentlyJoinedChannel.updateScheduledUserMessage(
+                    scheduleMessageToUpdate.scheduledInfo.scheduledMessageId,
+                    params
+                );
+                const updatedMessages = await loadSchedulesMessages()
 
-            updateState({ ...state, scheduledMessages: updatedMessages, scheduleMessageInputValue: "", scheduleMessageToUpdate: null, showScheduledMessageSettingsModal: false });
-        } else {
-            const userMessageParams = {
-                scheduledAt: Math.floor(new Date(state.scheduleDate + ' ' + state.scheduleTime).getTime())//1669987364000
-            };
-            userMessageParams.message = state.messageInputValue
-            currentlyJoinedChannel.createScheduledUserMessage(userMessageParams)
-                .onPending(message => {
-                    const updatedMessages = [...scheduledMessages, message]
-
-                    updateState({
-                        ...stateRef.current,
-                        messageInputValue: "",
-                        showScheduledMessageSettingsModal: false,
-                        scheduledMessages: updatedMessages
-                    });
-                })
-                .onFailed((error) => {
-                    console.log(error)
-                    console.log("failed")
+                updateState({
+                    ...state,
+                    scheduledMessages: updatedMessages,
+                    scheduleMessageInputValue: "",
+                    scheduleMessageToUpdate: null,
+                    showScheduledMessageSettingsModal: false,
+                    scheduleMessageRangeError: false
                 });
+            } else {
+                const userMessageParams = {
+                    scheduledAt: Math.floor(new Date(state.scheduleDate + ' ' + state.scheduleTime).getTime())
+                };
+                userMessageParams.message = state.messageInputValue
+                currentlyJoinedChannel.createScheduledUserMessage(userMessageParams)
+                    .onPending(message => {
+                        const updatedMessages = [...scheduledMessages, message]
+
+                        updateState({
+                            ...stateRef.current,
+                            messageInputValue: "",
+                            showScheduledMessageSettingsModal: false,
+                            scheduledMessages: updatedMessages,
+                            scheduleMessageRangeError: false,
+                        });
+                    })
+                    .onFailed((error) => {
+                        console.log(error)
+                        console.log("failed")
+                    });
+            }
+        } else {
+            updateState({ ...stateRef.current, scheduleMessageRangeError: true });
         }
     }
 
@@ -341,7 +354,7 @@ const BasicGroupChannelSample = (props) => {
 
     const getDate = () => {
         const today = Date.now()
-        const min = formatDate(today)
+        const min = formatDate(today + 300000)
         const max = formatDate(today + 2592000000)
 
         return {min, max}
@@ -478,6 +491,7 @@ const BasicGroupChannelSample = (props) => {
                 scheduleMessageToUpdate={state.scheduleMessageToUpdate}
                 scheduleDate={state.scheduleDate}
                 getDate={getDate}
+                scheduleMessageRangeError={state.scheduleMessageRangeError}
             />
             <ScheduledMessageListModal
                 showScheduledMessageListModal={state.showScheduledMessageListModal}
@@ -782,12 +796,16 @@ const ScheduledMessageSettingsModal = ({
     updateScheduleTime,
     scheduleMessageToUpdate,
     getDate,
+    scheduleMessageRangeError,
 }) => {
     if (showScheduledMessageSettingsModal) {
         return <div className="overlay scheduled-messages-settings-modal">
             <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div className="settings-header">
                     {scheduleMessageToUpdate ? 'Reschedule message': 'Send shcheduled message'}
+                </div>
+                <div className="schedule-message-error">
+                    {scheduleMessageRangeError && 'Scheduled time should be between 5 minutes and 30 days'}
                 </div>
                 <input
                     type="datetime-local"
