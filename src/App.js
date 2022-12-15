@@ -49,6 +49,8 @@ import GroupChannelUserDoNotDisturbOrSnooze from './samples/GroupChannelUserDoNo
 import GroupChannelStructuredData from './samples/GroupChannelStructuredData';
 import GroupChannelUsersOnlineStatus from './samples/GroupChannelUsersOnlineStatus';
 import GroupChannelPolls from './samples/GroupChannelPolls.js';
+import GroupChannelUsersOnlineStatus from './samples/GroupChannelUsersOnlineStatus'
+import GroupChannelScheduledMessages from './samples/GroupChannelScheduledMessages'
 
 const App = () => {
   return (
@@ -98,6 +100,7 @@ const App = () => {
         <Route path='/group-channel-structured-data' element={<GroupChannelStructuredData />} />
         <Route path='/group-channel-users-online-status' element={<GroupChannelUsersOnlineStatus />} />
         <Route path='/group-channel-polls' element={<GroupChannelPolls />} />
+        <Route path='/group-channel-scheduled-messages' element={<GroupChannelScheduledMessages />} />
       </Routes>
     </div>
   );
