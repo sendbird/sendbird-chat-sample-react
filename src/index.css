@@ -770,6 +770,7 @@ code {
   width: 40%;
 }
 
+
 .open-poll-btn {
   padding: 5px;
   background: transparent;
@@ -835,6 +836,52 @@ code {
   color: white;
   border-radius: 4px;
   cursor: pointer;
+
+.scheduled-messages-list-modal {
+  position: relative;
+}
+
+.close-button {
+  background: none;
+  padding: 0;
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
+.update-input {
+  display: flex;
+}
+
+.update-input input {
+  width: 50%;
+}
+
+.scheduled-message-header {
+  font-weight: 800;
+  margin-bottom: 30px;
+}
+
+.schedule-message {
+  margin-top: 20px;
+}
+
+.cancel-button {
+  margin-right: 10px;
+}
+
+.scheduled-messages-settings-modal {
+  z-index: 2;
+}
+
+.settings-header {
+  margin-bottom: 30px;
+  font-weight: 800;
+}
+
+.schedule-message-error {
+  color: red;
+  margin-bottom: 20px;
 }
 
 [data-tooltip] {
