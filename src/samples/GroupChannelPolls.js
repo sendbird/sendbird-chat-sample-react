@@ -7,6 +7,7 @@ import {
     MessageFilter,
     MessageCollectionInitPolicy
 } from '@sendbird/chat/groupChannel';
+import { PollVoteEvent } from "@sendbird/chat/poll";
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
@@ -44,7 +45,7 @@ const BasicGroupChannelSample = (props) => {
         isAddNewOptionModal: false,
         newPollOptionText: "",
         currentPoll: null,
-        checkedOptions: []
+        checkedOptions: [],
 
     });
 
@@ -418,61 +419,56 @@ const BasicGroupChannelSample = (props) => {
       updateState({ ...state, [name]: !state[name] })
     }
 
-    const addOrRemoveVoice = async(e, optionId, pollId) => {
-      const { userIdInputValue, checkedOptions } = state;
+    const addOrRemoveVoice = async(e, option, message, poll) => {
+      const { userIdInputValue, checkedOptions, currentlyJoinedChannel } = state;
+
+      let pollOptionId = option.id;
+      let pollOptionIds = [pollOptionId];
+      let pollId = poll.id;
+      let newVoteCount = e.currentTarget.checked ? option.voteCount + 1 : option.voteCount - 1;
+      const updatedVoteCounts = {
+        voteCount: newVoteCount,
+        optionId: pollOptionId,
+      };
+      let ts = Date.now();
+      let messageId = message.id;
+      const pollVoteEventPayload = {
+        updatedVoteCounts,
+        ts,
+        pollId,
+        messageId,
+      };
+
+      let pollEvent = new PollVoteEvent(pollId, messageId, pollVoteEventPayload);
 
       switch(e.currentTarget.type) {
         case "checkbox":
           if(e.currentTarget.checked) {
             const newCheckedOptions = checkedOptions.slice(0);
-            newCheckedOptions.push(optionId);
+            newCheckedOptions.push(option.id);
 
             updateState({ ...state, checkedOptions: newCheckedOptions });
 
-            await fetch(`https://api-${process.env.REACT_APP_SEND_BIRD_ID}.sendbird.com/v3/polls/${pollId}/vote`,{
-              method: "PUT",
-              headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Api-token': process.env.REACT_APP_SEND_BIRD_TOKEN
-              },
-              body: JSON.stringify({
-                "user_id": userIdInputValue,
-                "option_ids": newCheckedOptions
-              })
-            })
+            if (!poll.votedPollOptionIds.includes(pollOptionId)) {
+              await currentlyJoinedChannel.votePoll(pollId, newCheckedOptions, pollEvent)
+            }
+
           } else if(!e.currentTarget.checked) {
             const newCheckedOptions = checkedOptions.slice(0)
-            const filteredNewCheckedOptions = newCheckedOptions.filter((item) => item !== optionId);
+            const filteredNewCheckedOptions = newCheckedOptions.filter((item) => item !== option.id);
 
             updateState({ ...state, checkedOptions: filteredNewCheckedOptions });
 
-            await fetch(`https://api-${process.env.REACT_APP_SEND_BIRD_ID}.sendbird.com/v3/polls/${pollId}/vote`,{
-              method: "PUT",
-              headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Api-token': process.env.REACT_APP_SEND_BIRD_TOKEN
-              },
-              body: JSON.stringify({
-                "user_id": userIdInputValue,
-                "option_ids": filteredNewCheckedOptions
-              })
-            })
+            if (poll.votedPollOptionIds.includes(pollOptionId)) {
+              await currentlyJoinedChannel.votePoll(pollId, filteredNewCheckedOptions, pollEvent)
+            }
           };
           break;
         case "radio":
           if(e.currentTarget.checked) {
-
-            await fetch(`https://api-${process.env.REACT_APP_SEND_BIRD_ID}.sendbird.com/v3/polls/${pollId}/vote`,{
-              method: "PUT",
-              headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Api-token': process.env.REACT_APP_SEND_BIRD_TOKEN
-              },
-              body: JSON.stringify({
-                "user_id": userIdInputValue,
-                "option_ids": [optionId]
-              })
-            })
+            if (!poll.votedPollOptionIds.includes(pollOptionId)) {
+              await currentlyJoinedChannel.votePoll(pollId, pollOptionIds, pollEvent)
+            }
           };
           break;
         default:
@@ -521,7 +517,7 @@ const BasicGroupChannelSample = (props) => {
       const newValue = e.currentTarget.value
       updateState({ ...state, [value]: newValue })
     }
-    
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -712,8 +708,6 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, handleDele
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, handleDeleteOption, closePoll, isShowPollModals, addOrRemoveVoice }) => {
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
-    const isAnonymous = true;
-    const votedPollOptionIds = ["t1", "t2"]
 
     if(message._poll) {
       const {
@@ -746,7 +740,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                   {(status === "open") && 
                     <input
                       type={allowMultipleVotes ? "checkbox" : "radio"}
-                      onClick={(e) => addOrRemoveVoice(e, option.id, message._poll.id)}
+                      onClick={(e) => addOrRemoveVoice(e, option, message, message._poll)}
                       name="option" />}
                   <label htmlFor="option">{option.text}</label>
                   {(messageSentByCurrentUser && status === "open") &&
@@ -759,11 +753,6 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
               )
             })}
           </div>
-          {!isAnonymous && 
-            <div className="votes">
-              {votedPollOptionIds.map((vote) => <span className="vote" key={Math.random()}>{vote}</span>)}
-            </div>
-          }
           <div className="poll-status_wrapper">
             {((messageSentByCurrentUser || allowUserSuggestion) && status === "open") &&
               <button onClick={() => isShowPollModals(message._poll, "open", "isAddNewOptionModal", "currentPoll" )} className="add-new-option">Add new option</button>}
