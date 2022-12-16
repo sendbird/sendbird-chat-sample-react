@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -12,7 +13,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelUserDoNotDisturbOrSnooze = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -29,7 +30,14 @@ const BasicGroupChannelSample = (props) => {
         messageToUpdate: null,
         messageCollection: null,
         loading: false,
-        error: false
+        error: false,
+        isShowNotificationsSettingModal: false,
+        doNotDisturbStartHoursInputValue: "",
+        doNotDisturbStartMinutesInputValue: "",
+        doNotDisturbEndHoursInputValue: "",
+        doNotDisturbEndMinutesInputValue: "",
+        snoozeStartInputValue: "",
+        snoozeEndInputValue: ""
     });
 
     //need to access state in message received callback
@@ -137,6 +145,7 @@ const BasicGroupChannelSample = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
+
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -163,6 +172,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -176,7 +186,9 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
+
 
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
@@ -185,6 +197,7 @@ const BasicGroupChannelSample = (props) => {
         }
         updateState({ ...state, applicationUsers: users });
     }
+
 
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
@@ -205,18 +218,18 @@ const BasicGroupChannelSample = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue
+            userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
                     updateState({ ...stateRef.current, messageInputValue: "" });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -233,6 +246,7 @@ const BasicGroupChannelSample = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
                     updateState({ ...stateRef.current, messageInputValue: "", file: null });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -272,6 +286,7 @@ const BasicGroupChannelSample = (props) => {
             modules: [new GroupChannelModule()]
         });
 
+
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
@@ -288,6 +303,45 @@ const BasicGroupChannelSample = (props) => {
         }
 
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
+    }
+
+    const toggleNotificationsSettingModal = () => {
+        updateState({ ...state, isShowNotificationsSettingModal: !state.isShowNotificationsSettingModal })
+    }
+
+    const onNotificationModalInputChange = (e, stateKey) => {
+        const updateStateKeyValue = e.currentTarget.value;
+        updateState({ ...state, [stateKey]: updateStateKeyValue });
+    }
+
+    const addDoNotDisturb = async () => {
+        const { doNotDisturbStartHoursInputValue, doNotDisturbStartMinutesInputValue, doNotDisturbEndHoursInputValue, doNotDisturbEndMinutesInputValue } = state;
+
+        const isAddDoNotDisturb = doNotDisturbStartHoursInputValue && doNotDisturbStartMinutesInputValue && doNotDisturbEndHoursInputValue && doNotDisturbEndMinutesInputValue;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        if (isAddDoNotDisturb) {
+            await sb.setDoNotDisturb(true, +doNotDisturbStartHoursInputValue, +doNotDisturbStartMinutesInputValue, +doNotDisturbEndHoursInputValue, +doNotDisturbEndMinutesInputValue, timezone);
+
+            alert("Do not disturb mode is on");
+        } else {
+            alert("Fill in all fields");
+        }
+    }
+
+    const addNotificationsSnooze = async () => {
+        const { snoozeStartInputValue, snoozeEndInputValue } = state;
+
+        const snoozeStart = snoozeStartInputValue.split("-").join('') + "00000";
+        const snoozeEnd = snoozeStartInputValue.split("-").join('') + "00000";
+
+        if (snoozeStartInputValue && snoozeEndInputValue) {
+            await sb.setSnoozePeriod(true, +snoozeStart, +snoozeEnd);
+
+            alert("Mute notifications enabled");
+        } else {
+            alert("Fill in all fields");
+        }
     }
 
     if (state.loading) {
@@ -309,15 +363,14 @@ const BasicGroupChannelSample = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange}
-            />
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
+                toggleNotificationsSettingModal={toggleNotificationsSettingModal}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
-            />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -325,6 +378,19 @@ const BasicGroupChannelSample = (props) => {
                 addToChannelMembersList={addToChannelMembersList}
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
+            />
+            <NotificationsSettingModal
+                isShowNotificationsSettingModal={state.isShowNotificationsSettingModal}
+                toggleNotificationsSettingModal={toggleNotificationsSettingModal}
+                onNotificationModalInputChange={onNotificationModalInputChange}
+                addDoNotDisturb={addDoNotDisturb}
+                doNotDisturbStartHoursInputValue={state.doNotDisturbStartHoursInputValue}
+                doNotDisturbStartMinutesInputValue={state.doNotDisturbStartMinutesInputValue}
+                doNotDisturbEndHoursInputValue={state.doNotDisturbEndHoursInputValue}
+                doNotDisturbEndMinutesInputValue={state.doNotDisturbEndMinutesInputValue}
+                snoozeStartInputValue={state.snoozeStartInputValue}
+                snoozeEndInputValue={state.snoozeEndInputValue}
+                addNotificationsSnooze={addNotificationsSnooze}
             />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
@@ -357,13 +423,15 @@ const ChannelList = ({
     channels,
     handleJoinChannel,
     handleDeleteChannel,
-    handleLoadMemberSelectionList
+    handleLoadMemberSelectionList,
+    toggleNotificationsSettingModal
 }) => {
     return (
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Group Channels</h1>
                 <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
+                <button className="channel-create-button" style={{ marginTop: "5px" }} onClick={() => toggleNotificationsSettingModal()}>Notification Setting</button>
             </div>
             {channels.map(channel => {
                 return (
@@ -382,7 +450,8 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -391,7 +460,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname}</span>
+            return <span key={member.userId}>{member.nickname} </span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -455,7 +524,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -497,7 +567,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -518,7 +587,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
@@ -561,25 +629,132 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
+
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
+
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >
-                    Connect
-                </button>
+                >Connect</button>
             </div>
         </div>
     } else {
         return null;
     }
+}
+
+const NotificationsSettingModal = ({
+    isShowNotificationsSettingModal,
+    toggleNotificationsSettingModal,
+    onNotificationModalInputChange,
+    addDoNotDisturb,
+    doNotDisturbStartHoursInputValue,
+    doNotDisturbStartMinutesInputValue,
+    doNotDisturbEndHoursInputValue,
+    doNotDisturbEndMinutesInputValue,
+    snoozeStartInputValue,
+    snoozeEndInputValue,
+    addNotificationsSnooze
+}) => {
+    if (isShowNotificationsSettingModal) {
+        return (
+            <div className="overlay">
+                <div className="overlay-content notifications-overlay-content">
+                    <div className="do-not-disturb-wrapper">
+                        <h3>Don't disturb</h3>
+                        <div><b>Start:</b></div>
+                        <div className="do-not-disturb-start-wrapper">
+                            <label className="notification-modal-label" htmlFor="start-hours">Hours</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="start-hours"
+                                name="start-hours"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbStartHoursInputValue") }}
+                                value={doNotDisturbStartHoursInputValue}
+                                placeholder="min: 0, max: 24"
+                                min="0"
+                                max="24"
+                            />
+                            <label className="notification-modal-label" htmlFor="start-minutes">Minutes</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="start-minutes"
+                                name="start-minutes"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbStartMinutesInputValue") }}
+                                value={doNotDisturbStartMinutesInputValue}
+                                placeholder="min: 0, max: 59"
+                                min="0"
+                                max="59"
+                            />
+                        </div>
+                        <div><b>End:</b></div>
+                        <div className="do-not-disturb-end-wrapper">
+                            <label className="notification-modal-label" htmlFor="end-hours">Hours</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="end-hours"
+                                name="end-hours"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbEndHoursInputValue") }}
+                                value={doNotDisturbEndHoursInputValue}
+                                placeholder="min: 0, max: 24"
+                                min="0"
+                                max="24"
+                            />
+                            <label className="notification-modal-label" htmlFor="end-minutes">Minutes</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="end-minutes"
+                                name="end-minutes"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbEndMinutesInputValue") }}
+                                value={doNotDisturbEndMinutesInputValue}
+                                placeholder="min: 0, max: 59"
+                                min="0"
+                                max="59"
+                            />
+                        </div>
+                        <button className="channel-create-button" onClick={addDoNotDisturb}>Add</button>
+                    </div>
+                    <div className="notifications-snooze-wrapper">
+                        <h3>Notifications snooze</h3>
+                        <div className="notifications-snooze-input-wrapper">
+                            <label className="notification-modal-label" htmlFor="start-snooze">Start</label>
+                            <input
+                                className="notification-modal-input"
+                                type="date"
+                                id="start-snooze"
+                                name="start-snooze"
+                                onChange={(e) => { onNotificationModalInputChange(e, "snoozeStartInputValue") }}
+                                value={snoozeStartInputValue}
+                                min="0"
+                            />
+                            <label className="notification-modal-label" htmlFor="end-snooze">End</label>
+                            <input
+                                className="notification-modal-input"
+                                type="date"
+                                id="end-snooze"
+                                name="end-snooze"
+                                onChange={(e) => { onNotificationModalInputChange(e, "snoozeEndInputValue") }}
+                                value={snoozeEndInputValue}
+                                min="0"
+                            />
+                        </div>
+                        <button className="channel-create-button" onClick={addNotificationsSnooze}>Add</button>
+                    </div>
+                    <button onClick={toggleNotificationsSettingModal}>Cancel</button>
+                </div>
+            </div>
+        )
+    }
+    return null;
 }
 
 // Helpful functions that call Sendbird
@@ -614,6 +789,7 @@ const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
         .onApiResult(onApiResult);
     return collection;
 }
+
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
@@ -656,4 +832,4 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelUserDoNotDisturbOrSnooze;

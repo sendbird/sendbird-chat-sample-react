@@ -1,5 +1,7 @@
+
 import { useState, useEffect, useRef } from 'react';
-import SendbirdChat from '@sendbird/chat';
+import { v4 as uuid } from 'uuid';
+import SendbirdChat, { ConnectionHandler } from '@sendbird/chat';
 import {
     GroupChannelModule,
     GroupChannelFilter,
@@ -12,7 +14,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelRetrieveOnlineStatus = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -28,6 +30,7 @@ const BasicGroupChannelSample = (props) => {
         file: null,
         messageToUpdate: null,
         messageCollection: null,
+        typingMembers: [],
         loading: false,
         error: false
     });
@@ -59,8 +62,18 @@ const BasicGroupChannelSample = (props) => {
                     return channel;
                 }
             });
+            const currentChannel = channels.find((channel) => {
+                return stateRef.current.currentlyJoinedChannel.url === channel.url;
+            });
 
-            updateState({ ...stateRef.current, channels: updatedChannels });
+            if (currentChannel) {
+                const members = currentChannel.getTypingUsers();
+                updateState({ ...stateRef.current, currentlyJoinedChannel: currentChannel, channels: updatedChannels, typingMembers: members });
+
+            } else {
+                updateState({ ...stateRef.current, currentlyJoinedChannel: currentChannel, channels: updatedChannels, typingMembers: [] });
+
+            }
         },
     }
 
@@ -127,16 +140,13 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const handleJoinChannel = async (channelUrl) => {
-        if (state.messageCollection && state.messageCollection.dispose) {
-            state.messageCollection?.dispose();
-        }
-
         if (state.currentlyJoinedChannel?.url === channelUrl) {
             return null;
         }
         const { channels } = state;
-        updateState({ ...state, loading: true });
+        updateState({ ...state, typingMembers: [], loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
+
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -148,7 +158,9 @@ const BasicGroupChannelSample = (props) => {
 
         const collection = loadMessages(channel, messageHandlers, onCacheResult, onApiResult);
 
-        updateState({ ...state, messageCollection: collection });
+
+
+        updateState({ ...state, messageCollection: collection, loading: false })
     }
 
     const handleLeaveChannel = async () => {
@@ -163,6 +175,10 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
+        // await groupChannel.refresh();
+
+
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -176,6 +192,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleMemberInvite = async () => {
@@ -197,7 +214,15 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const onMessageInputChange = (e) => {
+        const { currentlyJoinedChannel, messageToUpdate } = state;
+
         const messageInputValue = e.currentTarget.value;
+
+        // Event should not be triggered if it is an update message in progress
+        if (messageToUpdate === null) {
+            messageInputValue !== "" ? currentlyJoinedChannel.startTyping() : currentlyJoinedChannel.endTyping();
+        }
+
         updateState({ ...state, messageInputValue });
     }
 
@@ -205,18 +230,19 @@ const BasicGroupChannelSample = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue
+            userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
+                    currentlyJoinedChannel.endTyping();
                     updateState({ ...stateRef.current, messageInputValue: "" });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -233,6 +259,8 @@ const BasicGroupChannelSample = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
                     updateState({ ...stateRef.current, messageInputValue: "", file: null });
+
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -280,6 +308,29 @@ const BasicGroupChannelSample = (props) => {
         userUpdateParams.userId = userIdInputValue;
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
 
+        // Todo: In the SDK ConnectionHandler doesn't have a constructor, for correct functionality it does.
+        // const connectionHandler = new ConnectionHandler();
+
+        // connectionHandler.onConnected = () => {
+        //     if (state.currentlyJoinedChannel) {
+        //         handleChannelUpdate(state.currentlyJoinedChannel)
+        //     }
+        // }
+
+        // connectionHandler.onDisconnected = () => {
+        //     if (state.currentlyJoinedChannel) {
+        //         handleChannelUpdate(state.currentlyJoinedChannel)
+        //     }
+        // }
+
+        // connectionHandler.onReconnectSucceeded = () => {
+        //     if (state.currentlyJoinedChannel) {
+        //         handleChannelUpdate(state.currentlyJoinedChannel)
+        //     }
+        // }
+
+        // sendbirdChat.addConnectionHandler(uuid(), connectionHandler);
+
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
         const [channels, error] = await loadChannels(channelHandlers);
@@ -309,15 +360,13 @@ const BasicGroupChannelSample = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange}
-            />
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
-            />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -336,6 +385,7 @@ const BasicGroupChannelSample = (props) => {
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
+                {state.typingMembers.length > 0 && DisplayTypingIndicator(state.typingMembers)}
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
@@ -370,7 +420,8 @@ const ChannelList = ({
                     <div key={channel.url} className="channel-list-item" >
                         <div
                             className="channel-list-item-name"
-                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            onClick={() => { handleJoinChannel(channel.url) }}
+                        >
                             <ChannelName members={channel.members} />
                             <div className="last-message">{channel.lastMessage?.message}</div>
                         </div>
@@ -382,7 +433,8 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -391,7 +443,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname}</span>
+            return <span key={member.userId}>{member.nickname} </span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -407,7 +459,7 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
             <div>{children}</div>
         </div>;
     }
-    return <div className="channel"></div>;
+    return <div className="channel" />;
 }
 
 const ChannelHeader = ({ children }) => {
@@ -415,16 +467,25 @@ const ChannelHeader = ({ children }) => {
 }
 
 const MembersList = ({ channel, handleMemberInvite }) => {
-    if (channel) {
-        return <div className="members-list">
-            <button onClick={handleMemberInvite}>Invite</button>
-            {channel.members.map((member) =>
-                <div className="member-item" key={member.userId}>{member.nickname}</div>
-            )}
-        </div>;
-    } else {
-        return null;
-    }
+    const [currentChannel, handleChannel] = useState(null);
+
+    // useEffect(async () => {
+    //     if (channel) {
+    //         await handleChannelUpdate(channel);
+    //         handleChannel(channel)
+    //     }
+    // }, [channel]);
+
+    return (
+        currentChannel && (
+            <div className="members-list">
+                <button onClick={handleMemberInvite}>Invite</button>
+                {currentChannel.members.map((member) =>
+                    <div className="member-item" key={member.userId}>{member.nickname}<span>{member.connectionStatus}</span></div>
+                )}
+            </div>
+        )
+    )
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
@@ -455,7 +516,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -497,7 +559,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -518,7 +579,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
@@ -561,25 +621,34 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
+
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
+
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}
-                >
-                    Connect
-                </button>
+                    onClick={setupUser}>Connect</button>
             </div>
         </div>
     } else {
         return null;
     }
+}
+
+const DisplayTypingIndicator = (typingMembers) => {
+    let typingIndicatorText = ""
+
+    typingMembers.length === 1 ? typingIndicatorText = typingMembers[0].nickname + " is typing..." :
+        typingMembers.length === 2 ? typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " are typing..." :
+            typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " and others are typing..."
+
+    return (
+        <div className='typing-indicator'>{typingIndicatorText}</div>
+    )
 }
 
 // Helpful functions that call Sendbird
@@ -615,6 +684,7 @@ const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
     return collection;
 }
 
+
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
@@ -631,6 +701,14 @@ const createChannel = async (channelName, userIdsToInvite) => {
         return [null, error];
     }
 }
+
+// const handleChannelUpdate = async (channel) => {
+//     try {
+//         return await channel.refresh();
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
 
 const deleteChannel = async (channelUrl) => {
     try {
@@ -656,4 +734,4 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelRetrieveOnlineStatus;

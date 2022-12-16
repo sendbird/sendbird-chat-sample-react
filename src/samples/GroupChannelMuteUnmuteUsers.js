@@ -1,4 +1,6 @@
+
 import { useState, useEffect, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -12,7 +14,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelMuteUnmuteUsers = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -20,6 +22,7 @@ const BasicGroupChannelSample = (props) => {
         currentlyJoinedChannel: null,
         messages: [],
         channels: [],
+        members: [],
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -28,8 +31,10 @@ const BasicGroupChannelSample = (props) => {
         file: null,
         messageToUpdate: null,
         messageCollection: null,
+
         loading: false,
-        error: false
+        error: false,
+        userIsOperator: false
     });
 
     //need to access state in message received callback
@@ -134,9 +139,13 @@ const BasicGroupChannelSample = (props) => {
         if (state.currentlyJoinedChannel?.url === channelUrl) {
             return null;
         }
-        const { channels } = state;
+        const { channels, userIdInputValue } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
+
+        const memberIndex = channel.members.findIndex((item => item.userId === userIdInputValue));
+        const userIsOperator = channel.members[memberIndex].role === "operator"
+
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -147,8 +156,7 @@ const BasicGroupChannelSample = (props) => {
         }
 
         const collection = loadMessages(channel, messageHandlers, onCacheResult, onApiResult);
-
-        updateState({ ...state, messageCollection: collection });
+        updateState({ ...state, messageCollection: collection, loading: false, members: channel.members, userIsOperator: userIsOperator })
     }
 
     const handleLeaveChannel = async () => {
@@ -163,6 +171,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -176,6 +185,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleMemberInvite = async () => {
@@ -205,18 +215,18 @@ const BasicGroupChannelSample = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue
+            userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
                     updateState({ ...stateRef.current, messageInputValue: "" });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -233,6 +243,8 @@ const BasicGroupChannelSample = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
                     updateState({ ...stateRef.current, messageInputValue: "", file: null });
+
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -290,6 +302,47 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
+    const handleOperator = async (callbackName, member) => {
+        const { currentlyJoinedChannel, members } = state;
+
+        try {
+            await currentlyJoinedChannel[callbackName]([member.userId]);
+            updateState({ ...state, members: members })
+        } catch (error) {
+            console.log("Error");
+            console.log(error);
+        }
+    }
+
+    const registerUnregisterAnOperator = (member) => {
+        if (member.role === "operator") {
+            handleOperator("removeOperators", member);
+            alert("Operator was unregister");
+        } else {
+            handleOperator("addOperators", member);
+            alert("Operator was register");
+        }
+    }
+
+    const muteUnmuteUser = (channel, member) => {
+        if (member.role === "operator") {
+            if (member.isMuted) {
+                unmuteUser(channel, member)
+            } else {
+                muteUser(channel, member, 'description')
+            }
+        }
+
+        const updatedMembers = state.members.map(item => {
+            if (item.userId === member.userId) {
+                return { ...item, isMuted: !item.isMuted }
+            }
+            return item
+        });
+
+        updateState({ ...state, members: updatedMembers });
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -309,15 +362,13 @@ const BasicGroupChannelSample = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange}
-            />
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
-            />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -326,6 +377,7 @@ const BasicGroupChannelSample = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
+
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
                 handleLeaveChannel={handleLeaveChannel}
@@ -338,6 +390,8 @@ const BasicGroupChannelSample = (props) => {
                 />
                 <MessageInput
                     value={state.messageInputValue}
+                    members={state.members}
+                    userIdInputValue={state.userIdInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
                     fileSelected={state.file}
@@ -345,7 +399,12 @@ const BasicGroupChannelSample = (props) => {
                 />
             </Channel>
             <MembersList
-                channel={state.currentlyJoinedChannel}
+                members={state.members}
+                userIdInputValue={state.userIdInputValue}
+                userIsOperator={state.userIsOperator}
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                registerUnregisterAnOperator={registerUnregisterAnOperator}
+                muteUnmuteUser={muteUnmuteUser}
                 handleMemberInvite={handleMemberInvite}
             />
         </>
@@ -382,7 +441,8 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -391,7 +451,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname}</span>
+            return <span key={member.userId}>{member.nickname} </span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -414,13 +474,33 @@ const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
 }
 
-const MembersList = ({ channel, handleMemberInvite }) => {
-    if (channel) {
+const MembersList = ({ members, currentlyJoinedChannel, handleMemberInvite, registerUnregisterAnOperator, muteUnmuteUser, userIsOperator, userIdInputValue }) => {
+    if (members) {
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
-            {channel.members.map((member) =>
-                <div className="member-item" key={member.userId}>{member.nickname}</div>
-            )}
+            {members.map((member) => {
+                const isOperator = (member.role === "operator");
+                const memberIsSender = (member.userId !== userIdInputValue);
+                return (
+                    <div key={member.userId}>
+                        {userIsOperator && <div key={member.userId} className="member-item-wrapper">
+                            <div className="member-item">
+                                {member.nickname}
+                                {isOperator && <img className="message-icon" src='/operator_icon.png' />}
+                            </div>
+                            {memberIsSender && <button onClick={() => registerUnregisterAnOperator(member)}>
+                                {isOperator ? "Unregister as operator" : "Register as operator"}
+                            </button>}
+                            {memberIsSender &&
+                                <button className="mute-button" onClick={() => muteUnmuteUser(currentlyJoinedChannel, member)}>
+                                    {member.isMuted ? "Unmute" : "Mute"}
+                                </button>
+                            }
+                        </div>}
+                        {!userIsOperator && <div className="member-item">{member.nickname}</div>}
+                    </div>
+                )
+            })}
         </div>;
     } else {
         return null;
@@ -455,7 +535,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -470,7 +551,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
         </div>
@@ -485,29 +567,32 @@ const ProfileImage = ({ user }) => {
     }
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
-    return (
-        <div className="message-input">
-            <input
-                placeholder="write a message"
-                value={value}
-                onChange={onChange}
-                onKeyDown={(event => handleEnterPress(event, sendMessage))}
-            />
-            <div className="message-input-buttons">
-                <button className="send-message-button" onClick={sendMessage}>Send Message</button>
-                <label className="file-upload-label" htmlFor="upload" >Select File</label>
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, members, userIdInputValue }) => {
+    const member = members.find(member => member.userId === userIdInputValue)
 
+    return (
+        member.isMuted
+            ? <div>You are muted until {new Date(member.restrictionInfo.endAt).toUTCString()}</div>
+            : < div className="message-input" >
                 <input
-                    id="upload"
-                    className="file-upload-button"
-                    type='file'
-                    hidden={true}
-                    onChange={onFileInputChange}
-                    onClick={() => { }}
+                    placeholder="write a message"
+                    value={value}
+                    onChange={onChange}
+                    onKeyDown={(event => handleEnterPress(event, sendMessage))}
                 />
+                <div className="message-input-buttons">
+                    <button className="send-message-button" onClick={sendMessage}>Send Message</button>
+                    <label className="file-upload-label" htmlFor="upload" >Select File</label>
+                    <input
+                        id="upload"
+                        className="file-upload-button"
+                        type='file'
+                        hidden={true}
+                        onChange={onFileInputChange}
+                        onClick={() => { }}
+                    />
+                </div>
             </div>
-        </div>
     );
 }
 
@@ -518,8 +603,8 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
+
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -561,20 +646,18 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
+
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
+
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >
-                    Connect
-                </button>
+                >Connect</button>
             </div>
         </div>
     } else {
@@ -656,4 +739,12 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+const muteUser = async (channel, userId, description) => {
+    await channel.muteUser(userId, 600000, description);
+}
+
+const unmuteUser = async (channel, userId) => {
+    await channel.unmuteUser(userId);
+}
+
+export default GroupChannelMuteUnmuteUsers;

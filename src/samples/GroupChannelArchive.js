@@ -1,18 +1,21 @@
+
 import { useState, useEffect, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
     GroupChannelFilter,
     GroupChannelListOrder,
     MessageFilter,
-    MessageCollectionInitPolicy
+    MessageCollectionInitPolicy,
+    HiddenChannelFilter
 } from '@sendbird/chat/groupChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelArchive = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -20,6 +23,8 @@ const BasicGroupChannelSample = (props) => {
         currentlyJoinedChannel: null,
         messages: [],
         channels: [],
+        archiveChannels: [],
+        sortChannels: 'all',
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -137,6 +142,7 @@ const BasicGroupChannelSample = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
+
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -163,6 +169,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -176,6 +183,31 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
+    }
+
+    const handleArchiveChannel = async (channelUrl) => {
+        try {
+            if (state.sortChannels === 'all') {
+                await archiveChannel(channelUrl);
+            } else if (state.sortChannels === 'archive') {
+                await unarchiveChannel(channelUrl);
+            }
+            const updatedChannels = state.channels.filter((channel) => {
+                return channel.url !== channelUrl;
+            });
+            const updatedArchiveChannels = state.archiveChannels.filter((channel) => {
+                return channel.url !== channelUrl;
+            });
+            updateState({
+                ...state,
+                channels: updatedChannels,
+                archiveChannels: updatedArchiveChannels,
+                messages: []
+            });
+        } catch (error) {
+            console.log("error", error)
+        }
     }
 
     const handleMemberInvite = async () => {
@@ -184,6 +216,22 @@ const BasicGroupChannelSample = (props) => {
             return onError(error);
         }
         updateState({ ...state, applicationUsers: users });
+    }
+
+    const handleChangeSortChannels = async (event) => {
+        if (event.target.value === 'all') {
+            const [channels, error] = await loadChannels();
+            if (error) {
+                return onError(error);
+            }
+            updateState({ ...state, channels: channels, sortChannels: event.target.value });
+        } else if (event.target.value === 'archive') {
+            const [archiveChannels, error] = await loadArchiveChannels();
+            if (error) {
+                return onError(error);
+            }
+            updateState({ ...state, archiveChannels: archiveChannels, sortChannels: event.target.value });
+        }
     }
 
     const onUserNameInputChange = (e) => {
@@ -196,6 +244,7 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, userIdInputValue });
     }
 
+
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
         updateState({ ...state, messageInputValue });
@@ -205,18 +254,18 @@ const BasicGroupChannelSample = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue
+            userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
                     updateState({ ...stateRef.current, messageInputValue: "" });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -233,6 +282,7 @@ const BasicGroupChannelSample = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
                     updateState({ ...stateRef.current, messageInputValue: "", file: null });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -309,15 +359,17 @@ const BasicGroupChannelSample = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange}
-            />
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
+                archiveChannels={state.archiveChannels}
+                sortChannels={state.sortChannels}
+                handleChangeSortChannels={handleChangeSortChannels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
-            />
+                handleArchiveChannel={handleArchiveChannel}
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -328,6 +380,7 @@ const BasicGroupChannelSample = (props) => {
             />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
+                sortChannels={state.sortChannels}
                 handleLeaveChannel={handleLeaveChannel}
                 channelRef={channelRef}
             >
@@ -355,8 +408,12 @@ const BasicGroupChannelSample = (props) => {
 // Chat UI Components
 const ChannelList = ({
     channels,
+    archiveChannels,
+    sortChannels,
+    handleChangeSortChannels,
     handleJoinChannel,
     handleDeleteChannel,
+    handleArchiveChannel,
     handleLoadMemberSelectionList
 }) => {
     return (
@@ -365,23 +422,38 @@ const ChannelList = ({
                 <h1>Group Channels</h1>
                 <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
             </div>
-            {channels.map(channel => {
-                return (
-                    <div key={channel.url} className="channel-list-item" >
-                        <div
-                            className="channel-list-item-name"
-                            onClick={() => { handleJoinChannel(channel.url) }}>
-                            <ChannelName members={channel.members} />
-                            <div className="last-message">{channel.lastMessage?.message}</div>
-                        </div>
-                        <div>
-                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                <img className="channel-icon" src='/icon_delete.png' />
-                            </button>
-                        </div>
-                    </div>
-                );
-            })}
+            <select
+                onChange={(event) => handleChangeSortChannels(event)}
+                defaultValue={sortChannels}
+                className="sort-channels"
+            >
+                <option value="all">all channels</option>
+                <option value="archive">archive</option>
+            </select>
+            {(sortChannels === 'all' ? channels : archiveChannels)
+                .map(channel => {
+                    return (
+                        <div key={channel.url} className="channel-list-item" >
+                            <div
+                                className="channel-list-item-name"
+                                onClick={() => { handleJoinChannel(channel.url) }}>
+                                <ChannelName members={channel.members} />
+                                <div className="last-message">{channel.lastMessage?.message}</div>
+                            </div>
+                            <div>
+                                <button className="control-button" onClick={() => handleArchiveChannel(channel.url)}>
+                                    <img
+                                        className={`channel-icon ${sortChannels === 'all' ? '' : 'unarchive'}`}
+                                        src='/archive_icon.png'
+                                        alt="channel-icon"
+                                    />
+                                </button>
+                                <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                    <img className="channel-icon" src='/icon_delete.png' alt="channel-icon" />
+                                </button>
+                            </div>
+                        </div>);
+                })}
         </div >);
 }
 
@@ -391,13 +463,13 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname}</span>
+            return <span key={member.userId}>{member.nickname} </span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
 }
 
-const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
+const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, sortChannels, channelRef }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
@@ -406,6 +478,11 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
             </div>
             <div>{children}</div>
         </div>;
+    }
+    if (sortChannels === 'archive') {
+        return <div className="channel">
+            <p className="archived-channel">This channel is archived</p>
+        </div>
     }
     return <div className="channel"></div>;
 }
@@ -440,6 +517,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
+
                 </div>
             );
         })}
@@ -455,7 +533,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -466,11 +545,10 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                {messageSentByCurrentUser &&
-                    <div>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                {messageSentByCurrentUser && <div>
+                    <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
+                    <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                </div>}
             </div>
             <div>{message.message}</div>
         </div>
@@ -497,7 +575,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -520,6 +597,7 @@ const MembersSelect = ({
     handleUpdateChannelMembersList
 
 }) => {
+
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -561,20 +639,18 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
+
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
+
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >
-                    Connect
-                </button>
+                >Connect</button>
             </div>
         </div>
     } else {
@@ -615,6 +691,19 @@ const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
     return collection;
 }
 
+const loadArchiveChannels = async () => {
+    try {
+        const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({
+            includeEmpty: true,
+            hiddenChannelFilter: HiddenChannelFilter.HIDDEN
+        });
+        const channels = await groupChannelQuery.next();
+        return [channels, null];
+    } catch (error) {
+        return [null, error];
+    }
+}
+
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
@@ -642,6 +731,19 @@ const deleteChannel = async (channelUrl) => {
     }
 }
 
+const archiveChannel = async (channelUrl) => {
+    const channel = await sb.groupChannel.getChannel(channelUrl);
+    const params = {};
+    params.hidePreviousMessages = false;
+    params.allowAutoUnhide = true;
+    await channel.hide(params);
+}
+
+const unarchiveChannel = async (channelUrl) => {
+    const channel = await sb.groupChannel.getChannel(channelUrl);
+    await channel.unhide();
+}
+
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
@@ -656,4 +758,4 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelArchive;

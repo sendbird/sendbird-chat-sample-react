@@ -1,23 +1,15 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { ConnectionHandler } from '@sendbird/chat';
 import { v4 as uuid } from 'uuid';
 
-import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
+import SendbirdChat from '@sendbird/chat';
 import {
     OpenChannelModule,
     OpenChannelHandler,
-    OpenChannelCreateParams,
-    OpenChannelUpdateParams
 } from '@sendbird/chat/openChannel';
 
-import {
-    UserMessageUpdateParams,
-    UserMessageCreateParams,
-    MessageListParams,
-    FileMessageCreateParams
-} from '@sendbird/chat/message';
-
 import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime } from '../utils/messageUtils';
+import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 
 let sb;
 
@@ -51,20 +43,51 @@ const OpenChannelReportAMessageUserChannel = (props) => {
     const stateRef = useRef();
     stateRef.current = state;
 
+    const channelRef = useRef();
+
+    const scrollToBottom = (item, smooth) => {
+        item?.scrollTo({
+            top: item.scrollHeight,
+            behavior: smooth
+        })
+    }
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current)
+    }, [state.currentlyJoinedChannel])
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current, 'smooth')
+    }, [state.messages])
+
     const onError = (error) => {
         updateState({ ...state, error: error.message });
         console.log(error);
     }
 
     const handleJoinChannel = async (channelUrl) => {
+        if (state.currentlyJoinedChannel?.url === channelUrl) {
+            return null;
+        }
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channelToJoin = channels.find((channel) => channel.url === channelUrl);
-        const [channel, messages, error] = await joinChannel(channelToJoin);
+        await channelToJoin.enter();
+        const [messages, error] = await loadMessages(channelToJoin);
         if (error) {
             return onError(error);
-
         }
+
+        // setup connection event handlers
+        const connectionHandler = new ConnectionHandler();
+
+        connectionHandler.onReconnectSucceeded = async () => {
+            const [messages, error] = await loadMessages(channelToJoin);
+
+            updateState({ ...stateRef.current, messages: messages });
+        }
+
+        sb.addConnectionHandler(uuid(), connectionHandler);
 
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
@@ -87,13 +110,12 @@ const OpenChannelReportAMessageUserChannel = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         }
         sb.openChannel.addOpenChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
+        updateState({ ...state, currentlyJoinedChannel: channelToJoin, messages: messages, loading: false })
     }
 
     const handleLeaveChannel = async () => {
         const { currentlyJoinedChannel } = state;
         await currentlyJoinedChannel.exit();
-
         updateState({ ...state, currentlyJoinedChannel: null })
     }
 
@@ -166,36 +188,33 @@ const OpenChannelReportAMessageUserChannel = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
 
         if (messageToUpdate) {
-            const userMessageUpdateParams = new UserMessageUpdateParams();
+            const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
-            const userMessageParams = new UserMessageCreateParams();
+            const userMessageParams = {};
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
             }).onFailed((error) => {
                 console.log(error)
                 console.log("failed")
             });
-
         }
     }
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             const { currentlyJoinedChannel, messages } = state;
-            const fileMessageParams = new FileMessageCreateParams();
+            const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
             }).onFailed((error) => {
                 console.log(error)
                 console.log("failed")
@@ -206,7 +225,6 @@ const OpenChannelReportAMessageUserChannel = (props) => {
     const handleDeleteMessage = async (messageToDelete) => {
         const { currentlyJoinedChannel } = state;
         await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
-
     }
 
     const updateMessage = async (message) => {
@@ -221,10 +239,14 @@ const OpenChannelReportAMessageUserChannel = (props) => {
             modules: [new OpenChannelModule()]
         });
 
-        await sendbirdChat.connect(userIdInputValue);
+        try {
+            await sendbirdChat.connect(userIdInputValue);
+        } catch (e) {
+            console.log("error", e)
+        }
         await sendbirdChat.setChannelInvitationPreference(true);
 
-        const userUpdateParams = new UserUpdateParams();
+        const userUpdateParams = {};
         userUpdateParams.nickname = userNameInputValue;
         userUpdateParams.userId = userIdInputValue;
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
@@ -239,41 +261,39 @@ const OpenChannelReportAMessageUserChannel = (props) => {
     }
 
     const toggleNotificationMessage = (notification) => {
-      const { showNotification } = state;
-      updateState({ ...state, showNotification: !showNotification, isOpenReportModal: false, reportNotification: notification, reportObject: {}, reportKey: "" })
+        const { showNotification } = state;
+        updateState({ ...state, showNotification: !showNotification, isOpenReportModal: false, reportNotification: notification, reportObject: {}, reportKey: "" })
     }
 
     const toggleReportModal = (obj, key) => {
-      const { isOpenReportModal } = state;
-      updateState({ ...state, isOpenReportModal: !isOpenReportModal, reportObject: obj, reportKey: key, isOpenChoiceReport: false })
+        const { isOpenReportModal } = state;
+        updateState({ ...state, isOpenReportModal: !isOpenReportModal, reportObject: obj, reportKey: key, isOpenChoiceReport: false })
     }
 
     const onReportCategoriesInputChange = (e) => {
-      const reportCategoriesInputValue = e.currentTarget.value;
-      updateState({ ...state, reportCategoriesInputValue})
+        const reportCategoriesInputValue = e.currentTarget.value;
+        updateState({ ...state, reportCategoriesInputValue })
     }
 
     const onReportDescriptionInputChange = (e) => {
-      const reportDescriptionInputValue = e.currentTarget.value;
-      updateState({ ...state, reportDescriptionInputValue})
+        const reportDescriptionInputValue = e.currentTarget.value;
+        updateState({ ...state, reportDescriptionInputValue })
     }
 
     const sendReport = async () => {
-      const { currentlyJoinedChannel, reportCategoriesInputValue, reportDescriptionInputValue, reportObject, reportKey } = state;
-      switch(reportKey) {
-        case 'Message':
-          // Report a message.
-          await currentlyJoinedChannel.reportMessage(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
-          break;
-        case 'Channel':
-          // Report a channel.
-          await reportObject.report(reportCategoriesInputValue, reportDescriptionInputValue);
-          break;
-        default:
-          break;
-      }
-
-      toggleNotificationMessage(reportKey)
+        const { currentlyJoinedChannel, reportCategoriesInputValue, reportDescriptionInputValue, reportObject, reportKey } = state;
+        switch (reportKey) {
+            case 'Message':
+                // Report a message.
+                await currentlyJoinedChannel.reportMessage(reportObject, reportCategoriesInputValue, reportDescriptionInputValue);
+                break;
+            case 'Channel':
+                // Report a channel.
+                await reportObject.report(reportCategoriesInputValue, reportDescriptionInputValue);
+                break;
+            default: break;
+        }
+        toggleNotificationMessage(reportKey)
     }
 
     if (state.loading) {
@@ -313,36 +333,37 @@ const OpenChannelReportAMessageUserChannel = (props) => {
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 toggleChannelDetails={toggleChannelDetails} />
             <ReportModal
-              isOpenReportModal={state.isOpenReportModal}
-              toggleReportModal={toggleReportModal}
-              sendReport={sendReport}
-              onReportCategoriesInputChange={onReportCategoriesInputChange}
-              reportDescriptionInputValue={state.reportDescriptionInputValue}
-              onReportDescriptionInputChange={onReportDescriptionInputChange}
-            />
+                isOpenReportModal={state.isOpenReportModal}
+                toggleReportModal={toggleReportModal}
+                sendReport={sendReport}
+                onReportCategoriesInputChange={onReportCategoriesInputChange}
+                reportDescriptionInputValue={state.reportDescriptionInputValue}
+                onReportDescriptionInputChange={onReportDescriptionInputChange} />
             <ChannelCreate
                 showChannelCreate={state.showChannelCreate}
                 toggleShowCreateChannel={toggleShowCreateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
             <Channel
-              showNotification={state.showNotification}
-              reportNotification={state.reportNotification}
-              toggleNotificationMessage={toggleNotificationMessage}
-              currentlyJoinedChannel={state.currentlyJoinedChannel}
-              handleLeaveChannel={handleLeaveChannel}>
+                showNotification={state.showNotification}
+                reportNotification={state.reportNotification}
+                toggleNotificationMessage={toggleNotificationMessage}
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
-                    toggleReportModal={toggleReportModal}
-                />
+                    toggleReportModal={toggleReportModal} />
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
                     fileSelected={state.file}
-                    onFileInputChange={onFileInputChange} />
+                    onFileInputChange={onFileInputChange}
+                />
             </Channel>
         </>
     );
@@ -356,54 +377,48 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                 <h1>Open Channels</h1>
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
             </div>
-            {showNotification && !currentlyJoinedChannel && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{ `${reportNotification} was reported` }</div>}
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}>
-                                {channel.name}
-                            </div>
-                            {userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-
-                                    </button>
-                                </div>}
-                            <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-                        </div>);
-                })
-            }
-        </div >);
+            {showNotification && !currentlyJoinedChannel && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{`${reportNotification} was reported`}</div>}
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
+                        </div>
+                        {userIsOperator &&
+                            <div>
+                                <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                    <img className="channel-icon" src='/icon_edit.png' />
+                                </button>
+                                <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                    <img className="channel-icon" src='/icon_delete.png' />
+                                </button>
+                            </div>}
+                        <button className="control-button" onClick={() => toggleReportModal(channel, 'Channel')}><img className="oc-channel-list-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
-
-const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, toggleNotificationMessage, showNotification, reportNotification }) => {
+const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, toggleNotificationMessage, showNotification, reportNotification, channelRef }) => {
     if (currentlyJoinedChannel) {
-        return <div className="channel">
+        return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
-            {showNotification && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{ `${reportNotification} was reported` }</div>}
+            {showNotification && <div className='report-notification' onClick={() => toggleNotificationMessage("")}>{`${reportNotification} was reported`}</div>}
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleReportModal }) => {
@@ -416,28 +431,28 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, toggleRepo
                     message={message}
                     toggleReportModal={toggleReportModal}
                 />
-            </div>);
+            </div>
+        );
     })
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, toggleReportModal }) => {
+    if (!message.sender) return null;
     if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
-
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
-
                 <img src={message.url} />
-                <button className="control-button" onClick={() => toggleReportModal(message)}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-            </div >);
+                <button className="control-button" onClick={() => toggleReportModal(message)}><img className="oc-message-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
+            </div>
+        );
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
-
             <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
             <div>{message.message}</div>
 
@@ -449,10 +464,9 @@ const Message = ({ message, updateMessage, handleDeleteMessage, toggleReportModa
                     <img className="oc-message-icon" src='/icon_delete.png' />
                 </button>
             </>}
-            <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="oc-message-icon" style={{width: "19px"}} src='/report_icon.png' /></button>
-        </div >
+            <button className="control-button" onClick={() => toggleReportModal(message, "Message")}><img className="oc-message-icon" style={{ width: "19px" }} src='/report_icon.png' /></button>
+        </div>
     );
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
@@ -461,12 +475,12 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <input
                 placeholder="write a message"
                 value={value}
-                onChange={onChange} />
-
+                onChange={onChange}
+                onKeyDown={(event => handleEnterPress(event, sendMessage))}
+            />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -476,8 +490,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-
-        </div>);
+        </div>
+    );
 }
 
 const ChannelDetails = ({
@@ -489,51 +503,46 @@ const ChannelDetails = ({
     if (currentlyUpdatingChannel) {
         return <div className="overlay">
             <div className="overlay-content">
-
                 <h3>Update Channel Details</h3>
                 <div> Channel name</div>
                 <input className="form-input" onChange={onChannelNamenIputChange} />
-
                 <button className="form-button" onClick={() => toggleChannelDetails(null)}>Close</button>
-
                 <button onClick={() => handleUpdateChannel()}>Update channel name</button>
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
 
 const ReportModal = ({ isOpenReportModal, toggleReportModal, sendReport, onReportCategoriesInputChange, reportDescriptionInputValue, onReportDescriptionInputChange }) => {
-  if(isOpenReportModal) {
-    return <div className="overlay">
-      <div className="overlay-content">
-        <h3>Report Modal</h3>
-
-        <label htmlFor="report_categories">Report categories: </label>
-        <select className="form-input" name="report_categories" id="report_categories" onChange={onReportCategoriesInputChange}>
-          <option value=""></option>
-          <option value="suspicious">Suspicious</option>
-          <option value="harassing">Harassing</option>
-          <option value="inappropriate">Inappropriate</option>
-          <option value="spam">Spam</option>
-        </select>
-
-        <label htmlFor="report_description">Report Description: </label>
-        <textarea
-          onChange={onReportDescriptionInputChange}
-          className="form-input"
-          name="report_description"
-          id="report_description"
-          value={reportDescriptionInputValue} />
-
-        <div>
-          <button className="form-button" onClick={() => sendReport()}>Send</button>
-          <button className="form-button" onClick={() => toggleReportModal({}, "")}>Cancel</button>
+    if (isOpenReportModal) {
+        return <div className="overlay">
+            <div className="overlay-content">
+                <h3>Report Modal</h3>
+                <label htmlFor="report_categories">Report categories: </label>
+                <select className="form-input" name="report_categories" id="report_categories" onChange={onReportCategoriesInputChange}>
+                    <option value=""></option>
+                    <option value="suspicious">Suspicious</option>
+                    <option value="harassing">Harassing</option>
+                    <option value="inappropriate">Inappropriate</option>
+                    <option value="spam">Spam</option>
+                </select>
+                <label htmlFor="report_description">Report Description: </label>
+                <textarea
+                    onChange={onReportDescriptionInputChange}
+                    className="form-input"
+                    name="report_description"
+                    id="report_description"
+                    value={reportDescriptionInputValue}
+                />
+                <div>
+                    <button className="form-button" onClick={() => sendReport()}>Send</button>
+                    <button className="form-button" onClick={() => toggleReportModal({}, "")}>Cancel</button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  }
-  return null;
+    }
+    return null;
 }
 
 const ChannelCreate = ({
@@ -549,14 +558,13 @@ const ChannelCreate = ({
                     <h3>Create Channel</h3>
                 </div>
                 <div>Name</div>
-                <input className="form-input" onChange={onChannelNamenIputChange} />
+                <input className="form-input" onChange={onChannelNamenIputChange} onKeyDown={(event) => handleEnterPress(event, handleCreateChannel)} />
                 <div>
                     <button className="form-button" onClick={handleCreateChannel}>Create</button>
                     <button className="form-button" onClick={toggleShowCreateChannel}>Cancel</button>
                 </div>
-
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -571,35 +579,30 @@ const CreateUserForm = ({
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
-            <div className="overlay-content">
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue} />
-
+                    type="text" value={userIdInputValue}
+                />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
                     type="text" value={userNameInputValue} />
-
                 <div>
-
                     <button
                         className="user-submit-button"
-                        onClick={setupUser}>Connect</button>
+                        onClick={setupUser}
+                    >Connect</button>
                 </div>
             </div>
-
         </div>
     } else {
         return null;
     }
-
 }
-
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
@@ -607,30 +610,27 @@ const loadChannels = async () => {
         const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
         const channels = await openChannelQuery.next();
         return [channels, null];
-
     } catch (error) {
         return [null, error];
     }
-
 }
 
-const joinChannel = async (channel) => {
+const loadMessages = async (channel) => {
     try {
-        await channel.enter();
+
         //list all messages
-        const messageListParams = new MessageListParams();
+        const messageListParams = {};
         messageListParams.nextResultSize = 20;
         const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-        return [channel, messages, null];
+        return [messages, null];
     } catch (error) {
-        return [null, null, error]
+        return [null, error]
     }
 }
 
-
 const createChannel = async (channelName) => {
     try {
-        const openChannelParams = new OpenChannelCreateParams();
+        const openChannelParams = {};
         openChannelParams.name = channelName;
         openChannelParams.operatorUserIds = [sb.currentUser.userId];
         const openChannel = await sb.openChannel.createChannel(openChannelParams);
@@ -638,7 +638,6 @@ const createChannel = async (channelName) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -649,17 +648,14 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) => {
     try {
         const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
-        const openChannelParams = new OpenChannelUpdateParams();
+        const openChannelParams = {};
         openChannelParams.name = channelNameInputValue;
-
         openChannelParams.operatorUserIds = [sb.currentUser.userId];
-
         const updatedChannel = await channel.updateChannel(openChannelParams);
         return [updatedChannel, null];
     } catch (error) {
