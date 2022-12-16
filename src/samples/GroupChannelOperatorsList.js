@@ -1,4 +1,6 @@
+
 import { useState, useEffect, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -12,7 +14,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelOperatorsList = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -20,6 +22,7 @@ const BasicGroupChannelSample = (props) => {
         currentlyJoinedChannel: null,
         messages: [],
         channels: [],
+        operators: [],
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -137,6 +140,7 @@ const BasicGroupChannelSample = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
+
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -148,7 +152,9 @@ const BasicGroupChannelSample = (props) => {
 
         const collection = loadMessages(channel, messageHandlers, onCacheResult, onApiResult);
 
-        updateState({ ...state, messageCollection: collection });
+        const operators = await handleLoadOperators(channel)
+
+        updateState({ ...state, messageCollection: null, operators: operators, loading: false })
     }
 
     const handleLeaveChannel = async () => {
@@ -163,6 +169,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -176,6 +183,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleMemberInvite = async () => {
@@ -184,6 +192,14 @@ const BasicGroupChannelSample = (props) => {
             return onError(error);
         }
         updateState({ ...state, applicationUsers: users });
+    }
+
+    const handleLoadOperators = async (channel) => {
+        const [operators, error] = await loadOperators(channel);
+        if (error) {
+            return onError(error);
+        }
+        return operators
     }
 
     const onUserNameInputChange = (e) => {
@@ -205,18 +221,18 @@ const BasicGroupChannelSample = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue
+            userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
                     updateState({ ...stateRef.current, messageInputValue: "" });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -233,6 +249,7 @@ const BasicGroupChannelSample = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
                     updateState({ ...stateRef.current, messageInputValue: "", file: null });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -309,15 +326,13 @@ const BasicGroupChannelSample = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange}
-            />
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
-            />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -346,6 +361,7 @@ const BasicGroupChannelSample = (props) => {
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
+                operators={state.operators}
                 handleMemberInvite={handleMemberInvite}
             />
         </>
@@ -382,7 +398,8 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -391,7 +408,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname}</span>
+            return <span key={member.userId}>{member.nickname} </span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -414,12 +431,26 @@ const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
 }
 
-const MembersList = ({ channel, handleMemberInvite }) => {
+const MembersList = ({ channel, operators, handleMemberInvite }) => {
     if (channel) {
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
             {channel.members.map((member) =>
                 <div className="member-item" key={member.userId}>{member.nickname}</div>
+            )}
+            <OperatorsList operators={operators} />
+        </div>;
+    } else {
+        return null;
+    }
+}
+
+const OperatorsList = ({ operators }) => {
+    if (operators) {
+        return <div className="operators-list">
+            <p>Operators:</p>
+            {operators.map((operator) =>
+                <div className="operator-item" key={operator.userId}>{operator.nickname}</div>
             )}
         </div>;
     } else {
@@ -455,7 +486,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -470,7 +502,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
         </div>
@@ -497,7 +530,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -518,8 +550,8 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
+
     if (applicationUsers.length > 0) {
         return <div className="overlay">
             <div className="overlay-content">
@@ -561,20 +593,18 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
+
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
+
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >
-                    Connect
-                </button>
+                >Connect</button>
             </div>
         </div>
     } else {
@@ -614,6 +644,19 @@ const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
         .onApiResult(onApiResult);
     return collection;
 }
+
+
+const loadOperators = async (channel) => {
+    try {
+        const query = channel.createOperatorListQuery();
+        const operators = await query.next();
+        return [operators, null];
+    } catch (error) {
+        return [null, error];
+    }
+}
+
+
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
@@ -656,4 +699,4 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelOperatorsList;

@@ -1,4 +1,6 @@
+
 import { useState, useEffect, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -12,18 +14,20 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelUserProfileUpdate = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
         groupChannelMembers: [],
         currentlyJoinedChannel: null,
+        currentUser: null,
         messages: [],
         channels: [],
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
         channelNameUpdateValue: "",
+        userProfileNicknameInputValue: "",
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
@@ -137,6 +141,7 @@ const BasicGroupChannelSample = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
+
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -163,6 +168,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -205,18 +211,18 @@ const BasicGroupChannelSample = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue
+            userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
                     updateState({ ...stateRef.current, messageInputValue: "" });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -287,11 +293,38 @@ const BasicGroupChannelSample = (props) => {
             return onError(error);
         }
 
-        updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
+        updateState({ ...state, channels: channels, loading: false, settingUpUser: false, currentUser: sb.groupChannel._sessionManager.currentUser });
     }
 
     if (state.loading) {
         return <div>Loading...</div>
+    }
+
+    const toggleUserProfileModal = () => {
+        updateState({ ...state, isUserProfileModal: !state.isUserProfileModal });
+    }
+
+    const onProfileImageInputChange = async (e) => {
+        const { currentUser } = state;
+
+        if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+            const updatedUser = await updateUserProfile(currentUser.nickname, e.currentTarget.files[0]);
+            updateState({ ...state, currentUser: updatedUser });
+        }
+    }
+
+    const onProfileNicknameInputChange = (e) => {
+        const userProfileNicknameInputValue = e.currentTarget.value;
+        updateState({ ...state, userProfileNicknameInputValue })
+    }
+
+    const updateUserProfileNickname = async () => {
+        const { userProfileNicknameInputValue, currentUser } = state;
+
+        if (userProfileNicknameInputValue) {
+            const updatedUser = await updateUserProfile(userProfileNicknameInputValue, null, currentUser.profileUrl);
+            updateState({ ...state, currentUser: updatedUser, userProfileNicknameInputValue: "" });
+        }
     }
 
     if (state.error) {
@@ -309,15 +342,14 @@ const BasicGroupChannelSample = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange}
-            />
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
+                toggleUserProfileModal={toggleUserProfileModal}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
-            />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -325,6 +357,15 @@ const BasicGroupChannelSample = (props) => {
                 addToChannelMembersList={addToChannelMembersList}
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
+            />
+            <UserProfileModal
+                isUserProfileModal={state.isUserProfileModal}
+                currentUser={state.currentUser}
+                userProfileNicknameInputValue={state.userProfileNicknameInputValue}
+                toggleUserProfileModal={toggleUserProfileModal}
+                onProfileImageInputChange={onProfileImageInputChange}
+                onProfileNicknameInputChange={onProfileNicknameInputChange}
+                updateUserProfileNickname={updateUserProfileNickname}
             />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
@@ -357,13 +398,15 @@ const ChannelList = ({
     channels,
     handleJoinChannel,
     handleDeleteChannel,
-    handleLoadMemberSelectionList
+    handleLoadMemberSelectionList,
+    toggleUserProfileModal
 }) => {
     return (
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Group Channels</h1>
                 <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
+                <button className="channel-create-button" style={{ margin: "10px 0 0" }} onClick={toggleUserProfileModal}>Update Profile</button>
             </div>
             {channels.map(channel => {
                 return (
@@ -382,7 +425,8 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -391,7 +435,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname}</span>
+            return <span key={member.userId}>{member.nickname} </span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -455,7 +499,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -497,7 +542,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -518,7 +562,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
@@ -561,25 +604,61 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
+
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
+
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >
-                    Connect
-                </button>
+                >Connect</button>
             </div>
         </div>
     } else {
         return null;
     }
+}
+
+const UserProfileModal = ({ isUserProfileModal, toggleUserProfileModal, onProfileImageInputChange, onProfileNicknameInputChange, updateUserProfileNickname, currentUser, userProfileNicknameInputValue }) => {
+    if (isUserProfileModal) {
+        return (
+            <div className="overlay">
+                <div className="overlay-content">
+                    <h2 className="user-profile-title">My profile</h2>
+                    <p>Profile image:</p>
+                    <div className="user-profile-image-wrapper">
+                        <img className="user-profile-image" src={currentUser.profileUrl ? currentUser.profileUrl : "/profile_img.png"} alt="profile image" />
+                        <label className="user-profile-image-upload-label" htmlFor="profile_img" >Upload</label>
+                        <input
+                            id="profile_img"
+                            className="file-upload-button"
+                            type='file'
+                            hidden={true}
+                            onChange={onProfileImageInputChange}
+                            onClick={() => { }}
+                        />
+                    </div>
+                    <p>Nickname:</p>
+                    <div className="user-profile-nickname-wrapper">
+                        <input
+                            className="user-profile-nickname-input"
+                            placeholder="write a nickname"
+                            value={userProfileNicknameInputValue}
+                            onChange={onProfileNicknameInputChange} />
+                        <button className="user-profile-nickname-button" onClick={updateUserProfileNickname}>Update</button>
+                    </div>
+                    <div>
+                        <button className="form-button" onClick={toggleUserProfileModal}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+    return null;
 }
 
 // Helpful functions that call Sendbird
@@ -656,4 +735,21 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+const updateUserProfile = async (nickname, image, url) => {
+    try {
+        const userUpdateParams = {};
+        userUpdateParams.nickname = nickname;
+        if (image) {
+            userUpdateParams.profileImage = image;
+        } else {
+            userUpdateParams.profileUrl = url;
+        }
+        const updatedUser = await sb.updateCurrentUserInfo(userUpdateParams);
+        return updatedUser;
+    } catch (error) {
+        console.log("Error");
+        console.log(error);
+    }
+}
+
+export default GroupChannelUserProfileUpdate;

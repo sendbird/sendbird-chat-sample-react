@@ -1,4 +1,6 @@
+
 import { useState, useEffect, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -12,7 +14,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelStructuredData = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -20,6 +22,8 @@ const BasicGroupChannelSample = (props) => {
         currentlyJoinedChannel: null,
         messages: [],
         channels: [],
+        messageData: {},
+        showAddDataToMessage: false,
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -121,6 +125,10 @@ const BasicGroupChannelSample = (props) => {
         scrollToBottom(channelRef.current, 'smooth')
     }, [state.messages])
 
+    const messageDataNameRef = useRef();
+    const messageDataPriceRef = useRef();
+    const messageDataImageRef = useRef();
+
     const onError = (error) => {
         updateState({ ...state, error: error.message });
         console.log(error);
@@ -137,6 +145,7 @@ const BasicGroupChannelSample = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
+
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -176,7 +185,9 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
+
 
     const handleMemberInvite = async () => {
         const [users, error] = await getAllApplicationUsers();
@@ -196,27 +207,33 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, userIdInputValue });
     }
 
+
     const onMessageInputChange = (e) => {
         const messageInputValue = e.currentTarget.value;
         updateState({ ...state, messageInputValue });
     }
 
+    const toggleShowAddDataToMessage = () => {
+        updateState({ ...state, showAddDataToMessage: !state.showAddDataToMessage });
+    }
+
     const sendMessage = async () => {
-        const { messageToUpdate, currentlyJoinedChannel, messages } = state;
+        const { messageToUpdate, currentlyJoinedChannel, messages, messageData } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue
+            userMessageParams.message = state.messageInputValue;
+            userMessageParams.data = JSON.stringify(messageData);
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
                     updateState({ ...stateRef.current, messageInputValue: "" });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -233,6 +250,7 @@ const BasicGroupChannelSample = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
                     updateState({ ...stateRef.current, messageInputValue: "", file: null });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -262,6 +280,7 @@ const BasicGroupChannelSample = (props) => {
     const addToChannelMembersList = (userId) => {
         const groupChannelMembers = [...state.groupChannelMembers, userId];
         updateState({ ...state, groupChannelMembers: groupChannelMembers });
+
     }
 
     const setupUser = async () => {
@@ -290,6 +309,15 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
+    const handleAddDataToMessage = () => {
+        const updatedMessageData = {
+            name: messageDataNameRef.current.value,
+            price: messageDataPriceRef.current.value,
+            image: messageDataImageRef.current.value
+        }
+        updateState({ ...state, messageData: updatedMessageData, showAddDataToMessage: false });
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -309,15 +337,13 @@ const BasicGroupChannelSample = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange}
-            />
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
-            />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -326,6 +352,7 @@ const BasicGroupChannelSample = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
+
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
                 handleLeaveChannel={handleLeaveChannel}
@@ -342,12 +369,20 @@ const BasicGroupChannelSample = (props) => {
                     sendMessage={sendMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange}
+                    toggleShowAddDataToMessage={toggleShowAddDataToMessage}
                 />
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
                 handleMemberInvite={handleMemberInvite}
             />
+            <AddDataToMessage
+                showAddDataToMessage={state.showAddDataToMessage}
+                toggleShowAddDataToMessage={toggleShowAddDataToMessage}
+                handleAddDataToMessage={handleAddDataToMessage}
+                messageDataNameRef={messageDataNameRef}
+                messageDataPriceRef={messageDataPriceRef}
+                messageDataImageRef={messageDataImageRef} />
         </>
     );
 };
@@ -382,7 +417,8 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -391,7 +427,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname}</span>
+            return <span key={member.userId}>{member.nickname} </span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -431,14 +467,16 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
             if (!message.sender) return null;
-            const messageSentByYou = message.sender.userId === sb.currentUser.userId;
+            const messageSentByYou = message.sender.userId === sb.currentUser.userId; const data = message.data ? JSON.parse(message.data) : "";
+
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
                         message={message}
                         handleDeleteMessage={handleDeleteMessage}
                         updateMessage={updateMessage}
-                        messageSentByYou={messageSentByYou} />
+                        messageSentByYou={messageSentByYou}
+                        data={data} />
                     <ProfileImage user={message.sender} />
                 </div>
             );
@@ -446,21 +484,22 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     </div>
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou, data }) => {
     if (message.url) {
         return (
-            <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+            <div className={`message ${messageSentByYou ? 'message-from-you' : ''}`}>
                 <div className="message-user-info">
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
     return (
-        <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+        <div className={`message message--group ${messageSentByYou ? 'message-from-you' : ''}`}>
             <div className="message-info">
                 <div className="message-user-info">
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
@@ -473,6 +512,13 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
+            {Object.keys(data).length !== 0 &&
+                <div className="group-card">
+                    <img src={data.image} alt="" />
+                    <div className="card-name">{data.name}</div>
+                    <div>{data.price}</div>
+                </div>
+            }
         </div>
     );
 }
@@ -485,7 +531,7 @@ const ProfileImage = ({ user }) => {
     }
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleShowAddDataToMessage }) => {
     return (
         <div className="message-input">
             <input
@@ -497,7 +543,7 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
+                <label className="message-type-add" onClick={toggleShowAddDataToMessage}>Add data</label>
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -518,7 +564,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
@@ -561,25 +606,59 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
+
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
+
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >
-                    Connect
-                </button>
+                >Connect</button>
             </div>
         </div>
     } else {
         return null;
     }
+}
+
+const AddDataToMessage = ({
+    showAddDataToMessage,
+    toggleShowAddDataToMessage,
+    handleAddDataToMessage,
+    messageDataNameRef,
+    messageDataPriceRef,
+    messageDataImageRef
+}) => {
+    if (showAddDataToMessage) {
+        return <div className="overlay">
+            <div className="overlay-content">
+                <div>
+                    <h3>Add data to message</h3>
+                </div>
+                <div>
+                    <div>Name</div>
+                    <input className="form-input" ref={messageDataNameRef} />
+                </div>
+                <div>
+                    <div>Price</div>
+                    <input className="form-input" ref={messageDataPriceRef} />
+                </div>
+                <div>
+                    <div>Image url</div>
+                    <input className="form-input" ref={messageDataImageRef} />
+                </div>
+                <div>
+                    <button className="form-button" onClick={handleAddDataToMessage}>Save</button>
+                    <button className="form-button" onClick={toggleShowAddDataToMessage}>Cancel</button>
+                </div>
+            </div>
+        </div>;
+    }
+    return null;
 }
 
 // Helpful functions that call Sendbird
@@ -656,4 +735,4 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelStructuredData;
