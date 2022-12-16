@@ -1,20 +1,19 @@
-
 import { useState, useEffect, useRef } from 'react';
-import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
     GroupChannelFilter,
     GroupChannelListOrder,
     MessageFilter,
-    MessageCollectionInitPolicy
+    MessageCollectionInitPolicy,
+    ScheduledStatus
 } from '@sendbird/chat/groupChannel';
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const GroupChannelUsersOnlineStatus = (props) => {
+const BasicGroupChannelSample = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -32,7 +31,14 @@ const GroupChannelUsersOnlineStatus = (props) => {
         messageCollection: null,
         loading: false,
         error: false,
-        isUsersStatus: false
+        scheduledMessages: [],
+        showScheduledMessageSettingsModal: false,
+        showScheduledMessageListModal: false,
+        scheduleDate: null,
+        scheduleTime: null,
+        scheduleMessageInputValue: "",
+        scheduleMessageToUpdate: null,
+        scheduleMessageRangeError: false,
     });
 
     //need to access state in message received callback
@@ -62,10 +68,8 @@ const GroupChannelUsersOnlineStatus = (props) => {
                     return channel;
                 }
             });
-            const currentChannel = channels.find((channel) => {
-                return stateRef.current.currentlyJoinedChannel.url === channel.url;
-            });
 
+            updateState({ ...stateRef.current, channels: updatedChannels });
         },
     }
 
@@ -142,7 +146,6 @@ const GroupChannelUsersOnlineStatus = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
-
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -169,8 +172,6 @@ const GroupChannelUsersOnlineStatus = (props) => {
         if (error) {
             return onError(error);
         }
-
-        const updatedChannels = [groupChannel, ...state.channels];
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -184,7 +185,6 @@ const GroupChannelUsersOnlineStatus = (props) => {
         if (error) {
             return onError(error);
         }
-
     }
 
     const handleMemberInvite = async () => {
@@ -210,28 +210,91 @@ const GroupChannelUsersOnlineStatus = (props) => {
         updateState({ ...state, messageInputValue });
     }
 
+    const onScheduleMessageInputChange = (e) => {
+        const scheduleMessageInputValue = e.currentTarget.value;
+        updateState({ ...state, scheduleMessageInputValue });
+    }
+
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue;
+            userMessageUpdateParams.message = state.messageInputValue
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue;
+            userMessageParams.message = state.messageInputValue
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-                    updateState({ ...stateRef.current, messageInputValue: "" });
 
+                    updateState({ ...stateRef.current, messageInputValue: "" });
                 })
                 .onFailed((error) => {
                     console.log(error)
                     console.log("failed")
                 });
         }
+    }
+
+    const sendScheduledMessage = async () => {
+        const { scheduleMessageToUpdate, currentlyJoinedChannel, scheduledMessages } = state;
+        if (state.scheduleTime.replace(':', '') > getDate().min.slice(-5).replace(':', '')) {
+            if (scheduleMessageToUpdate) {
+                const params = {
+                    scheduledAt: Math.floor(new Date(state.scheduleDate + ' ' + state.scheduleTime).getTime())
+                };
+                if (state.scheduleMessageInputValue !== '') {
+                    params.message = state.scheduleMessageInputValue
+                }
+                await currentlyJoinedChannel.updateScheduledUserMessage(
+                    scheduleMessageToUpdate.scheduledInfo.scheduledMessageId,
+                    params
+                );
+                const updatedMessages = await loadSchedulesMessages()
+
+                updateState({
+                    ...state,
+                    scheduledMessages: updatedMessages,
+                    scheduleMessageInputValue: "",
+                    scheduleMessageToUpdate: null,
+                    showScheduledMessageSettingsModal: false,
+                    scheduleMessageRangeError: false
+                });
+            } else {
+                const userMessageParams = {
+                    scheduledAt: Math.floor(new Date(state.scheduleDate + ' ' + state.scheduleTime).getTime())
+                };
+                userMessageParams.message = state.messageInputValue
+                currentlyJoinedChannel.createScheduledUserMessage(userMessageParams)
+                    .onPending(message => {
+                        const updatedMessages = [...scheduledMessages, message]
+
+                        updateState({
+                            ...stateRef.current,
+                            messageInputValue: "",
+                            showScheduledMessageSettingsModal: false,
+                            scheduledMessages: updatedMessages,
+                            scheduleMessageRangeError: false,
+                        });
+                    })
+                    .onFailed((error) => {
+                        console.log(error)
+                        console.log("failed")
+                    });
+            }
+        } else {
+            updateState({ ...stateRef.current, scheduleMessageRangeError: true });
+        }
+    }
+
+    const updateScheduleTime = (timestamp) => {
+        const date = timestamp.slice(0, 10)
+        const time = timestamp.slice(-5)
+
+        updateState({ ...state, scheduleTime: time, scheduleDate: date });
     }
 
     const onFileInputChange = async (e) => {
@@ -242,7 +305,6 @@ const GroupChannelUsersOnlineStatus = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
                     updateState({ ...stateRef.current, messageInputValue: "", file: null });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -260,6 +322,10 @@ const GroupChannelUsersOnlineStatus = (props) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
     }
 
+    const updateScheduleMessage = async (message) => {
+        updateState({ ...state, scheduleMessageToUpdate: message, scheduleMessageInputValue: message.message });
+    }
+
     const handleLoadMemberSelectionList = async () => {
         updateState({ ...state, currentlyJoinedChannel: null });
         const [users, error] = await getAllApplicationUsers();
@@ -272,6 +338,26 @@ const GroupChannelUsersOnlineStatus = (props) => {
     const addToChannelMembersList = (userId) => {
         const groupChannelMembers = [...state.groupChannelMembers, userId];
         updateState({ ...state, groupChannelMembers: groupChannelMembers });
+    }
+
+    const formatDate = (unixTimestamp) => {
+        const date = new Date(unixTimestamp);
+
+        const year = date.getFullYear();
+        const month = "0" + (date.getMonth() + 1);
+        const day = "0" + date.getDate();
+        const hours = "0" + date.getHours();
+        const minutes = "0" + date.getMinutes();
+
+        return `${year}-${month.slice(-2)}-${day.slice(-2)}T${hours.slice(-2)}:${minutes.slice(-2)}`
+    }
+
+    const getDate = () => {
+        const today = Date.now()
+        const min = formatDate(today + 300000)
+        const max = formatDate(today + 2592000000)
+
+        return {min, max}
     }
 
     const setupUser = async () => {
@@ -297,11 +383,43 @@ const GroupChannelUsersOnlineStatus = (props) => {
             return onError(error);
         }
 
-        updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
+        const scheduledMessages = await loadSchedulesMessages()
+
+        updateState({ ...state, channels: channels, loading: false, settingUpUser: false, scheduledMessages });
     }
 
-    const showUsersStatus = () => {
-        updateState({ ...state, isUsersStatus: !state.isUsersStatus });
+    const toggleShowScheduledMessageSettingsModal = () => {
+        updateState({ ...state, showScheduledMessageSettingsModal: !state.showScheduledMessageSettingsModal });
+    }
+
+    const toggleShowScheduledMessageListModal = async () => {
+        const scheduledMessages = await loadSchedulesMessages()
+
+        updateState({ ...state, showScheduledMessageListModal: !state.showScheduledMessageListModal, scheduledMessages });
+    }
+
+    const handleDeleteScheduleMessage = async (scheduledMessage) => {
+        const { currentlyJoinedChannel } = state;
+        await currentlyJoinedChannel.cancelScheduledMessage(scheduledMessage.scheduledInfo.scheduledMessageId);
+        const updatedMessages = await loadSchedulesMessages()
+
+        updateState({ ...state, scheduledMessages: updatedMessages });
+    }
+
+    const sendScheduleMessageImmediately = async (scheduledMessage) => {
+        const { currentlyJoinedChannel, messages } = state;
+        await currentlyJoinedChannel.sendScheduledMessageNow(scheduledMessage.scheduledInfo.scheduledMessageId);
+
+        const updatedMessages = await loadSchedulesMessages()
+
+        const messagesIndex = scheduledMessage.scheduledInfo.scheduledMessageId
+        messages[messagesIndex] = scheduledMessage;
+
+        updateState({ ...state, scheduledMessages: updatedMessages, messages });
+    }
+
+    const rescheduleMessage = (message) => {
+        updateState({ ...state, scheduleMessageToUpdate: message, showScheduledMessageSettingsModal: true });
     }
 
     if (state.loading) {
@@ -323,13 +441,15 @@ const GroupChannelUsersOnlineStatus = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange} />
+                onUserNameInputChange={onUserNameInputChange}
+            />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
+            />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -352,6 +472,9 @@ const GroupChannelUsersOnlineStatus = (props) => {
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
+                    sendScheduledMessage={sendScheduledMessage}
+                    toggleShowScheduledMessageSettingsModal={toggleShowScheduledMessageSettingsModal}
+                    toggleShowScheduledMessageListModal={toggleShowScheduledMessageListModal}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange}
                 />
@@ -359,8 +482,30 @@ const GroupChannelUsersOnlineStatus = (props) => {
             <MembersList
                 channel={state.currentlyJoinedChannel}
                 handleMemberInvite={handleMemberInvite}
-                isUsersStatus={state.isUsersStatus}
-                showUsersStatus={showUsersStatus}
+            />
+            <ScheduledMessageSettingsModal
+                showScheduledMessageSettingsModal={state.showScheduledMessageSettingsModal}
+                toggleShowScheduledMessageSettingsModal={toggleShowScheduledMessageSettingsModal}
+                sendScheduledMessage={sendScheduledMessage}
+                updateScheduleTime={updateScheduleTime}
+                scheduleMessageToUpdate={state.scheduleMessageToUpdate}
+                scheduleDate={state.scheduleDate}
+                getDate={getDate}
+                scheduleMessageRangeError={state.scheduleMessageRangeError}
+            />
+            <ScheduledMessageListModal
+                showScheduledMessageListModal={state.showScheduledMessageListModal}
+                toggleShowScheduledMessageListModal={toggleShowScheduledMessageListModal}
+                onScheduleMessageInputChange={onScheduleMessageInputChange}
+                sendScheduledMessage={sendScheduledMessage}
+                updateScheduleTime={updateScheduleTime}
+                scheduledMessages={state.scheduledMessages}
+                updateScheduleMessage={updateScheduleMessage}
+                sendScheduleMessageImmediately={sendScheduleMessageImmediately}
+                handleDeleteScheduleMessage={handleDeleteScheduleMessage}
+                scheduleMessageToUpdate={state.scheduleMessageToUpdate}
+                value={state.scheduleMessageInputValue}
+                rescheduleMessage={rescheduleMessage}
             />
         </>
     );
@@ -396,8 +541,7 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div>
-    );
+        </div >);
 }
 
 const ChannelName = ({ members }) => {
@@ -406,7 +550,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname} </span>
+            return <span key={member.userId}>{member.nickname}</span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -429,15 +573,12 @@ const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
 }
 
-const MembersList = ({ channel, handleMemberInvite, isUsersStatus, showUsersStatus }) => {
+const MembersList = ({ channel, handleMemberInvite }) => {
     if (channel) {
         return <div className="members-list">
-            <button className="members-invite-btn" onClick={handleMemberInvite}>Invite</button>
-            <button className="show-users-status-btn" onClick={showUsersStatus}>
-                {isUsersStatus ? "Hide users status" : "Show users status"}
-            </button>
+            <button onClick={handleMemberInvite}>Invite</button>
             {channel.members.map((member) =>
-                <div className="member-item" key={member.userId}>{member.nickname}{isUsersStatus && <span>{member.connectionStatus}</span>}</div>
+                <div className="member-item" key={member.userId}>{member.nickname}</div>
             )}
         </div>;
     } else {
@@ -473,8 +614,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div>
-        );
+            </div >);
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -487,10 +627,54 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </div>
                 {messageSentByCurrentUser &&
                     <div>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>
-                }
+                        <button className="control-button" onClick={() => updateMessage(message)}>
+                            <img className="message-icon" src='/icon_edit.png' alt="Edit message" />
+                        </button>
+                        <button className="control-button" onClick={() => handleDeleteMessage(message)}>
+                            <img className="message-icon" src='/icon_delete.png' alt="Delete message" />
+                        </button>
+                    </div>}
+            </div>
+            <div>{message.message}</div>
+        </div>
+    );
+}
+
+const ScheduleMessage = ({ message, handleDeleteScheduleMessage, messageSentByYou, updateScheduleMessage, sendScheduleMessageImmediately, rescheduleMessage }) => {
+    if (message.url) {
+        return (
+            <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div>{timestampToTime(message.scheduledInfo.scheduledAt)}</div>
+                </div>
+                <img src={message.url} />
+            </div >);
+    }
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+
+    return (
+        <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+            <div className="message-info">
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div>{timestampToTime(message.scheduledInfo.scheduledAt)}</div>
+                </div>
+                {messageSentByCurrentUser &&
+                    <div>
+                        <button className="control-button" data-tooltip="send now" onClick={() => sendScheduleMessageImmediately(message)}>
+                            <img className="message-icon" src='/icon_send-message.png' alt="Send message" />
+                        </button>
+                        <button className="control-button" data-tooltip="reschedule" onClick={() => rescheduleMessage(message)}>
+                            <img className="message-icon" src='/icon_reschedule.png' alt="Reschedule message" />
+                        </button>
+                        <button className="control-button" data-tooltip="edit" onClick={() => updateScheduleMessage(message)}>
+                            <img className="message-icon" src='/icon_edit.png' alt="Edit message" />
+                        </button>
+                        <button className="control-button" data-tooltip="delete" onClick={() => handleDeleteScheduleMessage(message)}>
+                            <img className="message-icon" src='/icon_delete.png' alt="Delete message" />
+                        </button>
+                    </div>}
             </div>
             <div>{message.message}</div>
         </div>
@@ -505,7 +689,7 @@ const ProfileImage = ({ user }) => {
     }
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
+const MessageInput = ({ value, onChange, sendMessage, sendScheduledMessage, toggleShowScheduledMessageSettingsModal, toggleShowScheduledMessageListModal, onFileInputChange }) => {
     return (
         <div className="message-input">
             <input
@@ -516,7 +700,10 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
+                <button className="send-message-button" onClick={toggleShowScheduledMessageSettingsModal}>Schedule Message</button>
+                <button className="send-message-button" onClick={toggleShowScheduledMessageListModal}>List</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
+
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -537,6 +724,7 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
+
 }) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
@@ -579,18 +767,132 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue} />
-
+                    type="text" value={userIdInputValue}
+                />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue} />
-
+                    type="text" value={userNameInputValue}
+                />
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >Connect</button>
+                >
+                    Connect
+                </button>
+            </div>
+        </div>
+    } else {
+        return null;
+    }
+}
+
+const ScheduledMessageSettingsModal = ({
+    setupUser,
+    showScheduledMessageSettingsModal,
+    toggleShowScheduledMessageSettingsModal,
+    sendScheduledMessage,
+    updateScheduleTime,
+    scheduleMessageToUpdate,
+    getDate,
+    scheduleMessageRangeError,
+}) => {
+    if (showScheduledMessageSettingsModal) {
+        return <div className="overlay scheduled-messages-settings-modal">
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
+                <div className="settings-header">
+                    {scheduleMessageToUpdate ? 'Reschedule message': 'Send shcheduled message'}
+                </div>
+                <div className="schedule-message-error">
+                    {scheduleMessageRangeError && 'Scheduled time should be between 5 minutes and 30 days'}
+                </div>
+                <input
+                    type="datetime-local"
+                    onChange={(e) => {
+                        updateScheduleTime(e.target.value)
+                    }}
+                    min={getDate().min}
+                    max={getDate().max}
+                />
+                
+                <div className="schedule-message">
+                    <button
+                        className="user-submit-button cancel-button"
+                        onClick={toggleShowScheduledMessageSettingsModal}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        className="user-submit-button"
+                        onClick={sendScheduledMessage}
+                    >
+                        {scheduleMessageToUpdate ? 'Reschedule' : 'Schedule'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    } else {
+        return null;
+    }
+}
+
+const ScheduledMessageListModal = ({
+    value,
+    setupUser,
+    showScheduledMessageListModal,
+    toggleShowScheduledMessageListModal,
+    scheduledMessages,
+    sendScheduledMessage,
+    onScheduleMessageInputChange,
+    updateScheduleMessage,
+    sendScheduleMessageImmediately,
+    handleDeleteScheduleMessage,
+    rescheduleMessage,
+    scheduleMessageToUpdate
+}) => {
+    if (showScheduledMessageListModal) {
+        return <div className="overlay ">
+            <div className="overlay-content scheduled-messages-list-modal" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
+                <div className="scheduled-message-header">Shcheduled messages</div>
+
+                <div className="message-list">
+                    {scheduledMessages?.map(message => {
+                        if (!message.sender) return null;
+                        const messageSentByYou = message.sender.userId === sb.currentUser.userId;
+                        return (
+                            <div key={message.scheduledInfo.scheduledMessageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
+                                <ScheduleMessage
+                                    message={message}
+                                    updateScheduleMessage={updateScheduleMessage}
+                                    sendScheduleMessageImmediately={sendScheduleMessageImmediately}
+                                    handleDeleteScheduleMessage={handleDeleteScheduleMessage}
+                                    messageSentByYou={messageSentByYou}
+                                    rescheduleMessage={rescheduleMessage} />
+                                <ProfileImage user={message.sender} />
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {scheduleMessageToUpdate && <div className="update-input">
+                    <input
+                        placeholder="update schedule message"
+                        value={value}
+                        onChange={onScheduleMessageInputChange}
+                    />
+
+                    <button className="send-message-button" onClick={sendScheduledMessage}>Update Message</button>
+                </div>}
+
+                <button
+                    className="close-button"
+                    onClick={toggleShowScheduledMessageListModal}
+                >
+                    <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
+                        <path d="M 39.486328 6.9785156 A 1.50015 1.50015 0 0 0 38.439453 7.4394531 L 24 21.878906 L 9.5605469 7.4394531 A 1.50015 1.50015 0 0 0 8.484375 6.984375 A 1.50015 1.50015 0 0 0 7.4394531 9.5605469 L 21.878906 24 L 7.4394531 38.439453 A 1.50015 1.50015 0 1 0 9.5605469 40.560547 L 24 26.121094 L 38.439453 40.560547 A 1.50015 1.50015 0 1 0 40.560547 38.439453 L 26.121094 24 L 40.560547 9.5605469 A 1.50015 1.50015 0 0 0 39.486328 6.9785156 z" />
+                    </svg>
+                </button>
             </div>
         </div>
     } else {
@@ -629,6 +931,17 @@ const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
         .onCacheResult(onCacheResult)
         .onApiResult(onApiResult);
     return collection;
+}
+
+const loadSchedulesMessages = async () => {
+    const params = {
+        scheduledStatus: [ScheduledStatus.PENDING],
+    }
+
+    const scheduledMessageListQuery = sb.groupChannel.createScheduledMessageListQuery(params);
+    const queriedScheduledMessages = await scheduledMessageListQuery.next();
+
+    return queriedScheduledMessages
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
@@ -672,4 +985,4 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default GroupChannelUsersOnlineStatus;
+export default BasicGroupChannelSample;
