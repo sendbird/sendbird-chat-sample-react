@@ -14,14 +14,16 @@ import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 
 let sb;
 
-const OpenChannelSendAnAdminMessage = (props) => {
+const OpenChannelStructuredData = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
         currentlyUpdatingChannel: null,
         messages: [],
         channels: [],
+        messageData: {},
         showChannelCreate: false,
+        showAddDataToMessage: false,
         messageInputValue: "",
         userNameInputValue: "",
         userIdInputValue: "",
@@ -53,6 +55,10 @@ const OpenChannelSendAnAdminMessage = (props) => {
     useEffect(() => {
         scrollToBottom(channelRef.current, 'smooth')
     }, [state.messages])
+
+    const messageDataNameRef = useRef();
+    const messageDataPriceRef = useRef();
+    const messageDataImageRef = useRef();
 
     const onError = (error) => {
         updateState({ ...state, error: error.message });
@@ -110,7 +116,6 @@ const OpenChannelSendAnAdminMessage = (props) => {
     const handleLeaveChannel = async () => {
         const { currentlyJoinedChannel } = state;
         await currentlyJoinedChannel.exit();
-
         updateState({ ...state, currentlyJoinedChannel: null })
     }
 
@@ -179,8 +184,12 @@ const OpenChannelSendAnAdminMessage = (props) => {
         updateState({ ...state, messageInputValue });
     }
 
+    const toggleShowAddDataToMessage = () => {
+        updateState({ ...state, showAddDataToMessage: !state.showAddDataToMessage });
+    }
+
     const sendMessage = async () => {
-        const { messageToUpdate, currentlyJoinedChannel, messages } = state;
+        const { messageToUpdate, currentlyJoinedChannel, messages, messageData } = state;
 
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
@@ -192,6 +201,7 @@ const OpenChannelSendAnAdminMessage = (props) => {
         } else {
             const userMessageParams = {};
             userMessageParams.message = state.messageInputValue;
+            userMessageParams.data = JSON.stringify(messageData);
             currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
@@ -255,6 +265,15 @@ const OpenChannelSendAnAdminMessage = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
+    const handleAddDataToMessage = () => {
+        const updatedMessageData = {
+            name: messageDataNameRef.current.value,
+            price: messageDataPriceRef.current.value,
+            image: messageDataImageRef.current.value
+        }
+        updateState({ ...state, messageData: updatedMessageData, showAddDataToMessage: false });
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -306,8 +325,16 @@ const OpenChannelSendAnAdminMessage = (props) => {
                     sendMessage={sendMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange}
+                    toggleShowAddDataToMessage={toggleShowAddDataToMessage}
                 />
             </Channel>
+            <AddDataToMessage
+                showAddDataToMessage={state.showAddDataToMessage}
+                toggleShowAddDataToMessage={toggleShowAddDataToMessage}
+                handleAddDataToMessage={handleAddDataToMessage}
+                messageDataNameRef={messageDataNameRef}
+                messageDataPriceRef={messageDataPriceRef}
+                messageDataImageRef={messageDataImageRef} />
         </>
     );
 };
@@ -320,33 +347,25 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                 <h1>Open Channels</h1>
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
             </div>
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div
-                                className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}
-                            >
-                                {channel.name}
-                            </div>
-                            {
-                                userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-                                    </button>
-                                </div>
-                            }
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
                         </div>
-                    );
-                })
-            }
+                        {userIsOperator && <div>
+                            <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                <img className="channel-icon" src='/icon_edit.png' />
+                            </button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                        </div>}
+                    </div>
+                );
+            })}
         </div>
     );
 }
@@ -370,6 +389,8 @@ const ChannelHeader = ({ children }) => {
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return messages.map(message => {
+        const data = message.data ? JSON.parse(message.data) : "";
+
         return (
             <div key={message.messageId} className="oc-message-item">
                 <Message
@@ -377,13 +398,20 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                     updateMessage={updateMessage}
                     message={message}
                 />
+                {Object.keys(data).length !== 0 &&
+                    <div className="card">
+                        <img src={data.image} alt="" />
+                        <div className="card-name">{data.name}</div>
+                        <div>{data.price}</div>
+                    </div>
+                }
             </div>
         );
     })
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
@@ -393,32 +421,27 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
         );
     }
 
-    if (message.messageType === "admin") {
-        return <AdminMessage message={message} />
-    }
-
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
+
             <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
             <div>{message.message}</div>
-            {
-                messageSentByCurrentUser &&
-                <>
-                    <button className="control-button" onClick={() => updateMessage(message)}>
-                        <img className="oc-message-icon" src='/icon_edit.png' />
-                    </button>
-                    <button className="control-button" onClick={() => handleDeleteMessage(message)}>
-                        <img className="oc-message-icon" src='/icon_delete.png' />
-                    </button>
-                </>
-            }
+
+            {messageSentByCurrentUser && <>
+                <button className="control-button" onClick={() => updateMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_edit.png' />
+                </button>
+                <button className="control-button" onClick={() => handleDeleteMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_delete.png' />
+                </button>
+            </>}
         </div>
     );
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
+const MessageInput = ({ value, onChange, sendMessage, onFileInputChange, toggleShowAddDataToMessage }) => {
     return (
         <div className="message-input">
             <input
@@ -429,7 +452,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
-                <label className="file-upload-label" htmlFor="upload" >Select File</label>
+                <label className="file-upload-label" htmlFor="upload">Select File</label>
+                <label className="message-type-add" onClick={toggleShowAddDataToMessage}>Add data</label>
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -502,14 +526,12 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
                 <div>
                     <button
                         className="user-submit-button"
@@ -523,13 +545,41 @@ const CreateUserForm = ({
     }
 }
 
-const AdminMessage = ({ message }) => (
-    <div className="oc-message admin-message">
-        <div>{timestampToTime(message.createdAt)}</div>
-        <div className="oc-message-sender-name">{message.messageType}{':'}</div>
-        <div>{message.message}</div>
-    </div >
-)
+const AddDataToMessage = ({
+    showAddDataToMessage,
+    toggleShowAddDataToMessage,
+    handleAddDataToMessage,
+    messageDataNameRef,
+    messageDataPriceRef,
+    messageDataImageRef
+}) => {
+    if (showAddDataToMessage) {
+        return <div className="overlay">
+            <div className="overlay-content">
+                <div>
+                    <h3>Add data to message</h3>
+                </div>
+                <div>
+                    <div>Name</div>
+                    <input className="form-input" ref={messageDataNameRef} />
+                </div>
+                <div>
+                    <div>Price</div>
+                    <input className="form-input" ref={messageDataPriceRef} />
+                </div>
+                <div>
+                    <div>Image url</div>
+                    <input className="form-input" ref={messageDataImageRef} />
+                </div>
+                <div>
+                    <button className="form-button" onClick={handleAddDataToMessage}>Save</button>
+                    <button className="form-button" onClick={toggleShowAddDataToMessage}>Cancel</button>
+                </div>
+            </div>
+        </div>;
+    }
+    return null;
+}
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
@@ -594,4 +644,4 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default OpenChannelSendAnAdminMessage;
+export default OpenChannelStructuredData;

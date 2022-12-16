@@ -14,11 +14,12 @@ import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 
 let sb;
 
-const OpenChannelSendAnAdminMessage = (props) => {
+const BasicOpenChannelSample = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
         currentlyUpdatingChannel: null,
+        applicationUsers: [],
         messages: [],
         channels: [],
         showChannelCreate: false,
@@ -30,7 +31,8 @@ const OpenChannelSendAnAdminMessage = (props) => {
         file: null,
         messageToUpdate: null,
         loading: false,
-        error: false
+        error: false,
+        isUsersStatus: false
     });
 
     //need to access state in message reeived callback
@@ -68,8 +70,9 @@ const OpenChannelSendAnAdminMessage = (props) => {
         const channelToJoin = channels.find((channel) => channel.url === channelUrl);
         await channelToJoin.enter();
         const [messages, error] = await loadMessages(channelToJoin);
-        if (error) {
-            return onError(error);
+        const [users, usersError] = await getAllApplicationUsers();
+        if (error || usersError) {
+            return onError(error || usersError);
         }
 
         // setup connection event handlers
@@ -85,6 +88,18 @@ const OpenChannelSendAnAdminMessage = (props) => {
 
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
+        channelHandler.onUserEntered = (channel, user) => {
+            const userIndex = stateRef.current.applicationUsers.findIndex((item => item.userId == user.userId));
+            const updatedUsers = [...stateRef.current.applicationUsers];
+            updatedUsers[userIndex].connectionStatus = "online"
+            updateState({ ...stateRef.current, applicationUsers: updatedUsers });
+        }
+        channelHandler.onUserExited = (channel, user) => {
+            const userIndex = stateRef.current.applicationUsers.findIndex((item => item.userId == user.userId));
+            const updatedUsers = [...stateRef.current.applicationUsers];
+            updatedUsers[userIndex].connectionStatus = "offline"
+            updateState({ ...stateRef.current, applicationUsers: updatedUsers });
+        }
         channelHandler.onMessageUpdated = (channel, message) => {
             const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
             const updatedMessages = [...stateRef.current.messages];
@@ -104,7 +119,7 @@ const OpenChannelSendAnAdminMessage = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         }
         sb.openChannel.addOpenChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channelToJoin, messages: messages, loading: false })
+        updateState({ ...state, currentlyJoinedChannel: channelToJoin, messages: messages, applicationUsers: users, loading: false })
     }
 
     const handleLeaveChannel = async () => {
@@ -112,6 +127,7 @@ const OpenChannelSendAnAdminMessage = (props) => {
         await currentlyJoinedChannel.exit();
 
         updateState({ ...state, currentlyJoinedChannel: null })
+
     }
 
     const handleCreateChannel = async () => {
@@ -210,6 +226,7 @@ const OpenChannelSendAnAdminMessage = (props) => {
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
                 updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
+
             }).onFailed((error) => {
                 console.log(error)
                 console.log("failed")
@@ -255,6 +272,10 @@ const OpenChannelSendAnAdminMessage = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
+    const showUsersStatus = async () => {
+        updateState({ ...state, isUsersStatus: !state.isUsersStatus });
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -293,13 +314,17 @@ const OpenChannelSendAnAdminMessage = (props) => {
                 handleCreateChannel={handleCreateChannel} />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
+                isUsersStatus={state.isUsersStatus}
+                showUsersStatus={showUsersStatus}
                 handleLeaveChannel={handleLeaveChannel}
                 channelRef={channelRef}
             >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
-                    updateMessage={updateMessage} />
+                    updateMessage={updateMessage}
+                    isUsersStatus={state.isUsersStatus}
+                    applicationUsers={state.applicationUsers} />
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
@@ -320,42 +345,37 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                 <h1>Open Channels</h1>
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
             </div>
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div
-                                className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}
-                            >
-                                {channel.name}
-                            </div>
-                            {
-                                userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-                                    </button>
-                                </div>
-                            }
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
                         </div>
-                    );
-                })
-            }
+                        {userIsOperator && <div>
+                            <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                <img className="channel-icon" src='/icon_edit.png' />
+                            </button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                        </div>}
+                    </div>
+                );
+            })}
         </div>
     );
 }
 
-const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, channelRef }) => {
+const Channel = ({ currentlyJoinedChannel, handleLeaveChannel, children, showUsersStatus, isUsersStatus, channelRef }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
+                <button className="leave-channel" onClick={showUsersStatus}>
+                    {isUsersStatus ? "Hide users status" : "Show users status"}
+                </button>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Exit Channel</button>
             </div>
             <div>{children}</div>
@@ -368,7 +388,7 @@ const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, isUsersStatus, applicationUsers }) => {
     return messages.map(message => {
         return (
             <div key={message.messageId} className="oc-message-item">
@@ -376,44 +396,51 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                     message={message}
+                    isUsersStatus={isUsersStatus}
+                    applicationUsers={applicationUsers}
                 />
             </div>
         );
     })
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, isUsersStatus, applicationUsers }) => {
+    if (!message.sender) return null;
+    const user = applicationUsers.find((item) => item.userId === message.sender.userId);
+
     if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
-                <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
+                <div className="oc-message-sender-name">
+                    {message.sender.nickname}
+                    {isUsersStatus && <span className="user-online-status">{user.connectionStatus}</span>}
+                    {' '}
+                </div>
                 <img src={message.url} />
             </div>
         );
-    }
-
-    if (message.messageType === "admin") {
-        return <AdminMessage message={message} />
     }
 
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
-            <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
+            <div className="oc-message-sender-name">
+                {message.sender.nickname}
+                {isUsersStatus && <span className="user-online-status">{user.connectionStatus}</span>}
+                {':'}
+            </div>
             <div>{message.message}</div>
-            {
-                messageSentByCurrentUser &&
-                <>
-                    <button className="control-button" onClick={() => updateMessage(message)}>
-                        <img className="oc-message-icon" src='/icon_edit.png' />
-                    </button>
-                    <button className="control-button" onClick={() => handleDeleteMessage(message)}>
-                        <img className="oc-message-icon" src='/icon_delete.png' />
-                    </button>
-                </>
-            }
+
+            {messageSentByCurrentUser && <>
+                <button className="control-button" onClick={() => updateMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_edit.png' />
+                </button>
+                <button className="control-button" onClick={() => handleDeleteMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_delete.png' />
+                </button>
+            </>}
         </div>
     );
 }
@@ -502,14 +529,12 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
                 <div>
                     <button
                         className="user-submit-button"
@@ -523,13 +548,6 @@ const CreateUserForm = ({
     }
 }
 
-const AdminMessage = ({ message }) => (
-    <div className="oc-message admin-message">
-        <div>{timestampToTime(message.createdAt)}</div>
-        <div className="oc-message-sender-name">{message.messageType}{':'}</div>
-        <div>{message.message}</div>
-    </div >
-)
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
@@ -594,4 +612,14 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default OpenChannelSendAnAdminMessage;
+const getAllApplicationUsers = async () => {
+    try {
+        const userQuery = sb.createApplicationUserListQuery({ limit: 100 });
+        const users = await userQuery.next();
+        return [users, null];
+    } catch (error) {
+        return [null, error];
+    }
+}
+
+export default BasicOpenChannelSample;

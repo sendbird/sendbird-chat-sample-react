@@ -14,11 +14,12 @@ import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 
 let sb;
 
-const OpenChannelSendAnAdminMessage = (props) => {
+const OpenChannelUserProfileUpdate = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
         currentlyUpdatingChannel: null,
+        currentUser: null,
         messages: [],
         channels: [],
         showChannelCreate: false,
@@ -26,11 +27,13 @@ const OpenChannelSendAnAdminMessage = (props) => {
         userNameInputValue: "",
         userIdInputValue: "",
         channelNameInputValue: "",
+        userProfileNicknameInputValue: "",
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
         loading: false,
-        error: false
+        error: false,
+        isUserProfileModal: false
     });
 
     //need to access state in message reeived callback
@@ -220,6 +223,7 @@ const OpenChannelSendAnAdminMessage = (props) => {
     const handleDeleteMessage = async (messageToDelete) => {
         const { currentlyJoinedChannel } = state;
         await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+
     }
 
     const updateMessage = async (message) => {
@@ -252,7 +256,34 @@ const OpenChannelSendAnAdminMessage = (props) => {
         if (error) {
             return onError(error);
         }
-        updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
+        updateState({ ...state, channels: channels, loading: false, settingUpUser: false, currentUser: sb.openChannel._sessionManager.currentUser });
+    }
+
+    const toggleUserProfileModal = () => {
+        updateState({ ...state, isUserProfileModal: !state.isUserProfileModal });
+    }
+
+    const onProfileImageInputChange = async (e) => {
+        const { currentUser } = state;
+
+        if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+            const updatedUser = await updateUserProfile(currentUser.nickname, e.currentTarget.files[0]);
+            updateState({ ...state, currentUser: updatedUser });
+        }
+    }
+
+    const onProfileNicknameInputChange = (e) => {
+        const userProfileNicknameInputValue = e.currentTarget.value;
+        updateState({ ...state, userProfileNicknameInputValue })
+    }
+
+    const updateUserProfileNickname = async () => {
+        const { userProfileNicknameInputValue, currentUser } = state;
+
+        if (userProfileNicknameInputValue) {
+            const updatedUser = await updateUserProfile(userProfileNicknameInputValue, null, currentUser.profileUrl);
+            updateState({ ...state, currentUser: updatedUser, userProfileNicknameInputValue: "" });
+        }
     }
 
     if (state.loading) {
@@ -280,6 +311,7 @@ const OpenChannelSendAnAdminMessage = (props) => {
                 toggleChannelDetails={toggleChannelDetails}
                 handleJoinChannel={handleJoinChannel}
                 toggleShowCreateChannel={toggleShowCreateChannel}
+                toggleUserProfileModal={toggleUserProfileModal}
                 handleDeleteChannel={handleDeleteChannel} />
             <ChannelDetails
                 currentlyUpdatingChannel={state.currentlyUpdatingChannel}
@@ -291,6 +323,14 @@ const OpenChannelSendAnAdminMessage = (props) => {
                 toggleShowCreateChannel={toggleShowCreateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
+            <UserProfileModal
+                isUserProfileModal={state.isUserProfileModal}
+                currentUser={state.currentUser}
+                userProfileNicknameInputValue={state.userProfileNicknameInputValue}
+                toggleUserProfileModal={toggleUserProfileModal}
+                onProfileImageInputChange={onProfileImageInputChange}
+                onProfileNicknameInputChange={onProfileNicknameInputChange}
+                updateUserProfileNickname={updateUserProfileNickname} />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
                 handleLeaveChannel={handleLeaveChannel}
@@ -313,40 +353,33 @@ const OpenChannelSendAnAdminMessage = (props) => {
 };
 
 // Chat UI Components
-const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, handleDeleteChannel, toggleChannelDetails }) => {
+const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, handleDeleteChannel, toggleChannelDetails, toggleUserProfileModal }) => {
     return (
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Open Channels</h1>
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
+                <button className="channel-create-button" style={{ margin: "10px 0 0" }} onClick={toggleUserProfileModal}>Update Profile</button>
             </div>
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div
-                                className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}
-                            >
-                                {channel.name}
-                            </div>
-                            {
-                                userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-                                    </button>
-                                </div>
-                            }
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
                         </div>
-                    );
-                })
-            }
+                        {userIsOperator && <div>
+                            <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                <img className="channel-icon" src='/icon_edit.png' />
+                            </button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                        </div>}
+                    </div>
+                );
+            })}
         </div>
     );
 }
@@ -383,7 +416,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
@@ -393,27 +426,21 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
         );
     }
 
-    if (message.messageType === "admin") {
-        return <AdminMessage message={message} />
-    }
-
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
             <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
             <div>{message.message}</div>
-            {
-                messageSentByCurrentUser &&
-                <>
-                    <button className="control-button" onClick={() => updateMessage(message)}>
-                        <img className="oc-message-icon" src='/icon_edit.png' />
-                    </button>
-                    <button className="control-button" onClick={() => handleDeleteMessage(message)}>
-                        <img className="oc-message-icon" src='/icon_delete.png' />
-                    </button>
-                </>
-            }
+
+            {messageSentByCurrentUser && <>
+                <button className="control-button" onClick={() => updateMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_edit.png' />
+                </button>
+                <button className="control-button" onClick={() => handleDeleteMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_delete.png' />
+                </button>
+            </>}
         </div>
     );
 }
@@ -502,14 +529,12 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
                 <div>
                     <button
                         className="user-submit-button"
@@ -523,13 +548,43 @@ const CreateUserForm = ({
     }
 }
 
-const AdminMessage = ({ message }) => (
-    <div className="oc-message admin-message">
-        <div>{timestampToTime(message.createdAt)}</div>
-        <div className="oc-message-sender-name">{message.messageType}{':'}</div>
-        <div>{message.message}</div>
-    </div >
-)
+const UserProfileModal = ({ isUserProfileModal, toggleUserProfileModal, onProfileImageInputChange, onProfileNicknameInputChange, updateUserProfileNickname, currentUser, userProfileNicknameInputValue }) => {
+    if (isUserProfileModal) {
+        return (
+            <div className="overlay">
+                <div className="overlay-content">
+                    <h2 className="user-profile-title">My profile</h2>
+                    <p>Profile image:</p>
+                    <div className="user-profile-image-wrapper">
+                        <img className="user-profile-image" src={currentUser.profileUrl ? currentUser.profileUrl : "/profile_img.png"} alt="profile image" />
+                        <label className="user-profile-image-upload-label" htmlFor="profile_img" >Upload</label>
+                        <input
+                            id="profile_img"
+                            className="file-upload-button"
+                            type='file'
+                            hidden={true}
+                            onChange={onProfileImageInputChange}
+                            onClick={() => { }}
+                        />
+                    </div>
+                    <p>Nickname:</p>
+                    <div className="user-profile-nickname-wrapper">
+                        <input
+                            className="user-profile-nickname-input"
+                            placeholder="write a nickname"
+                            value={userProfileNicknameInputValue}
+                            onChange={onProfileNicknameInputChange} />
+                        <button className="user-profile-nickname-button" onClick={updateUserProfileNickname}>Update</button>
+                    </div>
+                    <div>
+                        <button className="form-button" onClick={toggleUserProfileModal}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+    return null;
+}
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
@@ -594,4 +649,22 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default OpenChannelSendAnAdminMessage;
+const updateUserProfile = async (nickname, image, url) => {
+    try {
+        const userUpdateParams = {};
+        userUpdateParams.nickname = nickname;
+        if (image) {
+            userUpdateParams.profileImage = image;
+        } else {
+            userUpdateParams.profileUrl = url;
+        }
+
+        const updatedUser = await sb.updateCurrentUserInfo(userUpdateParams);
+        return updatedUser;
+    } catch (error) {
+        console.log("Error");
+        console.log(error);
+    }
+}
+
+export default OpenChannelUserProfileUpdate;
