@@ -1,3 +1,5 @@
+import { SENDBIRD_INFO } from '../constants/constants';
+import { timestampToTime } from '../utils/messageUtils';
 import { useState, useEffect, useRef } from 'react';
 import { ConnectionHandler } from '@sendbird/chat';
 
@@ -8,13 +10,11 @@ import {
     OpenChannelModule,
     OpenChannelHandler,
 } from '@sendbird/chat/openChannel';
-
-import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
+import { handleEnterPress } from '../utils/messageUtils';
 
 let sb;
 
-const OpenChannelSendAnAdminMessage = (props) => {
+const OpenChannelUserDoNotDisturbOrSnooze = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
@@ -30,7 +30,14 @@ const OpenChannelSendAnAdminMessage = (props) => {
         file: null,
         messageToUpdate: null,
         loading: false,
-        error: false
+        error: false,
+        isShowNotificationsSettingModal: false,
+        doNotDisturbStartHoursInputValue: "",
+        doNotDisturbStartMinutesInputValue: "",
+        doNotDisturbEndHoursInputValue: "",
+        doNotDisturbEndMinutesInputValue: "",
+        snoozeStartInputValue: "",
+        snoozeEndInputValue: ""
     });
 
     //need to access state in message reeived callback
@@ -110,7 +117,6 @@ const OpenChannelSendAnAdminMessage = (props) => {
     const handleLeaveChannel = async () => {
         const { currentlyJoinedChannel } = state;
         await currentlyJoinedChannel.exit();
-
         updateState({ ...state, currentlyJoinedChannel: null })
     }
 
@@ -255,6 +261,42 @@ const OpenChannelSendAnAdminMessage = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
+    const toggleNotificationsSettingModal = () => {
+        updateState({ ...state, isShowNotificationsSettingModal: !state.isShowNotificationsSettingModal })
+    }
+
+    const onNotificationModalInputChange = (e, stateKey) => {
+        const updateStateKeyValue = e.currentTarget.value;
+        updateState({ ...state, [stateKey]: updateStateKeyValue });
+    }
+
+    const addDoNotDisturb = async () => {
+        const { doNotDisturbStartHoursInputValue, doNotDisturbStartMinutesInputValue, doNotDisturbEndHoursInputValue, doNotDisturbEndMinutesInputValue } = state;
+        const isAddDoNotDisturb = doNotDisturbStartHoursInputValue && doNotDisturbStartMinutesInputValue && doNotDisturbEndHoursInputValue && doNotDisturbEndMinutesInputValue;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        if (isAddDoNotDisturb) {
+            await sb.setDoNotDisturb(true, +doNotDisturbStartHoursInputValue, +doNotDisturbStartMinutesInputValue, +doNotDisturbEndHoursInputValue, +doNotDisturbEndMinutesInputValue, timezone);
+            alert("Do not disturb mode is on");
+        } else {
+            alert("Fill in all fields");
+        }
+    }
+
+    const addNotificationsSnooze = async () => {
+        const { snoozeStartInputValue, snoozeEndInputValue } = state;
+        const snoozeStart = snoozeStartInputValue.split("-").join('') + "00000";
+        const snoozeEnd = snoozeStartInputValue.split("-").join('') + "00000";
+
+        if (snoozeStartInputValue && snoozeEndInputValue) {
+            await sb.setSnoozePeriod(true, +snoozeStart, +snoozeEnd);
+
+            alert("Mute notifications enabled");
+        } else {
+            alert("Fill in all fields");
+        }
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -277,6 +319,7 @@ const OpenChannelSendAnAdminMessage = (props) => {
                 onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
+                toggleNotificationsSettingModal={toggleNotificationsSettingModal}
                 toggleChannelDetails={toggleChannelDetails}
                 handleJoinChannel={handleJoinChannel}
                 toggleShowCreateChannel={toggleShowCreateChannel}
@@ -291,6 +334,19 @@ const OpenChannelSendAnAdminMessage = (props) => {
                 toggleShowCreateChannel={toggleShowCreateChannel}
                 onChannelNamenIputChange={onChannelNamenIputChange}
                 handleCreateChannel={handleCreateChannel} />
+            <NotificationsSettingModal
+                isShowNotificationsSettingModal={state.isShowNotificationsSettingModal}
+                toggleNotificationsSettingModal={toggleNotificationsSettingModal}
+                onNotificationModalInputChange={onNotificationModalInputChange}
+                addDoNotDisturb={addDoNotDisturb}
+                doNotDisturbStartHoursInputValue={state.doNotDisturbStartHoursInputValue}
+                doNotDisturbStartMinutesInputValue={state.doNotDisturbStartMinutesInputValue}
+                doNotDisturbEndHoursInputValue={state.doNotDisturbEndHoursInputValue}
+                doNotDisturbEndMinutesInputValue={state.doNotDisturbEndMinutesInputValue}
+                snoozeStartInputValue={state.snoozeStartInputValue}
+                snoozeEndInputValue={state.snoozeEndInputValue}
+                addNotificationsSnooze={addNotificationsSnooze}
+            />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
                 handleLeaveChannel={handleLeaveChannel}
@@ -299,7 +355,8 @@ const OpenChannelSendAnAdminMessage = (props) => {
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
-                    updateMessage={updateMessage} />
+                    updateMessage={updateMessage}
+                />
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
@@ -313,40 +370,33 @@ const OpenChannelSendAnAdminMessage = (props) => {
 };
 
 // Chat UI Components
-const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, handleDeleteChannel, toggleChannelDetails }) => {
+const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, handleDeleteChannel, toggleChannelDetails, toggleNotificationsSettingModal }) => {
     return (
         <div className='channel-list'>
             <div className="channel-type">
                 <h1>Open Channels</h1>
                 <button className="channel-create-button" onClick={toggleShowCreateChannel}>Create Channel</button>
+                <button className="channel-create-button" style={{ marginTop: "5px" }} onClick={() => toggleNotificationsSettingModal()}>Notification Setting</button>
             </div>
-            {
-                channels.map(channel => {
-                    const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
-                    return (
-                        <div key={channel.url} className="channel-list-item" >
-                            <div
-                                className="channel-list-item-name"
-                                onClick={() => { handleJoinChannel(channel.url) }}
-                            >
-                                {channel.name}
-                            </div>
-                            {
-                                userIsOperator &&
-                                <div>
-                                    <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                        <img className="channel-icon" src='/icon_edit.png' />
-
-                                    </button>
-                                    <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                        <img className="channel-icon" src='/icon_delete.png' />
-                                    </button>
-                                </div>
-                            }
+            {channels.map(channel => {
+                const userIsOperator = channel.operators.some((operator) => operator.userId === sb.currentUser.userId)
+                return (
+                    <div key={channel.url} className="channel-list-item" >
+                        <div className="channel-list-item-name"
+                            onClick={() => { handleJoinChannel(channel.url) }}>
+                            {channel.name}
                         </div>
-                    );
-                })
-            }
+                        {userIsOperator && <div>
+                            <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
+                                <img className="channel-icon" src='/icon_edit.png' />
+                            </button>
+                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
+                                <img className="channel-icon" src='/icon_delete.png' />
+                            </button>
+                        </div>}
+                    </div>
+                );
+            })}
         </div>
     );
 }
@@ -383,7 +433,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
-    if (message.url) {
+    if (!message.sender) return null; if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
@@ -393,27 +443,21 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
         );
     }
 
-    if (message.messageType === "admin") {
-        return <AdminMessage message={message} />
-    }
-
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
     return (
         <div className="oc-message">
             <div>{timestampToTime(message.createdAt)}</div>
             <div className="oc-message-sender-name">{message.sender.nickname}{':'}</div>
             <div>{message.message}</div>
-            {
-                messageSentByCurrentUser &&
-                <>
-                    <button className="control-button" onClick={() => updateMessage(message)}>
-                        <img className="oc-message-icon" src='/icon_edit.png' />
-                    </button>
-                    <button className="control-button" onClick={() => handleDeleteMessage(message)}>
-                        <img className="oc-message-icon" src='/icon_delete.png' />
-                    </button>
-                </>
-            }
+
+            {messageSentByCurrentUser && <>
+                <button className="control-button" onClick={() => updateMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_edit.png' />
+                </button>
+                <button className="control-button" onClick={() => handleDeleteMessage(message)}>
+                    <img className="oc-message-icon" src='/icon_delete.png' />
+                </button>
+            </>}
         </div>
     );
 }
@@ -502,14 +546,12 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
                 <div>
                     <button
                         className="user-submit-button"
@@ -523,13 +565,114 @@ const CreateUserForm = ({
     }
 }
 
-const AdminMessage = ({ message }) => (
-    <div className="oc-message admin-message">
-        <div>{timestampToTime(message.createdAt)}</div>
-        <div className="oc-message-sender-name">{message.messageType}{':'}</div>
-        <div>{message.message}</div>
-    </div >
-)
+const NotificationsSettingModal = ({
+    isShowNotificationsSettingModal,
+    toggleNotificationsSettingModal,
+    onNotificationModalInputChange,
+    addDoNotDisturb,
+    doNotDisturbStartHoursInputValue,
+    doNotDisturbStartMinutesInputValue,
+    doNotDisturbEndHoursInputValue,
+    doNotDisturbEndMinutesInputValue,
+    snoozeStartInputValue,
+    snoozeEndInputValue,
+    addNotificationsSnooze
+}) => {
+    if (isShowNotificationsSettingModal) {
+        return (
+            <div className="overlay">
+                <div className="overlay-content notifications-overlay-content">
+                    <div className="do-not-disturb-wrapper">
+                        <h3>Don't disturb</h3>
+                        <div><b>Start:</b></div>
+                        <div className="do-not-disturb-start-wrapper">
+                            <label className="notification-modal-label" htmlFor="start-hours">Hours</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="start-hours"
+                                name="start-hours"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbStartHoursInputValue") }}
+                                value={doNotDisturbStartHoursInputValue}
+                                placeholder="min: 0, max: 24"
+                                min="0"
+                                max="24"
+                            />
+                            <label className="notification-modal-label" htmlFor="start-minutes">Minutes</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="start-minutes"
+                                name="start-minutes"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbStartMinutesInputValue") }}
+                                value={doNotDisturbStartMinutesInputValue}
+                                placeholder="min: 0, max: 59"
+                                min="0"
+                                max="59"
+                            />
+                        </div>
+                        <div><b>End:</b></div>
+                        <div className="do-not-disturb-end-wrapper">
+                            <label className="notification-modal-label" htmlFor="end-hours">Hours</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="end-hours"
+                                name="end-hours"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbEndHoursInputValue") }}
+                                value={doNotDisturbEndHoursInputValue}
+                                placeholder="min: 0, max: 24"
+                                min="0"
+                                max="24"
+                            />
+                            <label className="notification-modal-label" htmlFor="end-minutes">Minutes</label>
+                            <input
+                                className="notification-modal-input"
+                                type="number"
+                                id="end-minutes"
+                                name="end-minutes"
+                                onChange={(e) => { onNotificationModalInputChange(e, "doNotDisturbEndMinutesInputValue") }}
+                                value={doNotDisturbEndMinutesInputValue}
+                                placeholder="min: 0, max: 59"
+                                min="0"
+                                max="59"
+                            />
+                        </div>
+                        <button className="channel-create-button" onClick={addDoNotDisturb}>Add</button>
+                    </div>
+                    <div className="notifications-snooze-wrapper">
+                        <h3>Notifications snooze</h3>
+                        <div className="notifications-snooze-input-wrapper">
+                            <label className="notification-modal-label" htmlFor="start-snooze">Start</label>
+                            <input
+                                className="notification-modal-input"
+                                type="date"
+                                id="start-snooze"
+                                name="start-snooze"
+                                onChange={(e) => { onNotificationModalInputChange(e, "snoozeStartInputValue") }}
+                                value={snoozeStartInputValue}
+                                min="0"
+                            />
+                            <label className="notification-modal-label" htmlFor="end-snooze">End</label>
+                            <input
+                                className="notification-modal-input"
+                                type="date"
+                                id="end-snooze"
+                                name="end-snooze"
+                                onChange={(e) => { onNotificationModalInputChange(e, "snoozeEndInputValue") }}
+                                value={snoozeEndInputValue}
+                                min="0"
+                            />
+                        </div>
+                        <button className="channel-create-button" onClick={addNotificationsSnooze}>Add</button>
+                    </div>
+                    <button onClick={toggleNotificationsSettingModal}>Cancel</button>
+                </div>
+            </div>
+        )
+    }
+    return null;
+}
 
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
@@ -537,6 +680,7 @@ const loadChannels = async () => {
         const openChannelQuery = sb.openChannel.createOpenChannelListQuery({ limit: 30 });
         const channels = await openChannelQuery.next();
         return [channels, null];
+
     } catch (error) {
         return [null, error];
     }
@@ -582,7 +726,9 @@ const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) =>
         const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
         const openChannelParams = {};
         openChannelParams.name = channelNameInputValue;
+
         openChannelParams.operatorUserIds = [sb.currentUser.userId];
+
         const updatedChannel = await channel.updateChannel(openChannelParams);
         return [updatedChannel, null];
     } catch (error) {
@@ -594,4 +740,4 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default OpenChannelSendAnAdminMessage;
+export default OpenChannelUserDoNotDisturbOrSnooze;

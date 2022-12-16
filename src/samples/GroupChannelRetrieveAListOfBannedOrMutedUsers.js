@@ -1,4 +1,6 @@
+
 import { useState, useEffect, useRef } from 'react';
+import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -12,7 +14,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelRetrieveAListOfBannedOrMutedUsers = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -29,7 +31,8 @@ const BasicGroupChannelSample = (props) => {
         messageToUpdate: null,
         messageCollection: null,
         loading: false,
-        error: false
+        error: false,
+        bannedOrMutedUsers: []
     });
 
     //need to access state in message received callback
@@ -137,6 +140,7 @@ const BasicGroupChannelSample = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
+
         const onCacheResult = (err, messages) => {
             updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
@@ -163,6 +167,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -176,6 +181,7 @@ const BasicGroupChannelSample = (props) => {
         if (error) {
             return onError(error);
         }
+
     }
 
     const handleMemberInvite = async () => {
@@ -205,18 +211,18 @@ const BasicGroupChannelSample = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
-            userMessageUpdateParams.message = state.messageInputValue
+            userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
             const userMessageParams = {};
-            userMessageParams.message = state.messageInputValue
+            userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
                     updateState({ ...stateRef.current, messageInputValue: "" });
+
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -290,6 +296,26 @@ const BasicGroupChannelSample = (props) => {
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
     }
 
+    const handleBannedOrMutedMembers = async (e) => {
+        const { currentlyJoinedChannel } = state;
+
+        switch (e.currentTarget.value) {
+            case "empty":
+                updateState({ ...state, bannedOrMutedUsers: [] });
+                break
+            case "banned_users":
+                const bannedUsers = await getBannedOrMutedUsers(currentlyJoinedChannel, "createBannedUserListQuery");
+                updateState({ ...state, bannedOrMutedUsers: bannedUsers });
+                break;
+            case "muted_users":
+                const mutedUsers = await getBannedOrMutedUsers(currentlyJoinedChannel, "createMutedUserListQuery");
+                updateState({ ...state, bannedOrMutedUsers: mutedUsers });
+                break;
+            default:
+                break;
+        }
+    }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -309,15 +335,13 @@ const BasicGroupChannelSample = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange}
-            />
+                onUserNameInputChange={onUserNameInputChange} />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
-            />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -346,7 +370,9 @@ const BasicGroupChannelSample = (props) => {
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
+                bannedOrMutedUsers={state.bannedOrMutedUsers}
                 handleMemberInvite={handleMemberInvite}
+                handleBannedOrMutedMembers={handleBannedOrMutedMembers}
             />
         </>
     );
@@ -382,7 +408,8 @@ const ChannelList = ({
                     </div>
                 );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -391,7 +418,7 @@ const ChannelName = ({ members }) => {
 
     return <>
         {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname}</span>
+            return <span key={member.userId}>{member.nickname} </span>
         })}
         {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
     </>
@@ -414,13 +441,23 @@ const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
 }
 
-const MembersList = ({ channel, handleMemberInvite }) => {
+const MembersList = ({ channel, handleMemberInvite, handleBannedOrMutedMembers, bannedOrMutedUsers }) => {
     if (channel) {
         return <div className="members-list">
             <button onClick={handleMemberInvite}>Invite</button>
             {channel.members.map((member) =>
                 <div className="member-item" key={member.userId}>{member.nickname}</div>
             )}
+            {(channel.myRole === "operator") && <div className="banned-muted-users-list">
+                <select onChange={(event) => handleBannedOrMutedMembers(event)}>
+                    <option value="empty"></option>
+                    <option value="banned_users">Banned users</option>
+                    <option value="muted_users">Muted users</option>
+                </select>
+                {bannedOrMutedUsers.map((user) =>
+                    <div className="member-item" key={user.userId}>{user.nickname}</div>
+                )}
+            </div>}
         </div>;
     } else {
         return null;
@@ -455,7 +492,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -470,7 +508,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                    </div>}
+                    </div>
+                }
             </div>
             <div>{message.message}</div>
         </div>
@@ -497,7 +536,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -518,7 +556,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
     if (applicationUsers.length > 0) {
         return <div className="overlay">
@@ -561,20 +598,18 @@ const CreateUserForm = ({
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
-                    type="text" value={userIdInputValue}
-                />
+                    type="text" value={userIdInputValue} />
+
                 <div>User Nickname</div>
                 <input
                     onChange={onUserNameInputChange}
                     className="form-input"
-                    type="text" value={userNameInputValue}
-                />
+                    type="text" value={userNameInputValue} />
+
                 <button
                     className="user-submit-button"
                     onClick={setupUser}
-                >
-                    Connect
-                </button>
+                >Connect</button>
             </div>
         </div>
     } else {
@@ -656,4 +691,16 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+const getBannedOrMutedUsers = async (channel, callbackName) => {
+    try {
+        const listQuery = channel[callbackName]();
+        const bannedOrMutedUsers = await listQuery.next();
+
+        return bannedOrMutedUsers;
+    } catch (error) {
+        console.log("Error");
+        console.log(error);
+    }
+}
+
+export default GroupChannelRetrieveAListOfBannedOrMutedUsers;
