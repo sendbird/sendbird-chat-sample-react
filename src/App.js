@@ -53,10 +53,9 @@ import GroupChannelUserProfileUpdate from './samples/GroupChannelUserProfileUpda
 import GroupChannelRetrieveNumberOfMembersHaventReadMessage from './samples/GroupChannelRetrieveNumberOfMembersHaventReadMessage';
 import GroupChannelUserDoNotDisturbOrSnooze from './samples/GroupChannelUserDoNotDisturbOrSnooze';
 import GroupChannelStructuredData from './samples/GroupChannelStructuredData';
-import GroupChannelUsersOnlineStatus from './samples/GroupChannelUsersOnlineStatus';
 import GroupChannelPolls from './samples/GroupChannelPolls.js';
-import GroupChannelUsersOnlineStatus from './samples/GroupChannelUsersOnlineStatus'
-import GroupChannelScheduledMessages from './samples/GroupChannelScheduledMessages'
+import GroupChannelUsersOnlineStatus from './samples/GroupChannelUsersOnlineStatus';
+import GroupChannelScheduledMessages from './samples/GroupChannelScheduledMessages';
 
 const App = () => {
   return (
