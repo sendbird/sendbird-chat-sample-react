@@ -17,9 +17,9 @@ import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
 import OpenChannelAddExtraDataToMessage from './samples/OpenChannelAddExtraDataToMessage';
 import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
 import OpenChannelUsersOnlineStatus from './samples/OpenChannelUsersOnlineStatus';
-import OpenChannelCategorizeMessagesByCustomType  from './samples/OpenChannelCategorizeMessagesByCustomType';
+import OpenChannelCategorizeMessagesByCustomType from './samples/OpenChannelCategorizeMessagesByCustomType';
 import OpenChannelUserProfileUpdate from './samples/OpenChannelUserProfileUpdate';
-import OpenChannelStructuredData  from './samples/OpenChannelStructuredData';
+import OpenChannelStructuredData from './samples/OpenChannelStructuredData';
 import OpenChannelUserDoNotDisturbOrSnooze from './samples/OpenChannelUserDoNotDisturbOrSnooze';
 
 // Group channel samples
@@ -32,10 +32,9 @@ import GroupChannelMarkMessagesAsRead from './samples/GroupChannelMarkMessagesAs
 import GroupChannelReactToAMessage from './samples/GroupChannelReactToAMessage';
 import GroupChannelCategorizeByCustomType from './samples/GroupChannelCategorizeByCustomType';
 import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportAMessageUserChannel'
-import GroupChannelCategorizeMessagesByCustomType  from './samples/GroupChannelCategorizeMessagesByCustomType';
+import GroupChannelCategorizeMessagesByCustomType from './samples/GroupChannelCategorizeMessagesByCustomType';
 import GroupChannelRetrieveOnlineStatus from './samples/GroupChannelRetrieveOnlineStatus';
 import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegisterUnregisterOperator';
-import GroupChannelLocalCaching from './samples/GroupChannelLocalCaching';
 import GroupChannelUpdateDeleteMessageByOperator from './samples/GroupChannelUpdateDeleteMessageByOperator';
 import GroupChannelArchive from './samples/GroupChannelArchive'
 import GroupChannelMuteUnmuteUsers from './samples/GroupChannelMuteUnmuteUsers';
@@ -49,6 +48,7 @@ import GroupChannelRetrieveNumberOfMembersHaventReadMessage from './samples/Grou
 import GroupChannelUserDoNotDisturbOrSnooze from './samples/GroupChannelUserDoNotDisturbOrSnooze';
 import GroupChannelStructuredData from './samples/GroupChannelStructuredData';
 import GroupChannelUsersOnlineStatus from './samples/GroupChannelUsersOnlineStatus'
+import GroupChannelScheduledMessages from './samples/GroupChannelScheduledMessages'
 
 const App = () => {
   return (
@@ -78,7 +78,6 @@ const App = () => {
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-add-extra-data-to-message' element={<OpenChannelAddExtraDataToMessage />} />
-        <Route path='/group-channel-local-caching' element={<GroupChannelLocalCaching />} />
         <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-retrieve-online-status' element={<GroupChannelRetrieveOnlineStatus />} />
         <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
@@ -98,6 +97,7 @@ const App = () => {
         <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
         <Route path='/group-channel-structured-data' element={<GroupChannelStructuredData />} />
         <Route path='/group-channel-users-online-status' element={<GroupChannelUsersOnlineStatus />} />
+        <Route path='/group-channel-scheduled-messages' element={<GroupChannelScheduledMessages />} />
       </Routes>
     </div>
   );
