@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { ConnectionHandler } from '@sendbird/chat';
+
 import { v4 as uuid } from 'uuid';
 
 import SendbirdChat from '@sendbird/chat';
@@ -12,7 +14,7 @@ import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 
 let sb;
 
-const BasicOpenChannelSample = (props) => {
+const OpenChannelDisplayOGTags = (props) => {
 
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
@@ -64,10 +66,23 @@ const BasicOpenChannelSample = (props) => {
         const { channels } = state;
         updateState({ ...state, loading: true });
         const channelToJoin = channels.find((channel) => channel.url === channelUrl);
-        const [channel, messages, error] = await joinChannel(channelToJoin);
+        await channelToJoin.enter();
+        const [messages, error] = await loadMessages(channelToJoin);
         if (error) {
             return onError(error);
         }
+
+        // setup connection event handlers
+        const connectionHandler = new ConnectionHandler();
+
+        connectionHandler.onReconnectSucceeded = async () => {
+            const [messages, error] = await loadMessages(channelToJoin);
+
+            updateState({ ...stateRef.current, messages: messages });
+        }
+
+        sb.addConnectionHandler(uuid(), connectionHandler);
+
 
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
@@ -90,7 +105,7 @@ const BasicOpenChannelSample = (props) => {
             updateState({ ...stateRef.current, messages: updatedMessages });
         }
         sb.openChannel.addOpenChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
+        updateState({ ...state, currentlyJoinedChannel: channelToJoin, messages: messages, loading: false })
     }
 
     const handleLeaveChannel = async () => {
@@ -519,16 +534,16 @@ const loadChannels = async () => {
     }
 }
 
-const joinChannel = async (channel) => {
+const loadMessages = async (channel) => {
     try {
-        await channel.enter();
+
         //list all messages
         const messageListParams = {};
         messageListParams.nextResultSize = 20;
         const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-        return [channel, messages, null];
+        return [messages, null];
     } catch (error) {
-        return [null, null, error]
+        return [null, error]
     }
 }
 
@@ -571,4 +586,4 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
-export default BasicOpenChannelSample;
+export default OpenChannelDisplayOGTags;
