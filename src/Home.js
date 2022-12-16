@@ -24,6 +24,7 @@ const Home = () => {
           <li><Link to="/freeze-open-channel">Open Channel with Freeze feature</Link></li>
           <li><Link to="/open-channel-report-a-message-user-channel">Open Channel Report a message,user or channel</Link></li>
           <li><Link to="/open-channel-categorize-messages-by-custom-type">Open Channel with Categorize messages by custom type feature</Link></li>
+          <li><Link to="/open-channel-add-extra-data-to-message">Open Channel Add extra data to message</Link></li>
           <li><Link to="/open-channel-users-online-status">Open Channel Users online status</Link></li>
           <li><Link to="/open-channel-user-profile-update">Open Channel User Profile update</Link></li>
           <li><Link to="/open-channel-structured-data">Open Channel Structured Data</Link></li>
@@ -63,6 +64,8 @@ const Home = () => {
           <li><Link to="/group-channel-user-profile-update">Group Channel User Profile update</Link></li>
           <li><Link to="/group-channel-retrieve-number-of-members-havent-read-message">Group Channel Retrieve number of members haven't read message</Link></li>
           <li><Link to="/group-channel-user-do-not-disturb-or-snooze">Group Channel User do not disturb or snooze</Link></li>
+          <li><Link to="/group-channel-structured-data">Group Channel Structured Data</Link></li>
+          <li><Link to="/group-channel-scheduled-messages">Group Channel Scheduled Messages</Link></li>
         </ul>
       </div>
     </div>

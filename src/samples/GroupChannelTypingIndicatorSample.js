@@ -1,21 +1,17 @@
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
-import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
+import SendbirdChat from '@sendbird/chat';
 import {
-    GroupChannelHandler,
     GroupChannelModule,
-    GroupChannelCreateParams,
+    GroupChannelFilter,
+    GroupChannelListOrder,
+    MessageFilter,
+    MessageCollectionInitPolicy
 } from '@sendbird/chat/groupChannel';
-import {
-    UserMessageCreateParams,
-    MessageListParams,
-    UserMessageUpdateParams,
-    FileMessageCreateParams
-} from '@sendbird/chat/message';
 
 import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime } from '../utils/messageUtils';
+import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
 const GroupChannelTypingIndicatorSample = (props) => {
@@ -33,7 +29,8 @@ const GroupChannelTypingIndicatorSample = (props) => {
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
-        typingMembers:[],
+        typingMembers: [],
+        messageCollection: null,
         loading: false,
         error: false
     });
@@ -42,56 +39,131 @@ const GroupChannelTypingIndicatorSample = (props) => {
     const stateRef = useRef();
     stateRef.current = state;
 
+    const channelRef = useRef();
+
+    const channelHandlers = {
+        onChannelsAdded: (context, channels) => {
+            const updatedChannels = [...channels, ...stateRef.current.channels];
+            updateState({ ...stateRef.current, channels: updatedChannels, applicationUsers: [] });
+        },
+        onChannelsDeleted: (context, channels) => {
+            const updatedChannels = stateRef.current.channels.filter((channel) => {
+                return !channels.includes(channel.url);
+            });
+            updateState({ ...stateRef.current, channels: updatedChannels });
+
+        },
+        onChannelsUpdated: (context, channels) => {
+            const updatedChannels = stateRef.current.channels.map((channel) => {
+                const updatedChannel = channels.find(incomingChannel => incomingChannel.url === channel.url);
+                if (updatedChannel) {
+                    return updatedChannel;
+                } else {
+                    return channel;
+                }
+            });
+            const currentChannel = channels.find((channel) => {
+                return stateRef.current.currentlyJoinedChannel.url === channel.url;
+            });
+
+            if (currentChannel) {
+                const members = currentChannel.getTypingUsers();
+                updateState({ ...stateRef.current, currentlyJoinedChannel: currentChannel, channels: updatedChannels, typingMembers: members });
+
+            } else {
+                updateState({ ...stateRef.current, currentlyJoinedChannel: currentChannel, channels: updatedChannels, typingMembers: [] });
+
+            }
+
+        },
+    }
+
+    const messageHandlers = {
+        onMessagesAdded: (context, channel, messages) => {
+            const updatedMessages = [...stateRef.current.messages, ...messages];
+
+            updateState({ ...stateRef.current, messages: updatedMessages });
+
+        },
+        onMessagesUpdated: (context, channel, messages) => {
+            const updatedMessages = [...stateRef.current.messages];
+            for (let i in messages) {
+                const incomingMessage = messages[i];
+                const indexOfExisting = stateRef.current.messages.findIndex(message => {
+                    return incomingMessage.reqId === message.reqId;
+                });
+
+                if (indexOfExisting !== -1) {
+                    updatedMessages[indexOfExisting] = incomingMessage;
+                }
+                if (!incomingMessage.reqId) {
+                    updatedMessages.push(incomingMessage);
+                }
+            }
+
+
+            updateState({ ...stateRef.current, messages: updatedMessages });
+        },
+        onMessagesDeleted: (context, channel, messageIds) => {
+            const updateMessages = stateRef.current.messages.filter((message) => {
+                return !messageIds.includes(message.messageId);
+            });
+            updateState({ ...stateRef.current, messages: updateMessages });
+
+        },
+        onChannelUpdated: (context, channel) => {
+
+        },
+        onChannelDeleted: (context, channelUrl) => {
+        },
+        onHugeGapDetected: () => {
+        }
+    }
+
+    const scrollToBottom = (item, smooth) => {
+        item?.scrollTo({
+            top: item.scrollHeight,
+            behavior: smooth
+        })
+    }
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current)
+    }, [state.currentlyJoinedChannel])
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current, 'smooth')
+    }, [state.messages])
+
     const onError = (error) => {
         updateState({ ...state, error: error.message });
         console.log(error);
     }
 
     const handleJoinChannel = async (channelUrl) => {
+        if (state.messageCollection) {
+            state.messageCollection?.dispose();
+        }
+
+        if (state.currentlyJoinedChannel?.url === channelUrl) {
+            return null;
+        }
         const { channels } = state;
         updateState({ ...state, typingMembers: [], loading: true });
         const channel = channels.find((channel) => channel.url === channelUrl);
-        const [messages, error] = await joinChannel(channel);
-        if (error) {
-            return onError(error);
-        }
-        // listen for incoming messages
-        const channelHandler = new GroupChannelHandler();
-        channelHandler.onUserJoined = () => { };
-        channelHandler.onChannelChanged = () => { };
-        channelHandler.onMessageUpdated = (channel, message) => {
-            const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
-            const updatedMessages = [...stateRef.current.messages];
-            updatedMessages[messageIndex] = message;
-            updateState({ ...stateRef.current, messages: updatedMessages });
+
+        const onCacheResult = (err, messages) => {
+            updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
 
         }
 
-        channelHandler.onMessageReceived = (channel, message) => {
-            const updatedMessages = [...stateRef.current.messages, message];
-            updateState({ ...stateRef.current, messages: updatedMessages });
-        };
-
-        channelHandler.onTypingStatusUpdated = (groupChannel) => {
-
-            if (groupChannel.url === channel.url) {
-                const members = groupChannel.getTypingUsers();
-                updateState({ ...stateRef.current, typingMembers: members})
-            } else {
-                const members = []
-                updateState({ ...stateRef.current, typingMembers: members})
-            }
-
+        const onApiResult = (err, messages) => {
+            updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
         }
 
-        channelHandler.onMessageDeleted = (channel, message) => {
-            const updatedMessages = stateRef.current.messages.filter((messageObject) => {
-                return messageObject.messageId !== message;
-            });
-            updateState({ ...stateRef.current, messages: updatedMessages });
-        };
-        sb.groupChannel.addGroupChannelHandler(uuid(), channelHandler);
-        updateState({ ...state, currentlyJoinedChannel: channel, messages: messages, loading: false })
+        const collection = loadMessages(channel, messageHandlers, onCacheResult, onApiResult);
+
+        updateState({ ...state, messageCollection: collection });
     }
 
     const handleLeaveChannel = async () => {
@@ -107,8 +179,6 @@ const GroupChannelTypingIndicatorSample = (props) => {
             return onError(error);
         }
 
-        const updatedChannels = [groupChannel, ...state.channels];
-        updateState({ ...state, channels: updatedChannels, applicationUsers: [] });
     }
 
     const handleUpdateChannelMembersList = async () => {
@@ -122,10 +192,6 @@ const GroupChannelTypingIndicatorSample = (props) => {
         if (error) {
             return onError(error);
         }
-        const updatedChannels = state.channels.filter((channel) => {
-            return channel.url !== channelUrl;
-        });
-        updateState({ ...state, channels: updatedChannels });
     }
 
 
@@ -137,7 +203,6 @@ const GroupChannelTypingIndicatorSample = (props) => {
         updateState({ ...state, applicationUsers: users });
     }
 
-
     const onUserNameInputChange = (e) => {
         const userNameInputValue = e.currentTarget.value;
         updateState({ ...state, userNameInputValue });
@@ -148,41 +213,33 @@ const GroupChannelTypingIndicatorSample = (props) => {
         updateState({ ...state, userIdInputValue });
     }
 
-
     const onMessageInputChange = (e) => {
         const { currentlyJoinedChannel, messageToUpdate } = state;
-
         const messageInputValue = e.currentTarget.value;
-
         // Event should not be triggered if it is an update message in progress
         if (messageToUpdate === null) {
             messageInputValue !== "" ? currentlyJoinedChannel.startTyping() : currentlyJoinedChannel.endTyping();
-
         }
-        
+
         updateState({ ...state, messageInputValue });
     }
 
     const sendMessage = async () => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
         if (messageToUpdate) {
-            const userMessageUpdateParams = new UserMessageUpdateParams();
+            const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
-            const userMessageParams = new UserMessageCreateParams();
+            const userMessageParams = {};
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-                    const updatedMessages = [...messages, message];
-
                     currentlyJoinedChannel.endTyping();
-
-                    updateState({ ...state, messages: updatedMessages, messageInputValue: "" });
-
+                    updateState({ ...stateRef.current, messageInputValue: "" });
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -194,19 +251,17 @@ const GroupChannelTypingIndicatorSample = (props) => {
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             const { currentlyJoinedChannel, messages } = state;
-            const fileMessageParams = new FileMessageCreateParams();
+            const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
                     const updatedMessages = [...messages, message];
                     updateState({ ...state, messages: updatedMessages, messageInputValue: "", file: null });
-
                 })
                 .onFailed((error) => {
                     console.log(error)
                     console.log("failed")
                 });
-
         }
     }
 
@@ -238,22 +293,21 @@ const GroupChannelTypingIndicatorSample = (props) => {
         const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
             appId: SENDBIRD_INFO.appId,
-            localCacheEnabled: false,
+            localCacheEnabled: true,
             modules: [new GroupChannelModule()]
         });
-
 
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
-        const userUpdateParams = new UserUpdateParams();
+        const userUpdateParams = {};
         userUpdateParams.nickname = userNameInputValue;
         userUpdateParams.userId = userIdInputValue;
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
 
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
-        const [channels, error] = await loadChannels();
+        const [channels, error] = await loadChannels(channelHandlers);
         if (error) {
             return onError(error);
         }
@@ -295,22 +349,24 @@ const GroupChannelTypingIndicatorSample = (props) => {
                 handleCreateChannel={handleCreateChannel}
                 handleUpdateChannelMembersList={handleUpdateChannelMembersList}
             />
-
-            <Channel currentlyJoinedChannel={state.currentlyJoinedChannel} handleLeaveChannel={handleLeaveChannel}>
+            <Channel
+                currentlyJoinedChannel={state.currentlyJoinedChannel}
+                handleLeaveChannel={handleLeaveChannel}
+                channelRef={channelRef}
+            >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
-
                 {state.typingMembers.length > 0 && DisplayTypingIndicator(state.typingMembers)}
-
                 <MessageInput
                     value={state.messageInputValue}
                     onChange={onMessageInputChange}
                     sendMessage={sendMessage}
                     fileSelected={state.file}
-                    onFileInputChange={onFileInputChange} />
+                    onFileInputChange={onFileInputChange}
+                />
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
@@ -347,9 +403,11 @@ const ChannelList = ({
                                 <img className="channel-icon" src='/icon_delete.png' />
                             </button>
                         </div>
-                    </div>);
+                    </div>
+                );
             })}
-        </div >);
+        </div>
+    );
 }
 
 const ChannelName = ({ members }) => {
@@ -364,25 +422,21 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-
-const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel }) => {
+const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
     if (currentlyJoinedChannel) {
-        return <div className="channel">
+        return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
             </div>
             <div>{children}</div>
         </div>;
-
     }
     return <div className="channel"></div>;
-
 }
 
 const ChannelHeader = ({ children }) => {
     return <div className="channel-header">{children}</div>;
-
 }
 
 const MembersList = ({ channel, handleMemberInvite }) => {
@@ -396,15 +450,13 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     } else {
         return null;
     }
-
-
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
+            if (!message.sender) return null;
             const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-
             return (
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
@@ -413,10 +465,10 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         updateMessage={updateMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
-
-                </div>);
+                </div>
+            );
         })}
-    </div >
+    </div>
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
@@ -428,7 +480,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
-            </div >);
+            </div>
+        );
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
@@ -446,9 +499,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     </div>}
             </div>
             <div>{message.message}</div>
-        </div >
+        </div>
     );
-
 }
 
 const ProfileImage = ({ user }) => {
@@ -456,9 +508,7 @@ const ProfileImage = ({ user }) => {
         return <img className="profile-image" src={user.plainProfileUrl} />
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
-
     }
-
 }
 
 const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
@@ -467,12 +517,12 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
             <input
                 placeholder="write a message"
                 value={value}
-                onChange={onChange} />
-
+                onChange={onChange}
+                onKeyDown={(event => handleEnterPress(event, sendMessage))}
+            />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -482,8 +532,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
-
-        </div>);
+        </div>
+    );
 }
 
 const MembersSelect = ({
@@ -493,7 +543,6 @@ const MembersSelect = ({
     addToChannelMembersList,
     handleCreateChannel,
     handleUpdateChannelMembersList
-
 }) => {
 
     if (applicationUsers.length > 0) {
@@ -504,22 +553,23 @@ const MembersSelect = ({
                         handleUpdateChannelMembersList();
                     } else {
                         handleCreateChannel();
-
                     }
                 }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
                 {applicationUsers.map((user) => {
                     const userSelected = groupChannelMembers.some((member) => member === user.userId);
-                    return <div
-                        key={user.userId}
-                        className={`member-item ${userSelected ? 'member-selected' : ''}`}
-                        onClick={() => addToChannelMembersList(user.userId)}>
-                        <ProfileImage user={user} />
-                        <div className="member-item-name">{user.nickname}</div>
-                    </div>
+                    return (
+                        <div
+                            key={user.userId}
+                            className={`member-item ${userSelected ? 'member-selected' : ''}`}
+                            onClick={() => addToChannelMembersList(user.userId)}
+                        >
+                            <ProfileImage user={user} />
+                            <div className="member-item-name">{user.nickname}</div>
+                        </div>
+                    )
                 })}
-
             </div>
-        </div >;
+        </div>;
     }
     return null;
 }
@@ -534,14 +584,12 @@ const CreateUserForm = ({
 }) => {
     if (settingUpUser) {
         return <div className="overlay">
-            <div className="overlay-content">
+            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
                 <div>User ID</div>
-
                 <input
                     onChange={onUserIdInputChange}
                     className="form-input"
                     type="text" value={userIdInputValue} />
-
 
                 <div>User Nickname</div>
                 <input
@@ -551,63 +599,68 @@ const CreateUserForm = ({
 
                 <button
                     className="user-submit-button"
-                    onClick={setupUser}>Connect</button>
+                    onClick={setupUser}
+                >Connect</button>
             </div>
         </div>
-
-
     } else {
         return null;
     }
-
 }
 
 const DisplayTypingIndicator = (typingMembers) => {
     let typingIndicatorText = ""
 
     typingMembers.length === 1 ? typingIndicatorText = typingMembers[0].nickname + " is typing..." :
-      typingMembers.length === 2 ? typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " are typing..." :
-        typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " and others are typing..."
+        typingMembers.length === 2 ? typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " are typing..." :
+            typingIndicatorText = typingMembers[0].nickname + ", " + typingMembers[1].nickname + " and others are typing..."
 
     return (
-      <div className='typing-indicator'>{typingIndicatorText}</div>
+        <div className='typing-indicator'>{typingIndicatorText}</div>
     )
 }
 
 // Helpful functions that call Sendbird
-const loadChannels = async () => {
-    try {
-        const groupChannelQuery = sb.groupChannel.createMyGroupChannelListQuery({ limit: 30, includeEmpty: true });
-        const channels = await groupChannelQuery.next();
-        return [channels, null];
-    } catch (error) {
-        return [null, error];
-    }
+const loadChannels = async (channelHandlers) => {
+    const groupChannelFilter = new GroupChannelFilter();
+    groupChannelFilter.includeEmpty = true;
 
+    const collection = sb.groupChannel.createGroupChannelCollection({
+        filter: groupChannelFilter,
+        order: GroupChannelListOrder.LATEST_LAST_MESSAGE,
+    });
 
+    collection.setGroupChannelCollectionHandler(channelHandlers);
+
+    const channels = await collection.loadMore();
+    return [channels, null];
 }
 
-const joinChannel = async (channel) => {
-    try {
-        const messageListParams = new MessageListParams();
-        messageListParams.nextResultSize = 20;
-        const messages = await channel.getMessagesByTimestamp(0, messageListParams);
-        return [messages, null];
-    } catch (error) {
-        return [null, error];
-    }
+const loadMessages = async (channel, messageHandlers, onCacheResult, onApiResult) => {
+    const messageFilter = new MessageFilter();
 
+    const collection = channel.createMessageCollection({
+        filter: messageFilter,
+        startingPoint: Date.now(),
+        limit: 100
+    });
+
+    collection.setMessageCollectionHandler(messageHandlers);
+    collection
+        .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
+        .onCacheResult(onCacheResult)
+        .onApiResult(onApiResult);
+    return collection;
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
     await channel.inviteWithUserIds(userIds);
 }
 
-
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
-        const groupChannelParams = new GroupChannelCreateParams();
-        groupChannelParams.addUserIds(userIdsToInvite);
+        const groupChannelParams = {};
+        groupChannelParams.invitedUserIds = userIdsToInvite;
         groupChannelParams.name = channelName;
         groupChannelParams.operatorUserIds = userIdsToInvite;
         const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
@@ -615,7 +668,6 @@ const createChannel = async (channelName, userIdsToInvite) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteChannel = async (channelUrl) => {
@@ -626,7 +678,6 @@ const deleteChannel = async (channelUrl) => {
     } catch (error) {
         return [null, error];
     }
-
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
@@ -640,9 +691,7 @@ const getAllApplicationUsers = async () => {
         return [users, null];
     } catch (error) {
         return [null, error];
-
     }
-
 }
 
 export default GroupChannelTypingIndicatorSample;
