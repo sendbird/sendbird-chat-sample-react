@@ -243,15 +243,11 @@ code {
   box-sizing: border-box;
 }
 
-.og-tags-url {
-  margin: 0 0 5px;
-}
-
 .og-tags-title {
   margin: 0 0 10px;
 }
 
-.og-tags-description {
+.og-tags-description, .og-tags-url, .metadata-modal-list {
   margin: 0 0 5px;
 }
 
@@ -324,7 +320,7 @@ code {
   filter: none;
 }
 
-.oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list {
+.oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list, .metadata-modal-list {
   display: flex;
 }
 
@@ -369,7 +365,7 @@ code {
   width: 24px;
 }
 
-.oc-message:hover .oc-message-icon, .message-input .oc-message-icon{
+.oc-message:hover .oc-message-icon, .message-input .oc-message-icon, .metadata-modal-list .oc-message-icon {
   visibility: visible;
 }
 
@@ -655,6 +651,33 @@ code {
   text-align: center;
 }
 
+.channel-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.create-metadata-conteiner {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px;
+}
+
+.create-metadata-title {
+  margin: 0;
+  padding: 5px;
+  font-size: 16px;
+}
+
+.create-metadata-btn {
+  padding: 5px 10px;
+}
+
+.metadata-modal-input {
+  display: flex;
+  margin: 0 0 10px;
+}
+
 .choise-report-obj {
   cursor: pointer;
   color: #6210CC;
@@ -770,7 +793,6 @@ code {
   width: 40%;
 }
 
-
 .open-poll-btn {
   padding: 5px;
   background: transparent;
@@ -836,6 +858,13 @@ code {
   color: white;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.oc-members-list {
+  margin-bottom: 80px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
 
 .scheduled-messages-list-modal {
   position: relative;

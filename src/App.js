@@ -14,6 +14,7 @@ import OpenChannelFreeze from './samples/OpenChannelFreeze';
 import OpenChannelSendAndReceiveVariousTypesOfFiles from './samples/OpenChannelSendAndReceiveVariousTypesOfFiles'
 import OpenChannelCopyMessage from './samples/OpenChannelCopyMessage';
 import OpenChannelDisplayOGTags from './samples/OpenChannelDisplayOGTags';
+import OpenChannelMetadataAndMetacounter from './samples/OpenChannelMetadataAndMetacounter';
 import OpenChannelAddExtraDataToMessage from './samples/OpenChannelAddExtraDataToMessage';
 import OpenChannelReportAMessageUserChannel from './samples/OpenChannelReportAMessageUserChannel'
 import OpenChannelUsersOnlineStatus from './samples/OpenChannelUsersOnlineStatus';
@@ -21,6 +22,11 @@ import OpenChannelCategorizeMessagesByCustomType from './samples/OpenChannelCate
 import OpenChannelUserProfileUpdate from './samples/OpenChannelUserProfileUpdate';
 import OpenChannelStructuredData from './samples/OpenChannelStructuredData';
 import OpenChannelUserDoNotDisturbOrSnooze from './samples/OpenChannelUserDoNotDisturbOrSnooze';
+import OpenChannelRegisterUnregisterOperator from './samples/OpenChannelRegisterUnregisterOperator';
+import OpenChannelMuteUnmuteUsers from './samples/OpenChannelMuteUnmuteUsers';
+import OpenChannelBanUnbanUsers from './samples/OpenChannelBanUnbanUsers';
+import OpenChannelUpdateDeleteMessageByOperator from './samples/OpenChannelUpdateDeleteMessageByOperator';
+import OpenChannelMembersListOrder from './samples/OpenChannelMembersListOrder';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -78,6 +84,7 @@ const App = () => {
         <Route path='/group-channel-categorize-by-custom-type' element={<GroupChannelCategorizeByCustomType />} />
         <Route path='/open-channel-report-a-message-user-channel' element={<OpenChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-categorize-messages-by-custom-type' element={<OpenChannelCategorizeMessagesByCustomType />} />
+        <Route path='/open-channel-metadata-and-metacounter' element={<OpenChannelMetadataAndMetacounter />} />
         <Route path='/group-channel-report-a-message-user-channel' element={<GroupChannelReportAMessageUserChannel />} />
         <Route path='/open-channel-add-extra-data-to-message' element={<OpenChannelAddExtraDataToMessage />} />
         <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
@@ -86,13 +93,20 @@ const App = () => {
         <Route path='/group-channel-update-delete-message-by-operator' element={<GroupChannelUpdateDeleteMessageByOperator />} />
         <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
         <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
-        <Route path='/group-channel-bun-unban-users' element={<GroupChannelBanUnbanUsers />} />
         <Route path='/group-channel-retrieve-number-of-members-havent-received-message' element={<GroupChannelRetrieveNumberOfMembersHaventReceivedMessage />} />
         <Route path='/group-channel-operators-list' element={<GroupChannelOperatorsList />} />
         <Route path='/group-channel-members-list-order' element={<GroupChannelMembersListOrder />} />
         <Route path='/open-channel-users-online-status' element={<OpenChannelUsersOnlineStatus />} />
         <Route path='/open-channel-user-profile-update' element={<OpenChannelUserProfileUpdate />} />
         <Route path='/group-channel-user-profile-update' element={<GroupChannelUserProfileUpdate />} />
+        <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
+        <Route path='/group-channel-user-do-not-disturb-or-snooze' element={<GroupChannelUserDoNotDisturbOrSnooze />} />
+        <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
+        <Route path='/open-channel-register-unregister-operator' element={<OpenChannelRegisterUnregisterOperator />} />
+        <Route path='/open-channel-mute-unmute-users' element={<OpenChannelMuteUnmuteUsers />} />
+        <Route path='/open-channel-bun-unban-users' element={<OpenChannelBanUnbanUsers />} />
+        <Route path='/open-channel-update-delete-message-by-operator' element={<OpenChannelUpdateDeleteMessageByOperator />} />
+        <Route path='/open-channel-members-list-order' element={<OpenChannelMembersListOrder />} />
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
         <Route path='/group-channel-retrieve-number-of-members-havent-read-message' element={<GroupChannelRetrieveNumberOfMembersHaventReadMessage />} />
         <Route path='/group-channel-user-do-not-disturb-or-snooze' element={<GroupChannelUserDoNotDisturbOrSnooze />} />
