@@ -1,20 +1,11 @@
 import { useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 
-import SendbirdChat, { UserUpdateParams } from '@sendbird/chat';
+import SendbirdChat from '@sendbird/chat';
 import {
     OpenChannelModule,
-    OpenChannelHandler,
-    OpenChannelCreateParams,
-    OpenChannelUpdateParams
+    OpenChannelHandler
 } from '@sendbird/chat/openChannel';
-
-import {
-    UserMessageUpdateParams,
-    UserMessageCreateParams,
-    MessageListParams,
-    FileMessageCreateParams
-} from '@sendbird/chat/message';
 
 import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime } from '../utils/messageUtils';
@@ -164,14 +155,14 @@ const OpenChannelMembersListOrder = (props) => {
         const { messageToUpdate, currentlyJoinedChannel, messages } = state;
 
         if (messageToUpdate) {
-            const userMessageUpdateParams = new UserMessageUpdateParams();
+            const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
             const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
-            const userMessageParams = new UserMessageCreateParams();
+            const userMessageParams = new {};
             userMessageParams.message = state.messageInputValue;
             currentlyJoinedChannel.sendUserMessage(userMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
@@ -188,7 +179,7 @@ const OpenChannelMembersListOrder = (props) => {
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
             const { currentlyJoinedChannel, messages } = state;
-            const fileMessageParams = new FileMessageCreateParams();
+            const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams).onSucceeded((message) => {
                 const updatedMessages = [...messages, message];
@@ -224,7 +215,7 @@ const OpenChannelMembersListOrder = (props) => {
         await sendbirdChat.connect(userIdInputValue);
         await sendbirdChat.setChannelInvitationPreference(true);
 
-        const userUpdateParams = new UserUpdateParams();
+        const userUpdateParams = {};
         userUpdateParams.nickname = userNameInputValue;
         userUpdateParams.userId = userIdInputValue;
         await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
@@ -629,7 +620,7 @@ const joinChannel = async (channel) => {
     try {
         await channel.enter();
         //list all messages
-        const messageListParams = new MessageListParams();
+        const messageListParams = {};
         messageListParams.nextResultSize = 20;
         const messages = await channel.getMessagesByTimestamp(0, messageListParams);
         return [channel, messages, null];
@@ -641,7 +632,7 @@ const joinChannel = async (channel) => {
 
 const createChannel = async (channelName) => {
     try {
-        const openChannelParams = new OpenChannelCreateParams();
+        const openChannelParams = {};
         openChannelParams.name = channelName;
         openChannelParams.operatorUserIds = [sb.currentUser.userId];
         const openChannel = await sb.openChannel.createChannel(openChannelParams);
@@ -666,7 +657,7 @@ const deleteChannel = async (channelUrl) => {
 const updateChannel = async (currentlyUpdatingChannel, channelNameInputValue) => {
     try {
         const channel = await sb.openChannel.getChannel(currentlyUpdatingChannel.url);
-        const openChannelParams = new OpenChannelUpdateParams();
+        const openChannelParams = {};
         openChannelParams.name = channelNameInputValue;
 
         openChannelParams.operatorUserIds = [sb.currentUser.userId];
