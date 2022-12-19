@@ -24,11 +24,17 @@ const Home = () => {
           <li><Link to="/freeze-open-channel">Open Channel with Freeze feature</Link></li>
           <li><Link to="/open-channel-report-a-message-user-channel">Open Channel Report a message,user or channel</Link></li>
           <li><Link to="/open-channel-categorize-messages-by-custom-type">Open Channel with Categorize messages by custom type feature</Link></li>
+          <li><Link to="/open-channel-metadata-and-metacounter">Open Channel Metadata and Metacounter</Link></li>
           <li><Link to="/open-channel-add-extra-data-to-message">Open Channel Add extra data to message</Link></li>
           <li><Link to="/open-channel-users-online-status">Open Channel Users online status</Link></li>
           <li><Link to="/open-channel-user-profile-update">Open Channel User Profile update</Link></li>
           <li><Link to="/open-channel-structured-data">Open Channel Structured Data</Link></li>
           <li><Link to="/open-channel-user-do-not-disturb-or-snooze">Open Channel User do not disturb or snooze</Link></li>
+          <li><Link to="/open-channel-register-unregister-operator">Open Channel Register and Unregister operator</Link></li>
+          <li><Link to="/open-channel-mute-unmute-users">Open Channel Mute and Unmute users</Link></li>
+          <li><Link to="/open-channel-bun-unban-users">Open Channel Ban and Unban users</Link></li>
+          <li><Link to="/open-channel-update-delete-message-by-operator">Open Channel Update and delete message by operator</Link></li>
+          <li><Link to="/open-channel-members-list-order">Open Channel Members list order</Link></li>
         </ul>
       </div>
       <div>
