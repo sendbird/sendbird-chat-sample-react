@@ -129,6 +129,11 @@ code {
   flex:1;
 }
 
+.channel-list-item-sup {
+  margin: 0 0 0 5px;
+  font-size: 10px;
+}
+
 .channel-icon{
   visibility:hidden;
   width: 20px;
@@ -320,7 +325,7 @@ code {
   filter: none;
 }
 
-.oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list, .metadata-modal-list {
+.oc-document-message, .message-user-info, .react-button-wrapper, .reactions-list, .metadata-modal-list, .create-channel-wrapper {
   display: flex;
 }
 
@@ -522,9 +527,18 @@ code {
   background-color: #6210CC;
 }
 
+.create-channel-wrapper {
+  align-items: baseline;
+}
+
 .channel-create-button{
   background-color: #62EEAB;
   width: 100%;
+}
+
+.create-channel-checkbox {
+  width: auto;
+  margin: 0 5px 0 10px;
 }
 
 .select-custom-type {
