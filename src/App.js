@@ -41,6 +41,7 @@ import GroupChannelReportAMessageUserChannel from './samples/GroupChannelReportA
 import GroupChannelCategorizeMessagesByCustomType from './samples/GroupChannelCategorizeMessagesByCustomType';
 import GroupChannelRetrieveOnlineStatus from './samples/GroupChannelRetrieveOnlineStatus';
 import GroupChannelRegisterUnregisterOperator from './samples/GroupChannelRegisterUnregisterOperator';
+import GroupChannelReactChannelTypes from './samples/GroupChannelTypes';
 import GroupChannelUpdateDeleteMessageByOperator from './samples/GroupChannelUpdateDeleteMessageByOperator';
 import GroupChannelArchive from './samples/GroupChannelArchive'
 import GroupChannelMuteUnmuteUsers from './samples/GroupChannelMuteUnmuteUsers';
@@ -88,6 +89,7 @@ const App = () => {
         <Route path='/group-channel-categorize-messages-by-custom-type' element={<GroupChannelCategorizeMessagesByCustomType />} />
         <Route path='/group-channel-retrieve-online-status' element={<GroupChannelRetrieveOnlineStatus />} />
         <Route path='/group-channel-register-unregister-operator' element={<GroupChannelRegisterUnregisterOperator />} />
+        <Route path='/group-channel-types' element={<GroupChannelReactChannelTypes />} />
         <Route path='/group-channel-update-delete-message-by-operator' element={<GroupChannelUpdateDeleteMessageByOperator />} />
         <Route path='/group-channel-archive' element={<GroupChannelArchive />} />
         <Route path='/group-channel-mute-unmute-users' element={<GroupChannelMuteUnmuteUsers />} />
