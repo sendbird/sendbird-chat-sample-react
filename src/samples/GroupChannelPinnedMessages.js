@@ -32,7 +32,8 @@ const GroupChannelPinnedMessages = (props) => {
         error: false,
         showPinnedMessagesListModal: false,
         pinnedMessages: [],
-        pinnedMessageIds: []
+        pinnedMessageIds: [],
+        isPinMessage: false
     });
 
     //need to access state in message received callback
@@ -205,7 +206,7 @@ const GroupChannelPinnedMessages = (props) => {
     }
 
     const sendMessage = async () => {
-        const { messageToUpdate, currentlyJoinedChannel, messages } = state;
+        const { messageToUpdate, currentlyJoinedChannel, messages, isPinMessage } = state;
         if (messageToUpdate) {
             const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue
@@ -216,11 +217,15 @@ const GroupChannelPinnedMessages = (props) => {
         } else {
             const userMessageParams = {};
             userMessageParams.message = state.messageInputValue
-            // userMessageParams.isPinnedMessage = true
+
+            if(isPinMessage) {
+              userMessageParams.isPinnedMessage = true
+            }
+
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
 
-                    updateState({ ...stateRef.current, messageInputValue: "" });
+                    updateState({ ...stateRef.current, messageInputValue: "", pinnedMessageIds: [...state.pinnedMessageIds, message.messageId], isPinMessage: false });
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -231,12 +236,17 @@ const GroupChannelPinnedMessages = (props) => {
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            const { currentlyJoinedChannel, messages } = state;
+            const { currentlyJoinedChannel, messages, isPinMessage } = state;
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
+
+            if(isPinMessage) {
+              fileMessageParams.isPinnedMessage = true
+            }
+
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
-                    updateState({ ...stateRef.current, messageInputValue: "", file: null });
+                    updateState({ ...stateRef.current, messageInputValue: "", file: null, pinnedMessageIds: [...state.pinnedMessageIds, message.messageId], isPinMessage: false });
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -265,7 +275,7 @@ const GroupChannelPinnedMessages = (props) => {
         const { currentlyJoinedChannel } = state;
         await unpinMessage(currentlyJoinedChannel, message);
 
-        updateState({ ...state, pinnedMessageIds: state.currentlyJoinedChannel.pinnedMessageIds.filter(pinnedMessageId => pinnedMessageId !== message.messageId) });
+        updateState({ ...state, pinnedMessageIds: state.pinnedMessageIds.filter(pinnedMessageId => pinnedMessageId !== message.messageId) });
     }
 
     const handleLoadMemberSelectionList = async () => {
@@ -312,6 +322,10 @@ const GroupChannelPinnedMessages = (props) => {
         updateState({ ...state, showPinnedMessagesListModal: !state.showPinnedMessagesListModal });
     }
 
+    const toggleIsPinMessage = () => {
+      updateState({ ...state, isPinMessage: !state.isPinMessage });
+  }
+
     if (state.loading) {
         return <div>Loading...</div>
     }
@@ -352,12 +366,16 @@ const GroupChannelPinnedMessages = (props) => {
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
                 handleLeaveChannel={handleLeaveChannel}
                 channelRef={channelRef}
+                pinnedMessageIds={state.pinnedMessageIds}
+                toggleShowPinnedMessagesListModal={toggleShowPinnedMessagesListModal}
             >
                 <MessagesList
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                     handlePinMessage={handlePinMessage}
+                    handleUnpinMessage={handleUnpinMessage}
+                    pinnedMessageIds={state.pinnedMessageIds}
                 />
                 <MessageInput
                     value={state.messageInputValue}
@@ -367,6 +385,8 @@ const GroupChannelPinnedMessages = (props) => {
                     onFileInputChange={onFileInputChange}
                     toggleShowPinnedMessagesListModal={toggleShowPinnedMessagesListModal}
                     pinnedMessageIds={state.pinnedMessageIds}
+                    isPinMessage={state.isPinMessage}
+                    toggleIsPinMessage={toggleIsPinMessage}
                 />
             </Channel>
             <MembersList
@@ -429,12 +449,15 @@ const ChannelName = ({ members }) => {
     </>
 }
 
-const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef }) => {
+const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channelRef, pinnedMessageIds, toggleShowPinnedMessagesListModal }) => {
     if (currentlyJoinedChannel) {
         return <div className="channel" ref={channelRef}>
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
+            </div>
+            <div>
+              <button className="leave-channel" onClick={toggleShowPinnedMessagesListModal}>{pinnedMessageIds.length} pinned</button>
             </div>
             <div>{children}</div>
         </div>;
@@ -459,7 +482,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     }
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage, handlePinMessage }) => {
+const MessagesList = ({ messages, pinnedMessageIds, handleDeleteMessage, updateMessage, handlePinMessage, handleUnpinMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
             if (!message.sender) return null;
@@ -468,9 +491,11 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, handlePinM
                 <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
                     <Message
                         message={message}
+                        pinnedMessageIds={pinnedMessageIds}
                         handleDeleteMessage={handleDeleteMessage}
                         updateMessage={updateMessage}
                         handlePinMessage={handlePinMessage}
+                        handleUnpinMessage={handleUnpinMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
                 </div>
@@ -479,18 +504,35 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage, handlePinM
     </div>
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, handlePinMessage, messageSentByYou }) => {
+const Message = ({ message, pinnedMessageIds, updateMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, messageSentByYou }) => {
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+    const isPinnedMessage = pinnedMessageIds.includes(message.messageId);
+
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+              <div className="message-info">
                 <div className="message-user-info">
-                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
-                    <div>{timestampToTime(message.createdAt)}</div>
+                  <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                  <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                <img src={message.url} />
+                <div>
+                  {messageSentByCurrentUser &&
+                    <div>
+                      {isPinnedMessage ?
+                          <button className="control-button" onClick={() => handleUnpinMessage(message)}>
+                            <img className="message-icon" src='/icon_unpin.png' />
+                          </button> :
+                          <button className="control-button" onClick={() => handlePinMessage(message)}>
+                            <img className="message-icon" src='/icon_pin.png' />
+                          </button>}
+                    </div>}
+                </div>
+              </div>
+
+              <img className="message-img" src={message.url} />
             </div >);
     }
-    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
     return (
         <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -501,7 +543,14 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handlePinMessage
                 </div>
                 {messageSentByCurrentUser &&
                     <div>
-                        <button className="control-button" onClick={() => handlePinMessage(message)}><img className="message-icon" src='/icon_pin.png' /></button>
+                        {isPinnedMessage ?
+                        <button className="control-button" onClick={() => handleUnpinMessage(message)}>
+                          <img className="message-icon" src='/icon_unpin.png' />
+                        </button> :
+                        <button className="control-button" onClick={() => handlePinMessage(message)}>
+                          <img className="message-icon" src='/icon_pin.png' />
+                        </button>}
+
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
                     </div>}
@@ -512,17 +561,28 @@ const Message = ({ message, updateMessage, handleDeleteMessage, handlePinMessage
 }
 
 const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou }) => {
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+              <div className="message-info">
                 <div className="message-user-info">
-                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
-                    <div>{timestampToTime(message.createdAt)}</div>
+                  <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                  <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                <img src={message.url} />
+                <div>
+                  {messageSentByCurrentUser &&
+                    <div>
+                      <button className="control-button" onClick={() => handleUnpinMessage(message)}>
+                        <img className="message-icon" src='/icon_unpin.png' />
+                      </button>
+                    </div>}
+                </div>
+              </div>
+              <img className="message-img" src={message.url} />
             </div >);
     }
-    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
 
     return (
         <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -555,7 +615,9 @@ const MessageInput = ({
     sendMessage,
     onFileInputChange,
     pinnedMessageIds,
-    toggleShowPinnedMessagesListModal
+    toggleShowPinnedMessagesListModal,
+    isPinMessage,
+    toggleIsPinMessage
 }) => {
     return (
         <div className="message-input">
@@ -567,6 +629,10 @@ const MessageInput = ({
             />
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
+                <div className="freeze-channel pin-checkbox">
+                  <input type="checkbox" onChange={toggleIsPinMessage} checked={isPinMessage} />
+                  is pin message?
+                </div>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
 
                 <input
@@ -578,7 +644,7 @@ const MessageInput = ({
                     onClick={() => { }}
                 />
             </div>
-            <button onClick={toggleShowPinnedMessagesListModal}>{pinnedMessageIds.length} pinned</button>
+            {/* <button onClick={toggleShowPinnedMessagesListModal}>{pinnedMessageIds.length} pinned</button> */}
         </div>
     );
 }
