@@ -12,7 +12,7 @@ import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
 let sb;
 
-const BasicGroupChannelSample = (props) => {
+const GroupChannelPinnedMessages = (props) => {
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -29,7 +29,10 @@ const BasicGroupChannelSample = (props) => {
         messageToUpdate: null,
         messageCollection: null,
         loading: false,
-        error: false
+        error: false,
+        showPinnedMessagesListModal: false,
+        pinnedMessages: [],
+        pinnedMessageIds: []
     });
 
     //need to access state in message received callback
@@ -148,7 +151,7 @@ const BasicGroupChannelSample = (props) => {
 
         const collection = loadMessages(channel, messageHandlers, onCacheResult, onApiResult);
 
-        updateState({ ...state, messageCollection: collection });
+        updateState({ ...state, messageCollection: collection, pinnedMessageIds: channel.pinnedMessageIds });
     }
 
     const handleLeaveChannel = async () => {
@@ -213,6 +216,7 @@ const BasicGroupChannelSample = (props) => {
         } else {
             const userMessageParams = {};
             userMessageParams.message = state.messageInputValue
+            // userMessageParams.isPinnedMessage = true
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
 
@@ -248,6 +252,20 @@ const BasicGroupChannelSample = (props) => {
 
     const updateMessage = async (message) => {
         updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
+    }
+
+    const handlePinMessage = async (message) => {
+        const { currentlyJoinedChannel } = state;
+        await pinMessage(currentlyJoinedChannel, message);
+
+        updateState({ ...state, pinnedMessageIds: [...state.pinnedMessageIds, message.messageId] });
+    }
+
+    const handleUnpinMessage = async (message) => {
+        const { currentlyJoinedChannel } = state;
+        await unpinMessage(currentlyJoinedChannel, message);
+
+        updateState({ ...state, pinnedMessageIds: state.currentlyJoinedChannel.pinnedMessageIds.filter(pinnedMessageId => pinnedMessageId !== message.messageId) });
     }
 
     const handleLoadMemberSelectionList = async () => {
@@ -288,6 +306,10 @@ const BasicGroupChannelSample = (props) => {
         }
 
         updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
+    }
+
+    const toggleShowPinnedMessagesListModal = async () => {
+        updateState({ ...state, showPinnedMessagesListModal: !state.showPinnedMessagesListModal });
     }
 
     if (state.loading) {
@@ -335,6 +357,7 @@ const BasicGroupChannelSample = (props) => {
                     messages={state.messages}
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
+                    handlePinMessage={handlePinMessage}
                 />
                 <MessageInput
                     value={state.messageInputValue}
@@ -342,11 +365,20 @@ const BasicGroupChannelSample = (props) => {
                     sendMessage={sendMessage}
                     fileSelected={state.file}
                     onFileInputChange={onFileInputChange}
+                    toggleShowPinnedMessagesListModal={toggleShowPinnedMessagesListModal}
+                    pinnedMessageIds={state.pinnedMessageIds}
                 />
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
                 handleMemberInvite={handleMemberInvite}
+            />
+            <PinnedMessagesListModal
+                messages={state.messages}
+                pinnedMessageIds={state.pinnedMessageIds}
+                showPinnedMessagesListModal={state.showPinnedMessagesListModal}
+                toggleShowPinnedMessagesListModal={toggleShowPinnedMessagesListModal}
+                handleUnpinMessage={handleUnpinMessage}
             />
         </>
     );
@@ -427,7 +459,7 @@ const MembersList = ({ channel, handleMemberInvite }) => {
     }
 }
 
-const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
+const MessagesList = ({ messages, handleDeleteMessage, updateMessage, handlePinMessage }) => {
     return <div className="message-list">
         {messages.map(message => {
             if (!message.sender) return null;
@@ -438,6 +470,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
                         message={message}
                         handleDeleteMessage={handleDeleteMessage}
                         updateMessage={updateMessage}
+                        handlePinMessage={handlePinMessage}
                         messageSentByYou={messageSentByYou} />
                     <ProfileImage user={message.sender} />
                 </div>
@@ -446,7 +479,7 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
     </div>
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
+const Message = ({ message, updateMessage, handleDeleteMessage, handlePinMessage, messageSentByYou }) => {
     if (message.url) {
         return (
             <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
@@ -468,8 +501,39 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </div>
                 {messageSentByCurrentUser &&
                     <div>
+                        <button className="control-button" onClick={() => handlePinMessage(message)}><img className="message-icon" src='/icon_pin.png' /></button>
                         <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
                         <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                    </div>}
+            </div>
+            <div>{message.message}</div>
+        </div>
+    );
+}
+
+const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou }) => {
+    if (message.url) {
+        return (
+            <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div>{timestampToTime(message.createdAt)}</div>
+                </div>
+                <img src={message.url} />
+            </div >);
+    }
+    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+
+    return (
+        <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+            <div className="message-info">
+                <div className="message-user-info">
+                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div>{timestampToTime(message.createdAt)}</div>
+                </div>
+                {messageSentByCurrentUser &&
+                    <div>
+                        <button className="control-button" onClick={() => handleUnpinMessage(message)}><img className="message-icon" src='/icon_unpin.png' /></button>
                     </div>}
             </div>
             <div>{message.message}</div>
@@ -485,7 +549,14 @@ const ProfileImage = ({ user }) => {
     }
 }
 
-const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
+const MessageInput = ({
+    value,
+    onChange,
+    sendMessage,
+    onFileInputChange,
+    pinnedMessageIds,
+    toggleShowPinnedMessagesListModal
+}) => {
     return (
         <div className="message-input">
             <input
@@ -507,6 +578,7 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                     onClick={() => { }}
                 />
             </div>
+            <button onClick={toggleShowPinnedMessagesListModal}>{pinnedMessageIds.length} pinned</button>
         </div>
     );
 }
@@ -582,6 +654,51 @@ const CreateUserForm = ({
     }
 }
 
+const PinnedMessagesListModal = ({
+    showPinnedMessagesListModal,
+    toggleShowPinnedMessagesListModal,
+    messages,
+    handleUnpinMessage,
+    pinnedMessageIds
+}) => {
+    const pinnedMessages = messages.filter(message => pinnedMessageIds.includes(message.messageId))
+
+    if (showPinnedMessagesListModal) {
+        return <div className="overlay ">
+            <div className="overlay-content scheduled-messages-list-modal">
+                <div className="scheduled-message-header">Pinned messages</div>
+
+                <div className="message-list">
+                    {pinnedMessages.map(message => {
+                        if (!message.sender) return null;
+                        const messageSentByYou = message.sender.userId === sb.currentUser.userId;
+                        return (
+                            <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
+                                <PinnedMessage
+                                    message={message}
+                                    handleUnpinMessage={handleUnpinMessage}
+                                    messageSentByYou={messageSentByYou} />
+                                <ProfileImage user={message.sender} />
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <button
+                    className="close-button"
+                    onClick={toggleShowPinnedMessagesListModal}
+                >
+                    <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
+                        <path d="M 39.486328 6.9785156 A 1.50015 1.50015 0 0 0 38.439453 7.4394531 L 24 21.878906 L 9.5605469 7.4394531 A 1.50015 1.50015 0 0 0 8.484375 6.984375 A 1.50015 1.50015 0 0 0 7.4394531 9.5605469 L 21.878906 24 L 7.4394531 38.439453 A 1.50015 1.50015 0 1 0 9.5605469 40.560547 L 24 26.121094 L 38.439453 40.560547 A 1.50015 1.50015 0 1 0 40.560547 38.439453 L 26.121094 24 L 40.560547 9.5605469 A 1.50015 1.50015 0 0 0 39.486328 6.9785156 z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    } else {
+        return null;
+    }
+}
+
 // Helpful functions that call Sendbird
 const loadChannels = async (channelHandlers) => {
     const groupChannelFilter = new GroupChannelFilter();
@@ -646,6 +763,14 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete);
 }
 
+const pinMessage = async (currentlyJoinedChannel, message) => {
+    await currentlyJoinedChannel.pinMessage(message.messageId);
+}
+
+const unpinMessage = async (currentlyJoinedChannel, message) => {
+    await currentlyJoinedChannel.unpinMessage(message.messageId);
+}
+
 const getAllApplicationUsers = async () => {
     try {
         const userQuery = sb.createApplicationUserListQuery({ limit: 100 });
@@ -656,4 +781,4 @@ const getAllApplicationUsers = async () => {
     }
 }
 
-export default BasicGroupChannelSample;
+export default GroupChannelPinnedMessages;
