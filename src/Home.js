@@ -69,6 +69,7 @@ const Home = () => {
           <li><Link to="/group-channel-structured-data">Group Channel Structured Data</Link></li>
           <li><Link to="/group-channel-polls">Group Channel Polls</Link></li>
           <li><Link to="/group-channel-scheduled-messages">Group Channel Scheduled Messages</Link></li>
+          <li><Link to="/group-channel-pinned-messages">Group Channel Pinned Messages</Link></li>
         </ul>
       </div>
     </div>
