@@ -223,8 +223,20 @@ const GroupChannelPinnedMessages = (props) => {
 
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
-
-                    updateState({ ...stateRef.current, messageInputValue: "", isPinMessage: false });
+                    if (isPinMessage) {
+                        updateState({
+                            ...stateRef.current,
+                            messageInputValue: "",
+                            pinnedMessageIds: [...state.pinnedMessageIds, message.messageId],
+                            isPinMessage: false
+                        });
+                    } else {
+                        updateState({
+                            ...stateRef.current,
+                            messageInputValue: "",
+                            isPinMessage: false
+                        });
+                    }
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -242,7 +254,22 @@ const GroupChannelPinnedMessages = (props) => {
 
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
-                    updateState({ ...stateRef.current, messageInputValue: "", file: null, isPinMessage: false });
+                    if (isPinMessage) {
+                        updateState({
+                            ...stateRef.current,
+                            messageInputValue: "",
+                            pinnedMessageIds: [...state.pinnedMessageIds, message.messageId],
+                            file: null,
+                            isPinMessage: false
+                        });
+                    } else {
+                        updateState({
+                            ...stateRef.current,
+                            messageInputValue: "",
+                            file: null,
+                            isPinMessage: false
+                        });
+                    }
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -254,6 +281,11 @@ const GroupChannelPinnedMessages = (props) => {
     const handleDeleteMessage = async (messageToDelete) => {
         const { currentlyJoinedChannel } = state;
         await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+
+        updateState({
+            ...state,
+            pinnedMessageIds: state.pinnedMessageIds.filter(pinnedMessageId => pinnedMessageId !== messageToDelete.messageId)
+        });
     }
 
     const updateMessage = async (message) => {
