@@ -33,7 +33,9 @@ const GroupChannelPinnedMessages = (props) => {
         showPinnedMessagesListModal: false,
         pinnedMessages: [],
         pinnedMessageIds: [],
-        isPinMessage: false
+        isPinMessage: false,
+        isMaxCountPinnedMessagesError: false,
+        maxCountPinnedMessages: 10,
     });
 
     //need to access state in message received callback
@@ -217,15 +219,12 @@ const GroupChannelPinnedMessages = (props) => {
         } else {
             const userMessageParams = {};
             userMessageParams.message = state.messageInputValue
-
-            if(isPinMessage) {
-              userMessageParams.isPinnedMessage = true
-            }
+            userMessageParams.isPinnedMessage = isPinMessage
 
             currentlyJoinedChannel.sendUserMessage(userMessageParams)
                 .onSucceeded((message) => {
 
-                    updateState({ ...stateRef.current, messageInputValue: "", pinnedMessageIds: [...state.pinnedMessageIds, message.messageId], isPinMessage: false });
+                    updateState({ ...stateRef.current, messageInputValue: "", isPinMessage: false });
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -239,14 +238,11 @@ const GroupChannelPinnedMessages = (props) => {
             const { currentlyJoinedChannel, messages, isPinMessage } = state;
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
-
-            if(isPinMessage) {
-              fileMessageParams.isPinnedMessage = true
-            }
+            fileMessageParams.isPinnedMessage = isPinMessage
 
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
-                    updateState({ ...stateRef.current, messageInputValue: "", file: null, pinnedMessageIds: [...state.pinnedMessageIds, message.messageId], isPinMessage: false });
+                    updateState({ ...stateRef.current, messageInputValue: "", file: null, isPinMessage: false });
                 })
                 .onFailed((error) => {
                     console.log(error)
@@ -266,9 +262,19 @@ const GroupChannelPinnedMessages = (props) => {
 
     const handlePinMessage = async (message) => {
         const { currentlyJoinedChannel } = state;
-        await pinMessage(currentlyJoinedChannel, message);
 
-        updateState({ ...state, pinnedMessageIds: [...state.pinnedMessageIds, message.messageId] });
+        if (state.pinnedMessageIds.length >= state.maxCountPinnedMessages) {
+            updateState({
+                ...state,
+                isMaxCountPinnedMessagesError: true
+            })
+        } else {
+            await pinMessage(currentlyJoinedChannel, message);
+            updateState({
+                ...state,
+                pinnedMessageIds: [...state.pinnedMessageIds, message.messageId]
+            })
+        }
     }
 
     const handleUnpinMessage = async (message) => {
@@ -322,9 +328,17 @@ const GroupChannelPinnedMessages = (props) => {
         updateState({ ...state, showPinnedMessagesListModal: !state.showPinnedMessagesListModal });
     }
 
+    const setMaxCountPinnedMessageError = (errorState) => {
+        updateState({ ...state, isMaxCountPinnedMessagesError: errorState });
+    }
+
     const toggleIsPinMessage = () => {
-      updateState({ ...state, isPinMessage: !state.isPinMessage });
-  }
+        if (state.pinnedMessageIds.length >= state.maxCountPinnedMessages) {
+            updateState({ ...state, isMaxCountPinnedMessagesError: true })
+        } else {
+            updateState({ ...state, isPinMessage: !state.isPinMessage });
+        }
+    }
 
     if (state.loading) {
         return <div>Loading...</div>
@@ -400,6 +414,10 @@ const GroupChannelPinnedMessages = (props) => {
                 toggleShowPinnedMessagesListModal={toggleShowPinnedMessagesListModal}
                 handleUnpinMessage={handleUnpinMessage}
             />
+            <ErrorModal
+                isMaxCountPinnedMessagesError={state.isMaxCountPinnedMessagesError}
+                setMaxCountPinnedMessageError={setMaxCountPinnedMessageError}
+            />
         </>
     );
 };
@@ -455,9 +473,7 @@ const Channel = ({ currentlyJoinedChannel, children, handleLeaveChannel, channel
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div>
                 <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
-            </div>
-            <div>
-              <button className="leave-channel" onClick={toggleShowPinnedMessagesListModal}>{pinnedMessageIds.length} pinned</button>
+                <button className="leave-channel" onClick={toggleShowPinnedMessagesListModal}>{pinnedMessageIds.length} pinned</button>
             </div>
             <div>{children}</div>
         </div>;
@@ -631,7 +647,7 @@ const MessageInput = ({
                 <button className="send-message-button" onClick={sendMessage}>Send Message</button>
                 <div className="freeze-channel pin-checkbox">
                   <input type="checkbox" onChange={toggleIsPinMessage} checked={isPinMessage} />
-                  is pin message?
+                  pin
                 </div>
                 <label className="file-upload-label" htmlFor="upload" >Select File</label>
 
@@ -644,7 +660,6 @@ const MessageInput = ({
                     onClick={() => { }}
                 />
             </div>
-            {/* <button onClick={toggleShowPinnedMessagesListModal}>{pinnedMessageIds.length} pinned</button> */}
         </div>
     );
 }
@@ -712,6 +727,32 @@ const CreateUserForm = ({
                     onClick={setupUser}
                 >
                     Connect
+                </button>
+            </div>
+        </div>
+    } else {
+        return null;
+    }
+}
+
+const ErrorModal = ({
+    isMaxCountPinnedMessagesError,
+    setMaxCountPinnedMessageError
+}) => {
+    if (isMaxCountPinnedMessagesError) {
+        return <div className="overlay ">
+            <div className="overlay-content scheduled-messages-list-modal">
+                <div>
+                    <p>The maximum number of pinned messages cannot exceed 10</p>
+                </div>
+
+                <button
+                    className="close-button"
+                    onClick={() => setMaxCountPinnedMessageError(false)}
+                >
+                    <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
+                        <path d="M 39.486328 6.9785156 A 1.50015 1.50015 0 0 0 38.439453 7.4394531 L 24 21.878906 L 9.5605469 7.4394531 A 1.50015 1.50015 0 0 0 8.484375 6.984375 A 1.50015 1.50015 0 0 0 7.4394531 9.5605469 L 21.878906 24 L 7.4394531 38.439453 A 1.50015 1.50015 0 1 0 9.5605469 40.560547 L 24 26.121094 L 38.439453 40.560547 A 1.50015 1.50015 0 1 0 40.560547 38.439453 L 26.121094 24 L 40.560547 9.5605469 A 1.50015 1.50015 0 0 0 39.486328 6.9785156 z" />
+                    </svg>
                 </button>
             </div>
         </div>
