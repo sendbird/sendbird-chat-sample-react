@@ -1004,3 +1004,11 @@ code {
   color: black;
   border-radius: 50%;
 }
+
+.pin-checkbox {
+  display: inline-block;
+}
+
+.message-img {
+  max-width: 100%;
+}

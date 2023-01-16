@@ -57,6 +57,7 @@ import GroupChannelStructuredData from './samples/GroupChannelStructuredData';
 import GroupChannelPolls from './samples/GroupChannelPolls.js';
 import GroupChannelUsersOnlineStatus from './samples/GroupChannelUsersOnlineStatus';
 import GroupChannelScheduledMessages from './samples/GroupChannelScheduledMessages';
+import GroupChannelPinnedMessages from './samples/GroupChannelPinnedMessages';
 
 const App = () => {
   return (
@@ -116,6 +117,7 @@ const App = () => {
         <Route path='/group-channel-users-online-status' element={<GroupChannelUsersOnlineStatus />} />
         <Route path='/group-channel-polls' element={<GroupChannelPolls />} />
         <Route path='/group-channel-scheduled-messages' element={<GroupChannelScheduledMessages />} />
+        <Route path='/group-channel-pinned-messages' element={<GroupChannelPinnedMessages />} />
       </Routes>
     </div>
   );
