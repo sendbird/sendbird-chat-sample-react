@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: sendbird-chat-sample-react
+  description: SendBird Chat SDK sample for React
+  annotations:
+    github.com/project-slug: sendbird/sendbird-chat-sample-react
+spec:
+  type: library
+  lifecycle: production
+  owner: dep-client-platform
+  system: sendbird-chat
