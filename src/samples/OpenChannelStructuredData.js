@@ -240,7 +240,7 @@ const OpenChannelStructuredData = (props) => {
         const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
             appId: SENDBIRD_INFO.appId,
-            localCacheEnabled: false,
+            localCacheEnabled: true,
             modules: [new OpenChannelModule()]
         });
 
