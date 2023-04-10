@@ -211,7 +211,7 @@ const GroupChannelTypes = (props) => {
         const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
             appId: SENDBIRD_INFO.appId,
-            localCacheEnabled: false,
+            localCacheEnabled: true,
             modules: [new GroupChannelModule()]
         });
 
@@ -613,7 +613,7 @@ const inviteUsersToChannel = async (channel, userIds) => {
 const createChannel = async (channelName, userIdsToInvite, isCreateSuperGroup, isPublicChannel) => {
     try {
         const groupChannelParams = {};
-        groupChannelParams.addUserIds(userIdsToInvite);
+        groupChannelParams.invitedUserIds = userIdsToInvite;
         groupChannelParams.name = isCreateSuperGroup ? "Supergroup channel" : channelName;
         groupChannelParams.operatorUserIds = userIdsToInvite;
         if(isCreateSuperGroup) {
