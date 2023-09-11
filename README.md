@@ -1,45 +1,24 @@
-# SendBird Chat SDK React Sample
+# Sendbird Chat SDK samples for React
 
-![React sample](/react-sample.gif?raw=true "react sample")
+This repository contains code samples in Kotlin, showcasing the key functionalities provided by Sendbird Chat SDK for Javascript. Each sample has a dedicated readme file briefing how the feature works on the code level. To learn more, see our [documentation for Javascript](https://sendbird.com/docs/chat/v4/javascript/overview).
 
+## Prerequisites
++ Node.js v10.13.0 or later
 
-## Overview
-A simple react app that demonstrates how to use the Sendbird [Chat SDK](https://sendbird.com/docs/chat).
+## Sendbird Application ID
 
-## Requirement
-A Sendbird [account](https://dashboard.sendbird.com/auth/signup).
-Node version >16 is required. Download [here](https://nodejs.org/en/).
+To streamline the implementation process, a sample Application ID has been provided for codes in this repository. However, you need a unique Sendbird Application ID to properly initialize the Chat SDK and enable its features in your production application. Sendbird Application ID can be found in the Overview page on [Sendbird Dashboard](https://dashbaord.sendbird.com). To learn more about how and when to use the Application ID, see our documentation on [initialization](https://sendbird.com/docs/chat/v4/android/getting-started/send-first-message#2-get-started-3-step-3-initialize-the-chat-sdk).
 
-## 🔒 Security tip
-When a new Sendbird application is created in the dashboard the default security settings are set permissive to simplify running samples and implementing your first code.
+## Code samples
 
-Before launching make sure to review the security tab under ⚙️ Settings -> Security, and set Access token permission to Read Only or Disabled so that unauthenticated users can not login as someone else. And review the Access Control lists. Most apps will want to disable "Allow retrieving user list" as that could expose usage numbers and other information.
+Refer to the following list of code samples and their readme files.
 
+- [Group Channel Add Remove Operators](./groupchannel-add-remove-operators/README.md)
+- ...
+- ...
 
-## Setup
-Replace {YOUR_SENDBIRD_APP_ID} in constants.js with yout Sendbird app ID. 
-To get the ID  of your Sendbird application, sign in to your dashboard, select the application, go to the Settings > Application > General, and then check the Application ID.
+## Security
 
-## Install
-run `npm install`
+When a new Sendbird application is created in [Sendbird Dashboard](https://dashbaord.sendbird.com), the default security settings are set permissive to simplify running samples and implementing your first code.
 
-## Running the app
-
-run `npm start`
-
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-## Considerations in real world app
- - In this sample repo users are connecting to sendbird using a user ID (Sendbird Dashboard --> Security --> Read & Write). Read & Write is not secure and will create a new user automatically from the SDK if none exists. In production be sure to change the Sendbird Dashboard security settings to Deny login, and [authenticate users](https://sendbird.com/docs/chat/v3/javascript/guides/authentication#2-connect-to-sendbird-server-with-a-user-id-and-a-token) with a Sendbird generated Session Token.
- - Typescript types are available from the Sendbird Chat SDK if you are building with TS.
- - Chat is based around user generated input so consider mitigations against XSS attacks.
- - Pagination of channel and message lists will be a must have in any real world application.
-
-
-
-# Gotchas
- - Hot reload can cause issues with the Sendbird Websocket connection while developing. Work around here https://github.com/facebook/create-react-app/issues/2519#issuecomment-318867289
-
-
-
-
+When launching a production application, make sure to review the security settings beforehand in **Settings > Application > Security** on the dashbaord and set **Access token permission** to **Deny login** because **Read & Write** is not secure and will allow a new user to be automatically created in the SDK if none exists. Ensure that users are authenticated with a Sendbird generated Session Token. Also review the **Access Control** lists. Most apps will want to disable **"Allow retrieving user list"** as that could expose sensitivie information such as usage numbers.
