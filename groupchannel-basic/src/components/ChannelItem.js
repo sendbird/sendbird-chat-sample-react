@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import ConfirmationModal from './ConfirmationModal';
 import {FiTrash2} from 'react-icons/fi';
+import '../styles/ChannelItem.css';
 
 const ChannelItem = ({channel, handleLoadChannel, handleDeleteChannel}) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);

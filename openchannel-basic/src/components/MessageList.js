@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import ConfirmationModal from './ConfirmationModal';
 import {FiEdit2, FiTrash2} from 'react-icons/fi';
+import '../styles/MessageList.css';
 
 function MessageList({sb, channel, messageList}) {
   const [isModalOpen, setModalOpen] = useState(false);

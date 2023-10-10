@@ -1,0 +1,18 @@
+.message-input {
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #cbcbcb;
+    width: 100%;
+    padding: 12px;
+    background: white;
+}
+
+#textMessage {
+    width: 50%;
+    height: 2em;
+    padding: 6px;
+    border: 1px solid #cbcbcb;
+    outline: none;
+}

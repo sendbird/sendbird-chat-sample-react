@@ -4,7 +4,8 @@ import ChannelList from '../components/ChannelList';
 import ChannelHeader from '../components/ChannelHeader';
 import MessageInput from '../components/MessageInput';
 import MessageList from '../components/MessageList';
-import MemberList from '../components/MemberList';
+import ChannelInformation from '../components/ChannelInformation';
+import '../styles/Chat.css';
 
 export default function Chat({sb, userId}) {
   const [channelList, setChannelList] = useState([]);
@@ -12,6 +13,7 @@ export default function Chat({sb, userId}) {
   const [members, setMembers] = useState([]);
   const [channelHeaderName, setChannelHeaderName] = useState('Channel Name');
   const [messageList, setMessageList] = useState([]);
+  const [showChannelInformation, setShowChannelInformation] = useState(false);
 
   const groupChannelFilter = new GroupChannelFilter();
   groupChannelFilter.includeEmpty = true;
@@ -77,14 +79,9 @@ export default function Chat({sb, userId}) {
       {channel && (
         <div className="channel">
           <ChannelHeader
-            channel={channel}
-            channelList={channelList}
-            setChannel={setChannel}
-            setMembers={setMembers}
-            setMessageList={setMessageList}
-            setChannelList={setChannelList}
             channelHeaderName={channelHeaderName}
-            setChannelHeaderName={setChannelHeaderName}
+            showChannelInformation={showChannelInformation}
+            setShowChannelInformation={setShowChannelInformation}
           />
           <div>
             <MessageList
@@ -102,11 +99,18 @@ export default function Chat({sb, userId}) {
           </div>
         </div>
       )}
-      {channel && (
-        <MemberList
+      {(channel && showChannelInformation ) && (
+        <ChannelInformation
           sb={sb}
           channel={channel}
+          channelList={channelList}
+          channelHeaderName={channelHeaderName}
           members={members}
+          setChannel={setChannel}
+          setChannelList={setChannelList}
+          setMembers={setMembers}
+          setMessageList={setMessageList}
+          setShowChannelInformation={setShowChannelInformation}
         />
       )}
     </div>

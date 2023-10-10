@@ -1,0 +1,27 @@
+.channel-information {
+    flex: 1;
+    overflow-y: scroll;
+    width: 20em;
+    display: flex;
+    flex-direction: column;
+    margin: 0 1em;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.close-icon {
+    width: 1.5em;
+    height: 1.5em;
+    cursor: pointer;
+    float: right;
+}
+
+.button {
+    margin-top: 10px;
+    cursor: pointer;
+}

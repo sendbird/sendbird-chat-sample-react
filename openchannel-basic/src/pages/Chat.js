@@ -3,7 +3,8 @@ import ChannelList from '../components/ChannelList';
 import ChannelHeader from '../components/ChannelHeader';
 import MessageInput from '../components/MessageInput';
 import MessageList from '../components/MessageList';
-import MemberList from '../components/MemberList';
+import ChannelInformation from '../components/ChannelInformation';
+import '../styles/Chat.css';
 
 export default function Chat({sb, userId}) {
   const [channel, setChannel] = useState(null);
@@ -12,7 +13,7 @@ export default function Chat({sb, userId}) {
   const [isLoading, setIsLoading] = useState(false);
   const [channelList, setChannelList] = useState([]);
   const [openQuery, setOpenQuery] = useState(sb.openChannel.createOpenChannelListQuery());
-  const [isOperator, setIsOperator] = useState(false);
+  const [showChannelInformation, setShowChannelInformation] = useState(false);
 
   const retrieveChannelList = useCallback(async () => {
     if (openQuery.hasNext) {
@@ -46,19 +47,13 @@ export default function Chat({sb, userId}) {
         openQuery={openQuery}
         setOpenQuery={setOpenQuery}
         retrieveChannelList={retrieveChannelList}
-        setIsOperator={setIsOperator}
       />
       {channel && (
         <div className="channel">
           <ChannelHeader
-            channel={channel}
             channelHeaderName={channelHeaderName}
-            setChannel={setChannel}
-            setMessageList={setMessageList}
-            channelList={channelList}
-            setChannelList={setChannelList}
-            userId={userId}
-            isOperator={isOperator}
+            showChannelInformation={showChannelInformation}
+            setShowChannelInformation={setShowChannelInformation}
           />
           <div>
             <MessageList
@@ -76,10 +71,15 @@ export default function Chat({sb, userId}) {
           </div>
         </div>
       )}
-      {channel && (
-        <MemberList
-          sb={sb}
+      {(channel && showChannelInformation ) && (
+        <ChannelInformation
           channel={channel}
+          channelList={channelList}
+          channelHeaderName={channelHeaderName}
+          setChannel={setChannel}
+          setChannelList={setChannelList}
+          setMessageList={setMessageList}
+          setShowChannelInformation={setShowChannelInformation}
         />
       )}
     </div>

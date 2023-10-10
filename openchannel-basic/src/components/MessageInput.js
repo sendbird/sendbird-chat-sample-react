@@ -1,6 +1,6 @@
-import {GrDocumentUpload} from 'react-icons/gr';
-import {AiOutlineSend} from 'react-icons/ai';
+import {ReactComponent as Attach} from '../assets/sendbird-icon-attach.svg'
 import {useState} from "react";
+import '../styles/MessageInput.css';
 
 function MessageInput({sb, channel, messageList, setMessageList}) {
   const [textMessage, setTextMessage] = useState('');
@@ -54,11 +54,9 @@ function MessageInput({sb, channel, messageList, setMessageList}) {
 
   return (
     <div className="message-input">
-      <GrDocumentUpload
+      <Attach
         htmlFor="upload"
-        size="3em"
-        className="add-file-button"
-        style={{ paddingRight: "5px" }}
+        style={{width: "2em", height: "2em", paddingRight: "5px"}}
         onClick={() => document.getElementById('upload').click()}
       />
       <input
@@ -75,11 +73,6 @@ function MessageInput({sb, channel, messageList, setMessageList}) {
         onChange={e => setTextMessage(e.target.value)}
         onKeyDown={handleKeyDown}
       />
-      <div style={{paddingLeft:"5px"}}>
-        <AiOutlineSend className="send-message-button" size="3em"
-                       onClick={() => sendMessage(textMessage)}/>
-
-      </div>
     </div>);
 }
 

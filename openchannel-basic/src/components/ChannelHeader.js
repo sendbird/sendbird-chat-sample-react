@@ -1,100 +1,20 @@
-import React, {useState} from 'react';
-import {FiEdit2, FiTrash2} from 'react-icons/fi';
-import {ImExit} from 'react-icons/im';
-import ConfirmationModal from "./ConfirmationModal";
+import React from 'react';
+import {ReactComponent as Information} from '../assets/sendbird-icon-information.svg';
+import '../styles/ChannelHeader.css'
 
 function ChannelHeader({
-                         channel,
                          channelHeaderName,
-                         setChannel,
-                         setMessageList,
-                         channelList,
-                         setChannelList,
-                         isOperator
+                         showChannelInformation,
+                         setShowChannelInformation
                        }) {
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(channelHeaderName);
-
-  async function exitChannel(channel) {
-    await channel.exit();
-    setChannel(null);
-    setMessageList([]);
-    setChannelList(channelList.filter(item => item.url !== channel.url));
-  }
-
-  const openModal = () => {
-    setModalIsOpen(true);
+  const changeShowChannelInformation = () => () => {
+    setShowChannelInformation(!showChannelInformation);
   };
-
-  const closeModal = () => {
-    setModalIsOpen(false);
-  };
-
-  const handleConfirmDelete = async () => {
-    await channel.delete();
-    setChannel(null);
-    setMessageList([]);
-    setChannelList(channelList.filter(item => item.url !== channel.url));
-    closeModal();
-  };
-
-  function startEditing() {
-    setNewName(channelHeaderName);
-    setIsEditing(true);
-  }
-
-  function cancelEditing() {
-    setIsEditing(false);
-  }
-
-  function saveName() {
-    if (newName.trim() !== "") {
-      let params = ({
-        name: newName,
-      });
-      channel.updateChannel(params, (response, error) => {
-        if (error) {
-          console.log(error);
-          return;
-        }
-        setChannel(response);
-      });
-      setIsEditing(false);
-    }
-  }
-
   return (
-    <div className="channel-top">
-      <div className="channel-header">
-        {isEditing ? (
-          <>
-            <input
-              id="channel-name-input"
-              type="text"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-            />
-            <button onClick={saveName}>Save</button>
-            <button onClick={cancelEditing}>Cancel</button>
-          </>
-        ) : (
-          <>
-            {channelHeaderName}
-            <FiEdit2 onClick={startEditing} size="0.7em" style={{cursor: 'pointer', marginLeft: '5px'}}/>
-          </>
-        )}
-      </div>
+    <div className="channel-header">
+      <h2>{channelHeaderName}</h2>
       <div>
-        <ImExit onClick={() => exitChannel(channel)} size="2em"/>
-        {isOperator && <FiTrash2 className='control-button' size="2em" onClick={openModal}/>}
-        <ConfirmationModal
-          isOpen={modalIsOpen}
-          onRequestClose={closeModal}
-          onConfirm={handleConfirmDelete}
-          title="Delete Channel"
-          message="Are you sure you want to delete this channel?"
-        />
+        <Information onClick={changeShowChannelInformation()} style={{ width: "1.5em", height: "1.5em"}}/>
       </div>
     </div>
   );
