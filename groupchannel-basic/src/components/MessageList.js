@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import ConfirmationModal from './ConfirmationModal';
-import {FiEdit2, FiTrash2} from 'react-icons/fi';
+import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import '../styles/MessageList.css';
 
-function MessageList({sb, channel, messageList}) {
+function MessageList({ sb, channel, messageList }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [currentMsg, setCurrentMsg] = useState(null);
   const [isUpdate, setIsUpdate] = useState(false);
@@ -20,7 +21,7 @@ function MessageList({sb, channel, messageList}) {
   };
 
   const confirmUpdate = async (newMessage) => {
-    await channel.updateUserMessage(currentMsg.messageId, {message: newMessage});
+    await channel.updateUserMessage(currentMsg.messageId, { message: newMessage });
     setModalOpen(false);
     currentMsg.message = newMessage;
   };
@@ -32,6 +33,7 @@ function MessageList({sb, channel, messageList}) {
 
   const renderMessageList = messageList.map((msg) => {
     const messageSentByMe = msg.sender.userId === sb.currentUser.userId;
+
     return (
       <div key={msg.messageId} className={`message-item ${messageSentByMe ? 'message-from-you' : ''}`}>
         <div className={`message ${messageSentByMe ? 'message-from-you' : ''}`}>
@@ -50,9 +52,9 @@ function MessageList({sb, channel, messageList}) {
           )}
         </div>
         {messageSentByMe && (
-          <span style={{marginRight: '8px'}}>
-            <FiEdit2 onClick={() => handleUpdateMessage(msg)} style={{cursor: 'pointer', marginRight: '4px'}}/>
-            <FiTrash2 onClick={() => handleDeleteMessage(msg)} style={{cursor: 'pointer'}}/>
+          <span style={{ marginRight: '8px' }}>
+            <FiEdit2 onClick={() => handleUpdateMessage(msg)} style={{ cursor: 'pointer', marginRight: '4px' }} />
+            <FiTrash2 onClick={() => handleDeleteMessage(msg)} style={{ cursor: 'pointer' }} />
           </span>
         )}
       </div>
@@ -61,7 +63,7 @@ function MessageList({sb, channel, messageList}) {
 
   return (
     <div className='message-list'>
-      <div>{renderMessageList}</div>
+      {renderMessageList}
       {isModalOpen && (
         <ConfirmationModal
           isOpen={isModalOpen}

@@ -1,5 +1,6 @@
+import React, { useState } from 'react';
 import SymbolImage from "../assets/sendbird_symbol.png";
-import {useState} from 'react';
+import '../styles/Login.css';
 
 function InputField({id, value, onChange, onKeyDown, label}) {
   return (
@@ -42,10 +43,15 @@ export default function Login({sb, setUserId, setIsLogin}) {
       <div className='align'>
         <img src={SymbolImage} width={300} height={300} alt='Sendbird Symbol'/>
       </div>
-      <InputField id='id' label='ID' value={idValue} onChange={(e) => setIdValue(e.target.value)}
-                  onKeyDown={handleKeyDown}/>
+      <InputField
+        id='id'
+        label='ID'
+        value={idValue}
+        onChange={(e) => setIdValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+      />
       <div className='align'>
-        <button className='login-button' onClick={() => checkCredential()}>Login</button>
+        <button className='login-button' onClick={checkCredential}>Login</button>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import SymbolImage from "../assets/sendbird_symbol.png";
 import {useState} from 'react';
+import '../styles/Login.css';
 
 function InputField({id, value, onChange, onKeyDown, label}) {
   return (

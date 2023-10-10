@@ -1,75 +1,21 @@
-import React, {useState} from 'react';
-import {FiEdit2} from 'react-icons/fi';
-import {ImExit} from 'react-icons/im';
+import React from 'react';
+import {ReactComponent as Information} from '../assets/sendbird-icon-information.svg';
+import '../styles/ChannelHeader.css';
 
 function ChannelHeader({
-                         channel,
-                         channelList,
-                         setChannel,
-                         setMembers,
-                         setMessageList,
-                         setChannelList,
                          channelHeaderName,
-                         setChannelHeaderName
+                         showChannelInformation,
+                         setShowChannelInformation
                        }) {
-  const [newName, setNewName] = useState(channelHeaderName);
-  const [isEditingHeaderName, setIsEditingHeaderName] = useState(false);
-
-  function startEditing() {
-    setNewName(channelHeaderName);
-    setIsEditingHeaderName(true);
-  }
-
-  function cancelEditing() {
-    setIsEditingHeaderName(false);
-  }
-
-  async function saveChannelName(newName) {
-    if (newName.trim() !== "") {
-      let params = ({
-        name: newName,
-      });
-      await channel.updateChannel(params, (_channel, error) => {
-        if (error) {
-          console.log(error);
-          return;
-        }
-        setChannelHeaderName(_channel.name);
-      });
-      setIsEditingHeaderName(false);
-    }
-  }
-
-  async function leaveChannel(channel) {
-    await channel.leave();
-    setChannel(null);
-    setMembers([]);
-    setMessageList([]);
-    setChannelList(channelList.filter(item => item.url !== channel.url));
-  }
-
+  const changeShowChannelInformation = () => () => {
+    setShowChannelInformation(!showChannelInformation);
+  };
   return (
-    <div className="channel-top">
-      <div className="channel-header">
-        {isEditingHeaderName ? (
-          <>
-            <input
-              id="channel-name-input"
-              type="text"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-            />
-            <button onClick={() => saveChannelName(newName)}>Save</button>
-            <button onClick={cancelEditing}>Cancel</button>
-          </>
-        ) : (
-          <>
-            {channelHeaderName}
-            <FiEdit2 onClick={startEditing} size="0.7em" style={{cursor: 'pointer', marginLeft: '5px'}}/>
-          </>
-        )}
+    <div className="channel-header">
+      <h2>{channelHeaderName}</h2>
+      <div>
+        <Information onClick={changeShowChannelInformation()} style={{ width: "1.5em", height: "1.5em"}}/>
       </div>
-      <ImExit onClick={() => leaveChannel(channel)} size="2em"/>
     </div>
   );
 }
