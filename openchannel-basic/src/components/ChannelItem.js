@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import ConfirmationModal from './ConfirmationModal';
-import {FiTrash2} from 'react-icons/fi';
+import {ReactComponent as Delete} from '../assets/sendbird-icon-delete.svg';
 import '../styles/ChannelItem.css';
 
 const ChannelItem = ({channel, handleLoadChannel, handleDeleteChannel, userId}) => {
@@ -29,7 +29,7 @@ const ChannelItem = ({channel, handleLoadChannel, handleDeleteChannel, userId}) 
         {channel.name}
       </div>
       {isOperator && (<div>
-        <FiTrash2 className='control-button' size="1.2em" onClick={openModal}/>
+        <Delete className='control-button' size="1.2em" onClick={openModal}/>
         <ConfirmationModal
           isOpen={modalIsOpen}
           onRequestClose={closeModal}

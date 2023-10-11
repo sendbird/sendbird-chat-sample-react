@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ConfirmationModal from './ConfirmationModal';
-import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import {ReactComponent as Edit} from '../assets/sendbird-icon-edit.svg';
+import {ReactComponent as Delete} from '../assets/sendbird-icon-delete.svg';
 import '../styles/MessageList.css';
 
 function MessageList({ sb, channel, messageList }) {
@@ -53,8 +54,8 @@ function MessageList({ sb, channel, messageList }) {
         </div>
         {messageSentByMe && (
           <span style={{ marginRight: '8px' }}>
-            <FiEdit2 onClick={() => handleUpdateMessage(msg)} style={{ cursor: 'pointer', marginRight: '4px' }} />
-            <FiTrash2 onClick={() => handleDeleteMessage(msg)} style={{ cursor: 'pointer' }} />
+            <Edit onClick={() => handleUpdateMessage(msg)} style={{ cursor: 'pointer', marginRight: '4px' }} />
+            <Delete onClick={() => handleDeleteMessage(msg)} style={{ cursor: 'pointer' }} />
           </span>
         )}
       </div>
