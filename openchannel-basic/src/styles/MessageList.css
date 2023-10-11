@@ -25,15 +25,6 @@
     flex-direction: row;
 }
 
-.member-item {
-    cursor: pointer;
-    font-weight: 600;
-    border-bottom: 1px solid #cfcfcf;
-    padding: 8px 0 4px;
-    display: flex;
-    align-items: center;
-}
-
 .message-info {
     margin-bottom: 4px;
     display: flex;

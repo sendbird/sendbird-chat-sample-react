@@ -12,7 +12,7 @@ const App = () => {
   const [userId, setUserId] = useState(null)
 
   const sb = SendbirdChat.init({
-      appId: "DE295D7F-DCE0-4D86-8F22-D551FD00ADCC",
+      appId: "43A36A3F-6248-4CDE-84F8-DC91436DECF8",
       modules: [
         new GroupChannelModule(),
       ],

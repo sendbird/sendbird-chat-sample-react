@@ -1,0 +1,8 @@
+.channel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #cbcbcb;
+    padding-left: 8px;
+    padding-right: 8px;
+}
