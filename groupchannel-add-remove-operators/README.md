@@ -9,53 +9,71 @@ Operators are users who can moderate channels by muting or banning users as well
 
 ## How it works
 
-`channel.addOperators` and `channel.removeOperators` are used to add and remove operators in a group channel. 
+By using `useEffect` hook, the `ChannelInformation` component is re-rendered when the `members` property of the channel is changed.
+so that the `operators` property of the channel is updated.
 
-`switchOperatorStatus` is a function that checks if the member is an operator.
-If the member is already an operator, remove them(`channel.removeOperators`). Otherwise, add them(`channel.addOperators`) as an operator.
+And show the list of operators in the channel. 
+with `Add Operator` button. When the user input the user ID and click the `Add Operator` button, trigger `addOperator` function.
+and call `await channel.addOperators([userId])`.
+In addition, a `Remove Operator` button (X) is also provided. When clicked, it triggers the `await channel.removeOperators([userId])`.
 
-And Render the operator status of the member in the `MemberList` component.
 
-MemberList.js
+ChannelInformation.js
 ```javascript
-const switchOperatorStatus = async (member) => {
-  if (isOperator(member)) {
-    // If the member is already an operator, remove them
-    await channel.removeOperators([member.userId]);
-  } else {
-    // Otherwise, add them as an operator
-    await channel.addOperators([member.userId]);
+useEffect(() => {
+  const ops = members.filter(member => member.role === 'operator');
+  setOperators(ops);
+}, [members]);
+
+const addOperator = async (userId) => {
+  if (userId.trim() !== "") {
+    await channel.addOperators([userId]);
+    const updatedOperators = [...operators, members.find(m => m.userId === userId)];
+    setOperators(updatedOperators);
   }
+  setAddingOperatorModalOpen(false);
 };
 
-const isOperator = (member) => {
-  return member.role === 'operator';
+const removeOperator = async (userId) => {
+  await channel.removeOperators([userId]);
+  const updatedOperators = operators.filter(op => op.userId !== userId);
+  setOperators(updatedOperators);
 };
 
-<div className="members-list">
-  {members.map((member) => (
-    <div
-      className="member-item"
-      key={member.userId}
-      onClick={() => toggleOperatorStatus(member)}
-    >
-      {isOperator(member) ? <GrUserAdmin style={{paddingRight: 10}}/> : ''} {member.nickname}({member.userId})
+<ConfirmationModal
+  isOpen={isAddingOperatorModalOpen}
+  onRequestClose={handleAddingOperatorCloseModal}
+  onConfirm={addOperator}
+  title="Add a operator"
+  message={""}
+  isUpdateMessage={true}
+/>
+
+<AccordionItem
+  Icon={Members}
+  title="Operators"
+  onActionBtnClick={() => setAddingOperatorModalOpen(true)}
+  actionBtnLabel="Add Operator"
+>
+  {operators.map((operator) => (
+    <div className="member-item" key={operator.userId}>
+      {operator.nickname}({operator.userId})
+      <Close onClick={() => removeOperator(operator.userId)} className="close-icon"/>
     </div>
   ))}
-</div>
+</AccordionItem>
 ```
 
-When the operator status of the member is changed, channel event(`onOperatorUpdated`) handler is triggered and the `MemberList` component is re-rendered.
+When the operator status of the member is changed, channel event(`onOperatorUpdated`) handler is triggered and the `ChannelInformation` component is re-rendered.
 
 ChannelList.js
 ```javascript
 const channelHandler = new GroupChannelHandler({
-  ...
   onOperatorUpdated: (channel) => {
     if (_channel.url === channel.url) {
       setMembers([...channel.members]);
     }
-  },
+  }
 });
 ```
 

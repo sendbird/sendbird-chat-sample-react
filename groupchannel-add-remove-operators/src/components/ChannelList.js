@@ -1,23 +1,19 @@
-import {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import ChannelItem from './ChannelItem';
 import CreateChannelModal from './CreateChannelModal';
 import ConfirmationModal from "./ConfirmationModal";
-import {MdOutlineCreateNewFolder, MdOutlineManageAccounts} from 'react-icons/md';
+import Avatar from "./Avatar";
+import {ReactComponent as Channel} from "../assets/sendbird-icon-channel.svg";
+import {ReactComponent as Create} from "../assets/sendbird-icon-create.svg";
 import {GroupChannelHandler} from "@sendbird/chat/groupChannel";
+import '../styles/ChannelList.css';
 
 function ChannelList({
-                       sb,
-                       groupQuery,
-                       userId,
-                       channel,
-                       channelList,
-                       setChannel,
-                       setChannelHeaderName,
-                       setChannelList,
-                       setMessageList,
-                       setMembers,
-                       loadMoreChannelList,
+                       sb, groupQuery, userId, channel, channelList, setChannel,
+                       setChannelHeaderName, setChannelList, setMessageList, setMembers, loadMoreChannelList,
                      }) {
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
   const [isCreatingChannelModalOpen, setCreatingChannelModalOpen] = useState(false);
   const [isUpdatingUserProfileModalOpen, setUpdatingUserProfileModalOpen] = useState(false);
   const [userNickname, setUserNickname] = useState(sb.currentUser.nickname);
@@ -100,16 +96,28 @@ function ChannelList({
     sb.groupChannel.addGroupChannelHandler(_channel.url, channelHandler);
   }, [channel, sb, setChannel, setChannelHeaderName, setMessageList, setMembers]);
 
+
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, [headerRef]);
+
   return (
     <div className="channel-list">
-      <div className="header-container"
-           style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-        <h1 className="channel-type">Channel List</h1>
-        <div>
-          <MdOutlineManageAccounts onClick={handleUpdatingUserProfileOpenModal} size="2em"/>
-          <MdOutlineCreateNewFolder onClick={handleCreatingChannelOpenModal} size="2em" style={{marginRight: '16px'}}/>
+      <div ref={headerRef} className="header">
+        <div className="userProfileButton" role='button' onClick={handleUpdatingUserProfileOpenModal}>
+          <Avatar sb={sb}/>
+          <div className="avatarSection">
+            <div>{sb.currentUser.nickname}</div>
+            <div>{sb.currentUser.userId}</div>
+          </div>
+        </div>
+        <div className="createChannelIcon" style={{marginRight: 10}} onClick={handleCreatingChannelOpenModal}>
+          <Create />
         </div>
       </div>
+
       <ConfirmationModal
         isOpen={isUpdatingUserProfileModalOpen}
         onRequestClose={handleUpdatingUserProfileCloseModal}
@@ -118,22 +126,32 @@ function ChannelList({
         message={userNickname}
         isUpdateMessage={true}
       />
+
       <CreateChannelModal
         sb={sb}
         isOpen={isCreatingChannelModalOpen}
         handleCloseModal={handleCreatingChannelCloseModal}
         handleCreateChannel={handleCreateChannel}
       />
+
       <div>
-        {channelList.map((channel) => (
-          <ChannelItem
-            key={channel.url}
-            channel={channel}
-            handleLoadChannel={handleLoadChannel}
-            handleDeleteChannel={handleDeleteChannel}
-          />
-        ))}
+        {channelList.length === 0 ? (
+          <div className="noChannelSection" style={{height: `calc(100vh - ${headerHeight}px)`}}>
+            <Channel className="noChannelIcon"/>
+            No Channels
+          </div>
+        ) : (
+          channelList.map((channel) => (
+            <ChannelItem
+              key={channel.url}
+              channel={channel}
+              handleLoadChannel={handleLoadChannel}
+              handleDeleteChannel={handleDeleteChannel}
+            />
+          ))
+        )}
       </div>
+
       {groupQuery.current.hasMore && <button onClick={loadMoreChannelList}>Load More</button>}
     </div>
   );

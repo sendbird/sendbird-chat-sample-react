@@ -32,12 +32,12 @@ function MessageList({sb, channel, messageList}) {
   };
 
   const renderMessageList = messageList.map((msg) => {
-    const messageSentByMe = msg.sender.userId === sb.currentUser.userId;
+    const messageSentByMe = msg.sender?.userId === sb.currentUser.userId;
     return (
       <div key={msg.messageId} className={`message-item ${messageSentByMe ? 'message-from-you' : ''}`}>
         <div className={`message ${messageSentByMe ? 'message-from-you' : ''}`}>
           <div className='message-info'>
-            <div className="message-sender-name">{msg.sender.nickname}</div>
+            <div className="message-sender-name">{msg.sender?.nickname}</div>
             <div>{new Date(msg.createdAt).toLocaleString()}</div>
           </div>
           {msg.messageType === "file" && (
