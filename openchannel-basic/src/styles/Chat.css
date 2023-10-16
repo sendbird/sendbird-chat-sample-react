@@ -9,7 +9,5 @@
     flex: 3;
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
     margin-bottom: 102px;
-    height: 100%;
 }

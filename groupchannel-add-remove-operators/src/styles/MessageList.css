@@ -1,3 +1,8 @@
+.message-list {
+    overflow-y: scroll;
+    height: auto;
+}
+
 .message {
     border-radius: 8px;
     width: 70%;
