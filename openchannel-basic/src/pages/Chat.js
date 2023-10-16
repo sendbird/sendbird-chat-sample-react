@@ -55,20 +55,18 @@ export default function Chat({sb, userId}) {
             showChannelInformation={showChannelInformation}
             setShowChannelInformation={setShowChannelInformation}
           />
-          <div>
-            <MessageList
-              sb={sb}
-              channel={channel}
-              messageList={messageList}
-              setMessageList={setMessageList}
-            />
-            <MessageInput
-              sb={sb}
-              messageList={messageList}
-              channel={channel}
-              setMessageList={setMessageList}
-            />
-          </div>
+          <MessageList
+            sb={sb}
+            channel={channel}
+            messageList={messageList}
+            setMessageList={setMessageList}
+          />
+          <MessageInput
+            sb={sb}
+            messageList={messageList}
+            channel={channel}
+            setMessageList={setMessageList}
+          />
         </div>
       )}
       {(channel && showChannelInformation ) && (
