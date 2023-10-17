@@ -1,6 +1,6 @@
-# Basic in a group channel
+# Add and remove an operator in a group channel
 
-This sample with UI components demonstrates how to basic in a group channel on Sendbird Chat SDK for JavaScript on React.
+This sample with UI components demonstrates how to add and remove an operator in a group channel on Sendbird Chat SDK for JavaScript on React.
 Operators are users who can moderate channels by muting or banning users as well as freezing channels. To learn more, see our documentation on operators
 
 ## Prerequisites
@@ -9,71 +9,70 @@ Operators are users who can moderate channels by muting or banning users as well
 
 ## How it works
 
-By using `useEffect` hook, the `ChannelInformation` component is re-rendered when the `members` property of the channel is changed.
-so that the `operators` property of the channel is updated.
-
-And show the list of operators in the channel. 
-with `Add Operator` button. When the user input the user ID and click the `Add Operator` button, trigger `addOperator` function.
-and call `await channel.addOperators([userId])`.
-In addition, a `Remove Operator` button (X) is also provided. When clicked, it triggers the `await channel.removeOperators([userId])`.
-
+By using `banUser`/`banUserWithUserId` and `unbanUser`/`unbanUserWithUserId` methods of `GroupChannel`, we can ban and unban a user in a group channel. 
 
 ChannelInformation.js
 ```javascript
-useEffect(() => {
-  const ops = members.filter(member => member.role === 'operator');
-  setOperators(ops);
-}, [members]);
-
-const addOperator = async (userId) => {
+const banUser = async (userId) => {
   if (userId.trim() !== "") {
-    await channel.addOperators([userId]);
-    const updatedOperators = [...operators, members.find(m => m.userId === userId)];
-    setOperators(updatedOperators);
+    await channel.banUserWithUserId(userId);
   }
-  setAddingOperatorModalOpen(false);
+  setBanUserModalModalOpen(false);
 };
 
-const removeOperator = async (userId) => {
-  await channel.removeOperators([userId]);
-  const updatedOperators = operators.filter(op => op.userId !== userId);
-  setOperators(updatedOperators);
+const unbanUser = async (userId) => {
+  await channel.unbanUserWithUserId(userId);
 };
 
 <ConfirmationModal
-  isOpen={isAddingOperatorModalOpen}
-  onRequestClose={handleAddingOperatorCloseModal}
-  onConfirm={addOperator}
-  title="Add a operator"
+  isOpen={isBanUserModalOpen}
+  onRequestClose={handleBanUserCloseModal}
+  onConfirm={banUser}
+  title="Ban user"
   message={""}
   isUpdateMessage={true}
 />
 
 <AccordionItem
   Icon={Members}
-  title="Operators"
-  onActionBtnClick={() => setAddingOperatorModalOpen(true)}
-  actionBtnLabel="Add Operator"
+  title="Ban Users"
+  onActionBtnClick={() => setBanUserModalModalOpen(true)}
+  actionBtnLabel="Ban User"
 >
-  {operators.map((operator) => (
-    <div className="member-item" key={operator.userId}>
-      {operator.nickname}({operator.userId})
-      <Close onClick={() => removeOperator(operator.userId)} className="close-icon"/>
+  {bannedUsers.map((ban) => (
+    <div className="member-item" key={ban.userId}>
+      {ban.nickname}({ban.userId})
+      <Close onClick={() => unbanUser(ban.userId)} className="close-icon"/>
     </div>
   ))}
 </AccordionItem>
 ```
 
-When the operator status of the member is changed, channel event(`onOperatorUpdated`) handler is triggered and the `ChannelInformation` component is re-rendered.
+When the user is banned or unbanned, channel event(`onUserBanned`, `onUserUnbanned`) handler is triggered and the `ChannelInformation` component is re-rendered.
 
 ChannelList.js
 ```javascript
 const channelHandler = new GroupChannelHandler({
-  onOperatorUpdated: (channel) => {
-    if (_channel.url === channel.url) {
-      setMembers([...channel.members]);
+  onUserBanned: (channel, user) => {
+    if (user.userId === sb.currentUser.userId) {
+      setChannel(null);
+      setChannelHeaderName('');
+      setMessageList([]);
+      setMembers([]);
+    }else if (_channel.url === channel.url) {
+      setMembers((currentMemberList) => currentMemberList.filter((m) => m.userId !== user.userId));
+      retrieveBannedUsers(_channel).then((bannedUsers) => {
+        setBannedUsers(bannedUsers);
+      });
     }
-  }
+  },
+  onUserUnbanned: (channel, user) => {
+    if (_channel.url === channel.url) {
+      retrieveBannedUsers(_channel).then((bannedUsers) => {
+        setBannedUsers(bannedUsers);
+      });
+    }
+  },
 });
 ```
 

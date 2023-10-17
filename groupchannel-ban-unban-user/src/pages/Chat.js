@@ -11,6 +11,7 @@ export default function Chat({sb, userId}) {
   const [channelList, setChannelList] = useState([]);
   const [channel, setChannel] = useState(null);
   const [members, setMembers] = useState([]);
+  const [bannedUsers, setBannedUsers] = useState([]);
   const [channelHeaderName, setChannelHeaderName] = useState('Channel Name');
   const [messageList, setMessageList] = useState([]);
   const [showChannelInformation, setShowChannelInformation] = useState(false);
@@ -74,6 +75,7 @@ export default function Chat({sb, userId}) {
         setChannelList={setChannelList}
         setMessageList={setMessageList}
         setMembers={setMembers}
+        setBannedUsers={setBannedUsers}
         setShowChannelInformation={setShowChannelInformation}
         loadMoreChannelList={loadMoreChannelList}
       />
@@ -105,6 +107,7 @@ export default function Chat({sb, userId}) {
           channelList={channelList}
           channelHeaderName={channelHeaderName}
           members={members}
+          bannedUsers={bannedUsers}
           setChannel={setChannel}
           setChannelList={setChannelList}
           setMembers={setMembers}
