@@ -74,6 +74,7 @@ export default function Chat({sb, userId}) {
         setChannelList={setChannelList}
         setMessageList={setMessageList}
         setMembers={setMembers}
+        setShowChannelInformation={setShowChannelInformation}
         loadMoreChannelList={loadMoreChannelList}
       />
       {channel && (

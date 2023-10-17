@@ -10,7 +10,7 @@ import '../styles/ChannelList.css';
 
 function ChannelList({
                        sb, groupQuery, userId, channel, channelList, setChannel,
-                       setChannelHeaderName, setChannelList, setMessageList, setMembers, loadMoreChannelList,
+                       setChannelHeaderName, setChannelList, setMessageList, setMembers, setShowChannelInformation, loadMoreChannelList,
                      }) {
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -64,6 +64,7 @@ function ChannelList({
     setMessageList(messages);
     setMembers(_channel.members);
     setChannelHeaderName(_channel.name);
+    setShowChannelInformation(false);
 
     const channelHandler = new GroupChannelHandler({
       onMessageReceived: (newChannel, message) => {
@@ -84,6 +85,16 @@ function ChannelList({
       onMessageDeleted: (channel, messageId) => {
         if (_channel.url === channel.url) {
           setMessageList((currentMessageList) => currentMessageList.filter((m) => m.messageId !== messageId));
+        }
+      },
+      onUserJoined: (channel, user) => {
+        if (_channel.url === channel.url) {
+          setMembers((currentMemberList) => [...currentMemberList, user]);
+        }
+      },
+      onUserLeft: (channel, user) => {
+        if (_channel.url === channel.url) {
+          setMembers((currentMemberList) => currentMemberList.filter((m) => m.userId !== user.userId));
         }
       },
       onOperatorUpdated: (channel) => {

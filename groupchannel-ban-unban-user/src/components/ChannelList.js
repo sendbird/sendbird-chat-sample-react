@@ -10,7 +10,7 @@ import '../styles/ChannelList.css';
 
 function ChannelList({
                        sb, groupQuery, userId, channel, channelList, setChannel,
-                       setChannelHeaderName, setChannelList, setMessageList, setMembers, setShowChannelInformation, loadMoreChannelList,
+                       setChannelHeaderName, setChannelList, setMessageList, setMembers, setBannedUsers, setShowChannelInformation, loadMoreChannelList,
                      }) {
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -54,6 +54,15 @@ function ChannelList({
     setChannelList(channelList.filter(item => item.url !== _channel.url));
   }, [channelList, setChannelList]);
 
+  const retrieveBannedUsers = useCallback(async (_channel) => {
+    const _bannedUsers = [];
+    const query = _channel.createBannedUserListQuery();
+    while (query.hasNext) {
+      const bannedUsers = await query.next();
+      _bannedUsers.push(...bannedUsers);
+    }
+    return _bannedUsers;
+  }, []);
 
   const handleLoadChannel = useCallback(async (_channel) => {
     channel && sb.groupChannel.removeGroupChannelHandler(channel.url);
@@ -64,6 +73,9 @@ function ChannelList({
     setMessageList(messages);
     setMembers(_channel.members);
     setChannelHeaderName(_channel.name);
+    retrieveBannedUsers(_channel).then((bannedUsers) => {
+      setBannedUsers(bannedUsers);
+    });
     setShowChannelInformation(false);
 
     const channelHandler = new GroupChannelHandler({
@@ -96,11 +108,31 @@ function ChannelList({
         if (_channel.url === channel.url) {
           setMembers((currentMemberList) => currentMemberList.filter((m) => m.userId !== user.userId));
         }
-      }
+      },
+      onUserBanned: (channel, user) => {
+        if (user.userId === sb.currentUser.userId) {
+          setChannel(null);
+          setChannelHeaderName('');
+          setMessageList([]);
+          setMembers([]);
+        }else if (_channel.url === channel.url) {
+          setMembers((currentMemberList) => currentMemberList.filter((m) => m.userId !== user.userId));
+          retrieveBannedUsers(_channel).then((bannedUsers) => {
+            setBannedUsers(bannedUsers);
+          });
+        }
+      },
+      onUserUnbanned: (channel, user) => {
+        if (_channel.url === channel.url) {
+          retrieveBannedUsers(_channel).then((bannedUsers) => {
+            setBannedUsers(bannedUsers);
+          });
+        }
+      },
     });
 
     sb.groupChannel.addGroupChannelHandler(_channel.url, channelHandler);
-  }, [channel, sb, setChannel, setChannelHeaderName, setMessageList, setMembers]);
+  }, [channel, sb, setChannel, setChannelHeaderName, setMessageList, setMembers, setBannedUsers, setShowChannelInformation, retrieveBannedUsers]);
 
 
   useEffect(() => {

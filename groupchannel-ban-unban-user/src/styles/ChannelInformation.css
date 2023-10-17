@@ -1,0 +1,33 @@
+.channel-information {
+    border-left: 1px solid #cbcbcb;
+}
+
+.channel-information-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #cbcbcb;
+    cursor: pointer;
+}
+
+.channel-information-body {
+    flex: 1;
+    overflow-y: scroll;
+    width: 20em;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    margin: 0 1em;
+}
+
+.close-icon {
+    width: 1.5em;
+    height: 1.5em;
+    cursor: pointer;
+    float: right;
+}
+
+.button {
+    margin-top: 10px;
+    cursor: pointer;
+}
