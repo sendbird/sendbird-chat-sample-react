@@ -104,43 +104,45 @@ function ChannelInformation({
 
   return (
     <div className="channel-information">
-      <div className="header">
+      <div className="channel-header">
         <h2>Channel information</h2>
         <Close onClick={closeChannelInformation} className="close-icon"/>
       </div>
-      <ConfirmationModal
-        isOpen={isUpdatingChannelNameModalOpen}
-        onRequestClose={handleUpdatingChannelNameCloseModal}
-        onConfirm={handleUpdateChannelName}
-        title="Update channel name"
-        message={channelHeaderName}
-        isUpdateMessage={true}
-      />
-      <AccordionItem
-        Icon={Members}
-        title="Members"
-        onActionBtnClick={loadMoreMembers}
-        actionBtnLabel="Refresh members"
-        onRightButtonClick={handleRefresh}
-      >
-        {members.map((member) => (
-          <div className="member-item" key={member.userId}>
-            {member.nickname}({member.userId})
-          </div>
-        ))}
-      </AccordionItem>
-      <button
-        className="button"
-        onClick={handleUpdatingChannelNameOpenModal}
-      >
-        Change channel name
-      </button>
-      <button
-        className="button"
-        onClick={() => leaveChannel(channel)}
-      >
-        Leave channel
-      </button>
+      <div className="channel-information-body">
+        <ConfirmationModal
+          isOpen={isUpdatingChannelNameModalOpen}
+          onRequestClose={handleUpdatingChannelNameCloseModal}
+          onConfirm={handleUpdateChannelName}
+          title="Update channel name"
+          message={channelHeaderName}
+          isUpdateMessage={true}
+        />
+        <AccordionItem
+          Icon={Members}
+          title="Members"
+          onActionBtnClick={loadMoreMembers}
+          actionBtnLabel="Refresh members"
+          onRightButtonClick={handleRefresh}
+        >
+          {members.map((member) => (
+            <div className="member-item" key={member.userId}>
+              {member.nickname}({member.userId})
+            </div>
+          ))}
+        </AccordionItem>
+        <button
+          className="button"
+          onClick={handleUpdatingChannelNameOpenModal}
+        >
+          Change channel name
+        </button>
+        <button
+          className="button"
+          onClick={() => leaveChannel(channel)}
+        >
+          Leave channel
+        </button>
+      </div>
     </div>
   );
 }
