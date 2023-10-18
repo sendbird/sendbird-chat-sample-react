@@ -5,11 +5,11 @@ import ConfirmationModal from "./ConfirmationModal";
 import Avatar from "./Avatar";
 import {ReactComponent as Channel} from "../assets/sendbird-icon-channel.svg";
 import {ReactComponent as Create} from "../assets/sendbird-icon-create.svg";
-import {GroupChannelHandler} from "@sendbird/chat/groupChannel";
+import {GroupChannelHandler, MessageCollectionInitPolicy, MessageFilter} from "@sendbird/chat/groupChannel";
 import '../styles/ChannelList.css';
 
 function ChannelList({
-                       sb, groupQuery, userId, channel, channelList, setChannel,
+                       sb, groupQuery, userId, channel, channelList, setChannel, setMessageCollection,
                        setChannelHeaderName, setChannelList, setMessageList, setMembers, setShowChannelInformation, loadMoreChannelList,
                      }) {
   const headerRef = useRef(null);
@@ -57,12 +57,26 @@ function ChannelList({
 
   const handleLoadChannel = useCallback(async (_channel) => {
     channel && sb.groupChannel.removeGroupChannelHandler(channel.url);
-    const PreviousMessageListQueryParams = {};
-    const PreviousMessageListQuery = _channel.createPreviousMessageListQuery(PreviousMessageListQueryParams);
-    const messages = await PreviousMessageListQuery.load();
+    const filter = new MessageFilter();
+    const limit = 20;
+    const startingPoint = Date.now();
+    const collection = _channel.createMessageCollection({
+      filter,
+      limit,
+      startingPoint,
+    });
+    collection
+      .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
+      .onCacheResult((err, messages) => {
+        setMessageList(messages.reverse());
+      })
+      .onApiResult((err, messages) => {
+        setMessageList(messages.reverse());
+      });
+
     setChannel(_channel);
-    setMessageList(messages);
     setMembers(_channel.members);
+    setMessageCollection(collection);
     setChannelHeaderName(_channel.name);
     setShowChannelInformation(false);
 
@@ -105,7 +119,7 @@ function ChannelList({
     });
 
     sb.groupChannel.addGroupChannelHandler(_channel.url, channelHandler);
-  }, [channel, sb, setChannel, setChannelHeaderName, setMessageList, setMembers]);
+  }, [channel, sb, setChannel, setChannelHeaderName, setMessageList, setShowChannelInformation, setMembers, setMessageCollection]);
 
 
   useEffect(() => {
