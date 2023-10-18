@@ -4,10 +4,20 @@ import {ReactComponent as Edit} from '../assets/sendbird-icon-edit.svg';
 import {ReactComponent as Delete} from '../assets/sendbird-icon-delete.svg';
 import '../styles/MessageList.css';
 
-function MessageList({ sb, channel, messageList }) {
+function MessageList({ sb, channel, messageList, messageCollection, setMessageList }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [currentMsg, setCurrentMsg] = useState(null);
   const [isUpdate, setIsUpdate] = useState(false);
+
+  const loadPreviousMessage = async () => {
+    if (messageCollection.hasPrevious) {
+      const prevMessageList = await messageCollection.loadPrevious();
+      const newMessageList = prevMessageList.filter(
+        (prevMsg) => !messageList.some((currentMsg) => currentMsg.messageId === prevMsg.messageId)
+      );
+      setMessageList((messageList) => [...newMessageList, ...messageList]);
+    }
+  };
 
   const handleUpdateMessage = (message) => {
     setIsUpdate(true);
@@ -65,6 +75,13 @@ function MessageList({ sb, channel, messageList }) {
 
   return (
     <div className='message-list'>
+      {messageCollection?.hasPrevious && (
+        <div  className='load-previous-btn'>
+          <button onClick={loadPreviousMessage}>
+            Load Previous
+          </button>
+        </div>
+      )}
       {renderMessageList}
       {isModalOpen && (
         <ConfirmationModal

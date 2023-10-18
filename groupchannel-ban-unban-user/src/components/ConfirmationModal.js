@@ -24,6 +24,7 @@ const ConfirmationModal = ({isOpen, onRequestClose, onConfirm, title, message, i
   const handleConfirm = () => {
     if (isUpdateMessage) {
       onConfirm(updatedMessage);
+      setUpdatedMessage(message);
     } else {
       onConfirm();
     }
