@@ -1,0 +1,59 @@
+.channel-list {
+    background: white;
+    flex: 1;
+    border-right: 1px solid #cbcbcb;
+    overflow-y: scroll;
+    margin: 10px;
+    justify-content: center;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+.userProfileButton,
+.channelIcons {
+    cursor: pointer;
+    display: flex;
+}
+
+.userProfileButton {
+    align-items: center;
+}
+
+.avatarSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.avatarSection div:nth-child(1) {
+    font-size: 18px;
+}
+
+.avatarSection div:nth-child(2) {
+    font-size: 16px;
+}
+
+.channelIcons svg {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+.noChannelSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.noChannelIcon {
+    width: 4em;
+    height: 4em;
+    margin-bottom: 10px;
+}
