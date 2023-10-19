@@ -1,0 +1,62 @@
+.message-list {
+    overflow-y: scroll;
+    height: auto;
+}
+
+.message {
+    border-radius: 8px;
+    width: 70%;
+    background: #8a2be2;
+    color: white;
+    padding: 24px;
+    margin-left: 12px;
+}
+
+.message-item {
+    margin: 12px;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.message.message-from-you {
+    margin-left: auto;
+    background: #39a9ff;
+    flex-direction: row;
+    margin-right: 12px;
+}
+
+.message-item.message-from-you {
+    flex-direction: row;
+}
+
+.message-info {
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    line-height: 24px;
+}
+
+.oc-message-sender-name,
+.message-sender-name {
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.oc-message,
+.message-og-tags {
+    padding: 12px 0;
+    display: flex;
+}
+
+.oc-message-og-tags,
+.message-og-tags {
+    flex-direction: column;
+    padding: 5px;
+    box-sizing: border-box;
+}
+.load-previous-btn {
+    display: flex;
+    justify-content: center;
+    margin: 12px;
+}
