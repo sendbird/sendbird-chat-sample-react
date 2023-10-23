@@ -125,7 +125,7 @@ function ChannelList({
   }, [headerRef]);
 
   return (
-    <div className="channel-list" onScroll={handleScroll}>
+    <div className="left-bar">
       <div ref={headerRef} className="header">
         <div className="userProfileButton" role='button' onClick={handleUpdatingUserProfileOpenModal}>
           <Avatar sb={sb}/>
@@ -152,9 +152,9 @@ function ChannelList({
         handleCloseModal={handleCreatingChannelCloseModal}
         handleCreateChannel={handleCreateChannel}
       />
-      <div>
+      <div className="channel-list" style={{height: `calc(98vh - ${headerHeight}px)`}} onScroll={handleScroll}>
         {channelList.length === 0 ? (
-          <div className="noChannelSection" style={{height: `calc(100vh - ${headerHeight}px)`}}>
+          <div className="noChannelSection">
             <Channel className="noChannelIcon"/>
             No Channels
           </div>
