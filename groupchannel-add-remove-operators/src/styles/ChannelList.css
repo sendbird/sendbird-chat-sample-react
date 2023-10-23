@@ -1,9 +1,12 @@
-.channel-list {
-    background: white;
+.left-bar {
     flex: 1;
+    background: white;
     border-right: 1px solid #cbcbcb;
-    overflow-y: scroll;
     margin: 10px;
+}
+
+.channel-list {
+    overflow-y: scroll;
     justify-content: center;
 }
 
