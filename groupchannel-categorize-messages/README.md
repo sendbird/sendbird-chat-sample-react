@@ -48,6 +48,7 @@ const confirmUpdate = async (newMessage, newCustomType) => {
 ```
 
 ## How to run
+Copy and paste the following code into Terminal.
 
 ``` bash
 npm install

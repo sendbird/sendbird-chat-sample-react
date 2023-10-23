@@ -65,7 +65,7 @@ const renderMessageList = messageList.map((msg) => {
 
 ## How to run
 
-Copy and paste the following code into Terminal or run it on an emulator to see what the sample looks like.
+Copy and paste the following code into Terminal.
 
 ``` bash
 npm install
