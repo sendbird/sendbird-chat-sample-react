@@ -14,7 +14,7 @@ To streamline the implementation process, a sample Application ID has been provi
 Refer to the following list of code samples and their readme files.
 
 - [Group Channel Add Remove Operators](./groupchannel-add-remove-operators/README.md)
-- ...
+- [Freeze or unfreeze a group channel](./groupchannel-freeze-unfreeze/README.md)
 - ...
 
 ## Security
