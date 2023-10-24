@@ -85,7 +85,7 @@ function MemberInviteModal({sb, isOpen, onRequestClose, onCreate, members = []})
           right: 'auto',
           bottom: 'auto',
           marginRight: '-50%',
-          transform: 'translate(-50%, -50%)',  // 중앙에 위치
+          transform: 'translate(-50%, -50%)',
           padding: '20px',
         }
       }}

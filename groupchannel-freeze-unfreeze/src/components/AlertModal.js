@@ -1,10 +1,10 @@
-import '../styles/ErrorModal.css'
+import '../styles/AlertModal.css'
 
-function ErrorModal({ message, onClose }) {
+function AlertModal({ message, onClose }) {
   return (
     <div className="modal-backdrop">
       <div className="modal-content">
-        <h2>Error</h2>
+        <h2>Alert</h2>
         <div className="modal-message-container">
           <pre className="modal-message">{message}</pre>
         </div>
@@ -14,4 +14,4 @@ function ErrorModal({ message, onClose }) {
   );
 }
 
-export default ErrorModal;
+export default AlertModal;

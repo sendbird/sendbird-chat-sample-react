@@ -5,7 +5,7 @@ import ChannelHeader from '../components/ChannelHeader';
 import MessageInput from '../components/MessageInput';
 import MessageList from '../components/MessageList';
 import ChannelInformation from '../components/ChannelInformation';
-import ErrorModal from "../components/ErrorModal";
+import AlertModal from "../components/AlertModal";
 import '../styles/Chat.css';
 
 export default function Chat({sb, userId}) {
@@ -68,7 +68,7 @@ export default function Chat({sb, userId}) {
 
   return (
     <div className='container'>
-      {isModalVisible && <ErrorModal message={errorMessage} onClose={() => setModalVisible(false)} />}
+      {isModalVisible && <AlertModal message={errorMessage} onClose={() => setModalVisible(false)} />}
       <ChannelList
         sb={sb}
         groupQuery={groupQuery}
