@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to [freeze or unfreeze](https://sendbird.com/docs/chat/sdk/v4/javascript/channel/moderating-a-channel/freeze-and-unfreeze-a-channel#1-freeze-and-unfreeze-a-channel) a group channel on Sendbird Chat SDK for Android. Freezing a group channel is part of moderation. When a channel is frozen, only the [operators](https://sendbird.com/docs/chat/v4/android/user/overview-user#2-user-types-3-operator) can send messages to the channel and users aren't allowed to chat.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/965af1c3-02f7-4937-b0e1-cc3ee9799c98)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
