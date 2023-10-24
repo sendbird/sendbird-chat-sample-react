@@ -1,0 +1,29 @@
+.modal-backdrop {
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 1000px;
+    text-align: center;
+}
+
+.modal-message-container {
+    margin: 40px;
+}
+
+.modal-message {
+    text-align: left;
+}
