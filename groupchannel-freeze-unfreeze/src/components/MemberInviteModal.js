@@ -74,7 +74,7 @@ function MemberInviteModal({sb, isOpen, onRequestClose, onCreate, members = []})
       contentLabel="Invite Members"
       style={{
         overlay: {
-          backgroundColor: 'rgba(0, 0, 0, 0.75)'  // 배경을 약간 어둡게
+          backgroundColor: 'rgba(0, 0, 0, 0.75)'
         },
         content: {
           color: 'lightsteelblue',
@@ -85,7 +85,7 @@ function MemberInviteModal({sb, isOpen, onRequestClose, onCreate, members = []})
           right: 'auto',
           bottom: 'auto',
           marginRight: '-50%',
-          transform: 'translate(-50%, -50%)',  // 중앙에 위치
+          transform: 'translate(-50%, -50%)',
           padding: '20px',
         }
       }}
