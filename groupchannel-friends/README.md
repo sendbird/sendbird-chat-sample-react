@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to add, retrieve, or remove friends in a group channel on Sendbird Chat SDK. In a group channel, the `friend` functionality serves as a tool for the current user to mark other channel members as their favorite.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/6506bb97-7904-440a-895f-9b83270dbca8)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
