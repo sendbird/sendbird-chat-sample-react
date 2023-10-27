@@ -12,7 +12,7 @@ By using `customTypesFilter` property of `MessageFilter`, we can categorize grou
 
 When the user adds a new `customTypeFilter`, reset the messageCollection with updated `customTypeFilter` and messageCollection will update the filtered messages.
 
-Chat.js
+[Chat.js](./src/pages/Chat.js#L33-L51)
 ```javascript
 const filter = new MessageFilter();
 filter.customTypesFilter = [...customTypesFilter, customType]
@@ -37,7 +37,7 @@ setMessageCollection(collection);
 
 User can update the message's `customType` by using `updateUserMessage` or `updateFileMessage` method.
 
-MessageList.js
+[MessageList.js](./src/components/MessageList.js#L34-L39)
 ```javascript
 const confirmUpdate = async (newMessage, newCustomType) => {
   await channel.updateUserMessage(currentMsg.messageId, { message: newMessage, customType: newCustomType });
