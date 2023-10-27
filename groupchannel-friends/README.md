@@ -10,7 +10,9 @@ This code sample with UI components demonstrates how to add, retrieve, or remove
 
 ## How it works
 
-`sb.createFriendListQuery()` creates a query instance for retrieving the list of friends in a group channel. 
+`sb.createFriendListQuery()` creates a query instance for retrieving the list of friends in a group channel.
+
+[FriendsModal.js](./src/components/FriendsModal.js#L75)
 ``` javascript
 const queryParams = { limit: 20 };
 const newQuery = sb.createFriendListQuery(queryParams);
@@ -18,6 +20,8 @@ const userList = await newQuery.next();
 ```
 
 and add/delete friends in a group channel by calling the `sb.addFriends()` and `sb.deleteFriends()` methods.
+
+[FriendsModal.js](./src/components/FriendsModal.js#L48-L59)
 ```javascript
 await sb.addFriends([userId]);
 await sb.deleteFriend(userId);
