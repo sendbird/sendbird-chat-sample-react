@@ -1,0 +1,28 @@
+.channel-list-item {
+    background: #fcfcfc;
+    padding: 12px;
+    border-top: 1px solid #ececec;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 42px;
+}
+
+.channel-list-item:hover {
+    background: #f0f0f0;
+}
+
+.channel-list-item-name {
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    max-width: 75ch;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.control-button {
+    padding: 4px;
+    margin-right: 1px;
+}
