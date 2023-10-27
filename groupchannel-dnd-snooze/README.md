@@ -10,7 +10,7 @@ This code sample with UI components demonstrates how to use [Do Not Disturb (DND
 
 Do Not Disturb (DND) and snooze are part of the notification settings used to block notifications from a specific channel or a group of channels for a set period of time.
 
-ChannelList.js
+[ChannelList.js](./src/components/ChannelList.js#L29-L50)
 ``` javascript
 if (selectedItem === "DND") {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
