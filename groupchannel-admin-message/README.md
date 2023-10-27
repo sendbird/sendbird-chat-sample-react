@@ -2,6 +2,8 @@
 
 This sample with UI components demonstrates how to handle [Admin messages](https://sendbird.com/docs/chat/v3/platform-api/message/message-overview#2-message-types) in a group channel on Sendbird Chat SDK for Javascript. Admin messages can be sent through [Sendbird Dashboard](https://dashboard.sendbird.com) or a [Platform API request](https://sendbird.com/docs/chat/v3/platform-api/message/messaging-basics/send-a-message#1-send-a-message), not on the SDK.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/af768660-7f8c-4fc9-b874-ca0b8a3543a4)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
