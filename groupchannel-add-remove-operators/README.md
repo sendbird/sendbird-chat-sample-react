@@ -9,6 +9,8 @@ Operators are users who can moderate channels by muting or banning users as well
 
 ## How it works
 
+By using `addOperators`/`addOperatorsWithUserIds` and `removeOperators`/`removeOperatorsWithUserIds` methods of `GroupChannel`, we can add and remove an operator in a group channel.
+
 [ChannelInformation.js](./src/components/ChannelInformation.js#L26-L42)
 ```javascript
 useEffect(() => {
