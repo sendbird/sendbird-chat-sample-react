@@ -9,70 +9,62 @@ Operators are users who can moderate channels by muting or banning users as well
 
 ## How it works
 
-By using `banUser`/`banUserWithUserId` and `unbanUser`/`unbanUserWithUserId` methods of `GroupChannel`, we can ban and unban a user in a group channel. 
-
 ChannelInformation.js
 ```javascript
-const banUser = async (userId) => {
+useEffect(() => {
+  const ops = members.filter(member => member.role === 'operator');
+  setOperators(ops);
+}, [members]);
+
+const addOperator = async (userId) => {
   if (userId.trim() !== "") {
-    await channel.banUserWithUserId(userId);
+    await channel.addOperators([userId]);
+    const updatedOperators = [...operators, members.find(m => m.userId === userId)];
+    setOperators(updatedOperators);
   }
-  setBanUserModalModalOpen(false);
+  setAddingOperatorModalOpen(false);
 };
 
-const unbanUser = async (userId) => {
-  await channel.unbanUserWithUserId(userId);
+const removeOperator = async (userId) => {
+  await channel.removeOperators([userId]);
+  const updatedOperators = operators.filter(op => op.userId !== userId);
+  setOperators(updatedOperators);
 };
 
 <ConfirmationModal
-  isOpen={isBanUserModalOpen}
-  onRequestClose={handleBanUserCloseModal}
-  onConfirm={banUser}
-  title="Ban user"
+  isOpen={isAddingOperatorModalOpen}
+  onRequestClose={handleAddingOperatorCloseModal}
+  onConfirm={addOperator}
+  title="Add a operator"
   message={""}
   isUpdateMessage={true}
 />
 
 <AccordionItem
   Icon={Members}
-  title="Ban Users"
-  onActionBtnClick={() => setBanUserModalModalOpen(true)}
-  actionBtnLabel="Ban User"
+  title="Operators"
+  onActionBtnClick={() => setAddingOperatorModalOpen(true)}
+  actionBtnLabel="Add Operator"
 >
-  {bannedUsers.map((ban) => (
-    <div className="member-item" key={ban.userId}>
-      {ban.nickname}({ban.userId})
-      <Close onClick={() => unbanUser(ban.userId)} className="close-icon"/>
+  {operators.map((operator) => (
+    <div className="member-item" key={operator.userId}>
+      {operator.nickname}({operator.userId})
+      <Close onClick={() => removeOperator(operator.userId)} className="close-icon"/>
     </div>
   ))}
 </AccordionItem>
 ```
 
-When the user is banned or unbanned, channel event(`onUserBanned`, `onUserUnbanned`) handler is triggered and the `ChannelInformation` component is re-rendered.
+When the operator status of the member is changed, channel event(`onOperatorUpdated`) handler is triggered and the `ChannelInformation` component is re-rendered.
 
 ChannelList.js
 ```javascript
 const channelHandler = new GroupChannelHandler({
-  onUserBanned: (channel, user) => {
-    if (user.userId === sb.currentUser.userId) {
-      setChannel(null);
-      setChannelHeaderName('');
-      setMessageList([]);
-      setMembers([]);
-    }else if (_channel.url === channel.url) {
-      setMembers((currentMemberList) => currentMemberList.filter((m) => m.userId !== user.userId));
-      retrieveBannedUsers(_channel).then((bannedUsers) => {
-        setBannedUsers(bannedUsers);
-      });
-    }
-  },
-  onUserUnbanned: (channel, user) => {
+  onOperatorUpdated: (channel) => {
     if (_channel.url === channel.url) {
-      retrieveBannedUsers(_channel).then((bannedUsers) => {
-        setBannedUsers(bannedUsers);
-      });
+      setMembers([...channel.members]);
     }
-  },
+  }
 });
 ```
 
