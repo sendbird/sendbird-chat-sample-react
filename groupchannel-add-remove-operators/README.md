@@ -9,7 +9,7 @@ Operators are users who can moderate channels by muting or banning users as well
 
 ## How it works
 
-ChannelInformation.js
+[ChannelInformation.js](./src/components/ChannelInformation.js#L26-L42)
 ```javascript
 useEffect(() => {
   const ops = members.filter(member => member.role === 'operator');
@@ -57,7 +57,7 @@ const removeOperator = async (userId) => {
 
 When the operator status of the member is changed, channel event(`onOperatorUpdated`) handler is triggered and the `ChannelInformation` component is re-rendered.
 
-ChannelList.js
+[ChannelList.js](./src/components/ChannelList.js#L114-L118)
 ```javascript
 const channelHandler = new GroupChannelHandler({
   onOperatorUpdated: (channel) => {
