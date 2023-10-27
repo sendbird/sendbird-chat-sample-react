@@ -10,7 +10,7 @@ This sample app demonstrates how to categorize group channels in Sendbird Chat S
 
 By using `customType` property of `GroupChannelParams`, we can categorize group channels.
 
-Chat.js
+[Chat.js](./src/pages/Chat.js#L33-L57)
 ```javascript
 const groupQuery = useRef(null);
 
