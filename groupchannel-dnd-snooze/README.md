@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to use [Do Not Disturb (DND) and snooze](https://sendbird.com/docs/chat/sdk/v4/javascript/push-notifications/configuring-preferences/push-notification-preferences#2-do-not-disturb) functionalities in a group channel on Sendbird Chat SDK for Javascript. While the DND mode mutes notifications from the SDK for a set period and repeats on a daily basis, snoozing blocks notifications for a set period and does not repeat.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/7421d3c6-f0a3-4910-9da8-497360cc0f80)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
