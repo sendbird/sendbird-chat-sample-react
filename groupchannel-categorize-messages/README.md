@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to categorize messages in a group channel using customType on Sendbird Chat SDK for React. You can use the customType value as a filter when getting messages.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/89751c04-26a3-4081-8f7b-4dc971a24312)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
