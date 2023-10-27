@@ -2,6 +2,8 @@
 
 This sample app demonstrates how to categorize group channels in Sendbird Chat SDK using `customType`.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/e6a80267-d5c1-403a-b52d-790e00ac79de)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
