@@ -3,6 +3,8 @@
 This sample with UI components demonstrates how to add and remove an operator in a group channel on Sendbird Chat SDK for JavaScript on React.
 Operators are users who can moderate channels by muting or banning users as well as freezing channels. To learn more, see our documentation on operators
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/e9bc5059-caa8-4ac1-b7b8-ae77ba75d1ec)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
