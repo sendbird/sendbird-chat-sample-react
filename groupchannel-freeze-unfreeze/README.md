@@ -12,7 +12,7 @@ This code sample with UI components demonstrates how to [freeze or unfreeze](htt
 
 You can freeze or unfreeze a group channel by calling the `freeze()` and `unfreeze()` methods.
 
-ChannelInformation.js
+[ChannelInformation.js](./src/components/ChannelInformation.js#L99-L103)
 ```javascript
 if (isFrozen) {
   await channel.unfreeze();
@@ -23,7 +23,7 @@ if (isFrozen) {
 
 And you can receive the event when the channel is frozen or unfrozen by adding a `ChannelHandler` to the channel.
 
-ChannelList.js
+[ChannelList.js](./src/components/ChannelList.js#L115-L124)
 ```javascript
 const channelHandler = new GroupChannelHandler({
   onChannelFrozen: (channel) => {
