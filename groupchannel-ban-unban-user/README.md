@@ -3,6 +3,8 @@
 This sample with UI components demonstrates how to ban and unban a user in a group channel on Sendbird Chat SDK for JavaScript on React.
 Banned users cannot send messages and exit the channel. to the channel. To learn more, see our documentation on [Ban and unban a user users](https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/ban-and-unban-a-user).
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/6d041712-93d6-4b56-a1c9-45fdfa14c6bb)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
