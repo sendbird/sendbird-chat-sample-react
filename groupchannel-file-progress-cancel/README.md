@@ -2,6 +2,8 @@
 
 This sample with UI components demonstrates how to cancel an in-progress file upload in a group channel on Sendbird Chat SDK.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/95ecc64c-cd26-48ec-abe6-3b5099dbbdaf)
+
 ## Prerequisites
 
 + Node.js v10.13.0 or later
