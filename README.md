@@ -14,7 +14,15 @@ To streamline the implementation process, a sample Application ID has been provi
 Refer to the following list of code samples and their readme files.
 
 - [Group Channel Add Remove Operators](./groupchannel-add-remove-operators/README.md)
-- [Freeze or unfreeze a group channel](./groupchannel-freeze-unfreeze/README.md)
+- [Group Channel Admin Message](./groupchannel-admin-message/README.md)
+- [Group Channel Ban Unban User](./groupchannel-ban-unban-user/README.md)
+- [Group Channel Categorize Channels](./groupchannel-categorize-channels/README.md)
+- [Group Channel Categorize Messages](./groupchannel-categorize-messages/README.md)
+- [Group Channel Dnd Snooze](./groupchannel-dnd-snooze/README.md)
+- [Group Channel File Progress Cancel](./groupchannel-file-progress-cancel/README.md)
+- [Group Channel Freeze Unfreeze](./groupchannel-freeze-unfreeze/README.md)
+- [Group Channel Friends](./groupchannel-friends/README.md)
+- [Group Channel Hide Archive](./groupchannel-hide-archive/README.md)
 - ...
 
 ## Security
