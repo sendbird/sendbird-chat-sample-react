@@ -41,6 +41,7 @@ function MessageInput({sb, channel, messageList, setMessageList}) {
           console.log("failed")
         });
     }
+    e.currentTarget.value = null;
   }
 
   function sendMessage(messageText) {
