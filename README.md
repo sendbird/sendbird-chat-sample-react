@@ -2,6 +2,8 @@
 
 This repository contains code samples in React, showcasing the key functionalities provided by Sendbird Chat SDK for Javascript. Each sample has a dedicated readme file briefing how the feature works on the code level. To learn more, see our [documentation for Javascript](https://sendbird.com/docs/chat/v4/javascript/overview).
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-react/assets/104121286/530b93db-ca32-4ab7-99d9-614d27e3d5bd)
+
 ## Prerequisites
 + Node.js v10.13.0 or later
 
