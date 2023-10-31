@@ -1,0 +1,35 @@
+.accordion-item-header {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.accordion-item-header-content {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 10px;
+}
+
+.right-arrow {
+    width: 1.5em;
+    height: 1.5em;
+    transition: transform 0.3s ease;
+}
+
+.open .right-arrow {
+    transform: rotate(90deg);
+}
+
+.accordion-item-content {
+    padding-left: 20px;
+}
+
+.button {
+    margin-top: 10px;
+    cursor: pointer;
+}
