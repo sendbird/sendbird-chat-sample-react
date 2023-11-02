@@ -1,20 +1,19 @@
-
-import { useState, useEffect, useRef } from 'react';
-import { v4 as uuid } from 'uuid';
-import SendbirdChat from '@sendbird/chat';
+import SendbirdChat from '@sendbird/chat'
 import {
-    GroupChannelModule,
     GroupChannelFilter,
     GroupChannelListOrder,
+    GroupChannelModule,
+    MessageCollectionInitPolicy,
     MessageFilter,
-    MessageCollectionInitPolicy
-} from '@sendbird/chat/groupChannel';
+} from '@sendbird/chat/groupChannel'
+import { useContext, useEffect, useRef, useState } from 'react'
 
-import { SENDBIRD_INFO } from '../constants/constants';
-import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
-let sb;
+import { GlobalContext } from '../GlobalProvider'
+import { handleEnterPress, timestampToTime } from '../utils/messageUtils'
+let sb
 
 const GroupChannelFreezeUnfreeze = (props) => {
+    const { appId } = useContext(GlobalContext)
 
     const [state, updateState] = useState({
         applicationUsers: [],
@@ -22,96 +21,100 @@ const GroupChannelFreezeUnfreeze = (props) => {
         currentlyJoinedChannel: null,
         messages: [],
         channels: [],
-        messageInputValue: "",
-        userNameInputValue: "",
-        userIdInputValue: "",
-        channelNameUpdateValue: "",
+        messageInputValue: '',
+        userNameInputValue: '',
+        userIdInputValue: '',
+        channelNameUpdateValue: '',
         settingUpUser: true,
         file: null,
         messageToUpdate: null,
         messageCollection: null,
         loading: false,
-        error: false
-    });
+        error: false,
+    })
 
     //need to access state in message received callback
-    const stateRef = useRef();
-    stateRef.current = state;
+    const stateRef = useRef()
+    stateRef.current = state
 
-    const channelRef = useRef();
+    const channelRef = useRef()
 
     const channelHandlers = {
         onChannelsAdded: (context, channels) => {
-            const updatedChannels = [...channels, ...stateRef.current.channels];
-            updateState({ ...stateRef.current, channels: updatedChannels, applicationUsers: [] });
+            const updatedChannels = [...channels, ...stateRef.current.channels]
+            updateState({
+                ...stateRef.current,
+                channels: updatedChannels,
+                applicationUsers: [],
+            })
         },
         onChannelsDeleted: (context, channels) => {
-            const updatedChannels = stateRef.current.channels.filter((channel) => {
-                return !channels.includes(channel.url);
-            });
-            updateState({ ...stateRef.current, channels: updatedChannels });
-
+            const updatedChannels = stateRef.current.channels.filter(
+                (channel) => {
+                    return !channels.includes(channel.url)
+                }
+            )
+            updateState({ ...stateRef.current, channels: updatedChannels })
         },
         onChannelsUpdated: (context, channels) => {
             const updatedChannels = stateRef.current.channels.map((channel) => {
-                const updatedChannel = channels.find(incomingChannel => incomingChannel.url === channel.url);
+                const updatedChannel = channels.find(
+                    (incomingChannel) => incomingChannel.url === channel.url
+                )
                 if (updatedChannel) {
-                    return updatedChannel;
+                    return updatedChannel
                 } else {
-                    return channel;
+                    return channel
                 }
-            });
+            })
 
-            updateState({ ...stateRef.current, channels: updatedChannels });
+            updateState({ ...stateRef.current, channels: updatedChannels })
         },
     }
 
     const messageHandlers = {
         onMessagesAdded: (context, channel, messages) => {
-            const updatedMessages = [...stateRef.current.messages, ...messages];
+            const updatedMessages = [...stateRef.current.messages, ...messages]
 
-            updateState({ ...stateRef.current, messages: updatedMessages });
-
+            updateState({ ...stateRef.current, messages: updatedMessages })
         },
         onMessagesUpdated: (context, channel, messages) => {
-            const updatedMessages = [...stateRef.current.messages];
+            const updatedMessages = [...stateRef.current.messages]
             for (let i in messages) {
-                const incomingMessage = messages[i];
-                const indexOfExisting = stateRef.current.messages.findIndex(message => {
-                    return incomingMessage.reqId === message.reqId;
-                });
+                const incomingMessage = messages[i]
+                const indexOfExisting = stateRef.current.messages.findIndex(
+                    (message) => {
+                        return incomingMessage.reqId === message.reqId
+                    }
+                )
 
                 if (indexOfExisting !== -1) {
-                    updatedMessages[indexOfExisting] = incomingMessage;
+                    updatedMessages[indexOfExisting] = incomingMessage
                 }
                 if (!incomingMessage.reqId) {
-                    updatedMessages.push(incomingMessage);
+                    updatedMessages.push(incomingMessage)
                 }
             }
 
-
-            updateState({ ...stateRef.current, messages: updatedMessages });
+            updateState({ ...stateRef.current, messages: updatedMessages })
         },
         onMessagesDeleted: (context, channel, messageIds) => {
-            const updateMessages = stateRef.current.messages.filter((message) => {
-                return !messageIds.includes(message.messageId);
-            });
-            updateState({ ...stateRef.current, messages: updateMessages });
-
+            const updateMessages = stateRef.current.messages.filter(
+                (message) => {
+                    return !messageIds.includes(message.messageId)
+                }
+            )
+            updateState({ ...stateRef.current, messages: updateMessages })
         },
-        onChannelUpdated: (context, channel) => {
-
-        },
-        onChannelDeleted: (context, channelUrl) => {
-        },
-        onHugeGapDetected: () => {
-        }
+        onChannelUpdated: (context, channel) => {},
+        onChannelDeleted: (context, channelUrl) => {},
+        onHugeGapDetected: () => {},
     }
 
     const scrollToBottom = (item, smooth) => {
         item?.scrollTo({
             top: item.scrollHeight,
-            behavior: smooth
+            behavior: smooth,
         })
     }
 
@@ -124,193 +127,243 @@ const GroupChannelFreezeUnfreeze = (props) => {
     }, [state.messages])
 
     const onError = (error) => {
-        updateState({ ...state, error: error.message });
-        console.log(error);
+        updateState({ ...state, error: error.message })
+        console.log(error)
     }
 
     const handleJoinChannel = async (channelUrl) => {
         if (state.messageCollection && state.messageCollection.dispose) {
-            state.messageCollection?.dispose();
+            state.messageCollection?.dispose()
         }
 
         if (state.currentlyJoinedChannel?.url === channelUrl) {
-            return null;
+            return null
         }
-        const { channels } = state;
-        updateState({ ...state, loading: true });
-        const channel = channels.find((channel) => channel.url === channelUrl);
+        const { channels } = state
+        updateState({ ...state, loading: true })
+        const channel = channels.find((channel) => channel.url === channelUrl)
 
         const onCacheResult = (err, messages) => {
-            updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
-
+            updateState({
+                ...stateRef.current,
+                currentlyJoinedChannel: channel,
+                messages: messages.reverse(),
+                loading: false,
+            })
         }
 
         const onApiResult = (err, messages) => {
-            updateState({ ...stateRef.current, currentlyJoinedChannel: channel, messages: messages.reverse(), loading: false })
+            updateState({
+                ...stateRef.current,
+                currentlyJoinedChannel: channel,
+                messages: messages.reverse(),
+                loading: false,
+            })
         }
 
-        const collection = loadMessages(channel, messageHandlers, onCacheResult, onApiResult);
+        const collection = loadMessages(
+            channel,
+            messageHandlers,
+            onCacheResult,
+            onApiResult
+        )
 
-        updateState({ ...state, messageCollection: collection });
+        updateState({ ...state, messageCollection: collection })
     }
 
     const handleLeaveChannel = async () => {
-        const { currentlyJoinedChannel } = state;
-        await currentlyJoinedChannel.leave();
+        const { currentlyJoinedChannel } = state
+        await currentlyJoinedChannel.leave()
 
         updateState({ ...state, currentlyJoinedChannel: null })
     }
 
     const handleFreezeChannel = async () => {
-        const { currentlyJoinedChannel } = state;
+        const { currentlyJoinedChannel } = state
         if (state.userIdInputValue == currentlyJoinedChannel?.creator.userId) {
             if (!currentlyJoinedChannel?.isFrozen) {
-                await currentlyJoinedChannel.freeze();
+                await currentlyJoinedChannel.freeze()
             } else {
-                await currentlyJoinedChannel.unfreeze();
+                await currentlyJoinedChannel.unfreeze()
             }
         } else {
-            return null;
+            return null
         }
 
         updateState({ ...state, currentlyJoinedChannel })
     }
 
-    const handleCreateChannel = async (channelName = "testChannel",) => {
-        const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers);
+    const handleCreateChannel = async (channelName = 'testChannel') => {
+        const [groupChannel, error] = await createChannel(
+            channelName,
+            state.groupChannelMembers
+        )
         if (error) {
-            return onError(error);
+            return onError(error)
         }
     }
 
     const handleUpdateChannelMembersList = async () => {
-        const { currentlyJoinedChannel, groupChannelMembers } = state;
-        await inviteUsersToChannel(currentlyJoinedChannel, groupChannelMembers);
-        updateState({ ...state, applicationUsers: [] });
+        const { currentlyJoinedChannel, groupChannelMembers } = state
+        await inviteUsersToChannel(currentlyJoinedChannel, groupChannelMembers)
+        updateState({ ...state, applicationUsers: [] })
     }
 
     const handleDeleteChannel = async (channelUrl) => {
-        const [channel, error] = await deleteChannel(channelUrl);
+        const [channel, error] = await deleteChannel(channelUrl)
         if (error) {
-            return onError(error);
+            return onError(error)
         }
-
     }
 
     const handleMemberInvite = async () => {
-        const [users, error] = await getAllApplicationUsers();
+        const [users, error] = await getAllApplicationUsers()
         if (error) {
-            return onError(error);
+            return onError(error)
         }
-        updateState({ ...state, applicationUsers: users });
+        updateState({ ...state, applicationUsers: users })
     }
 
     const onUserNameInputChange = (e) => {
-        const userNameInputValue = e.currentTarget.value;
-        updateState({ ...state, userNameInputValue });
+        const userNameInputValue = e.currentTarget.value
+        updateState({ ...state, userNameInputValue })
     }
 
     const onUserIdInputChange = (e) => {
-        const userIdInputValue = e.currentTarget.value;
-        updateState({ ...state, userIdInputValue });
+        const userIdInputValue = e.currentTarget.value
+        updateState({ ...state, userIdInputValue })
     }
 
     const onMessageInputChange = (e) => {
-        const messageInputValue = e.currentTarget.value;
-        updateState({ ...state, messageInputValue });
+        const messageInputValue = e.currentTarget.value
+        updateState({ ...state, messageInputValue })
     }
 
     const sendMessage = async () => {
-        const { messageToUpdate, currentlyJoinedChannel, messages } = state;
+        const { messageToUpdate, currentlyJoinedChannel, messages } = state
 
         if (!currentlyJoinedChannel?.isFrozen) {
             if (messageToUpdate) {
-                const userMessageUpdateParams = {};
-                userMessageUpdateParams.message = state.messageInputValue;
-                const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
-                const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
-                messages[messageIndex] = updatedMessage;
-                updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
+                const userMessageUpdateParams = {}
+                userMessageUpdateParams.message = state.messageInputValue
+                const updatedMessage =
+                    await currentlyJoinedChannel.updateUserMessage(
+                        messageToUpdate.messageId,
+                        userMessageUpdateParams
+                    )
+                const messageIndex = messages.findIndex(
+                    (item) => item.messageId == messageToUpdate.messageId
+                )
+                messages[messageIndex] = updatedMessage
+                updateState({
+                    ...state,
+                    messages: messages,
+                    messageInputValue: '',
+                    messageToUpdate: null,
+                })
             } else {
-                const userMessageParams = {};
-                userMessageParams.message = state.messageInputValue;
-                currentlyJoinedChannel.sendUserMessage(userMessageParams)
+                const userMessageParams = {}
+                userMessageParams.message = state.messageInputValue
+                currentlyJoinedChannel
+                    .sendUserMessage(userMessageParams)
                     .onSucceeded((message) => {
-                        updateState({ ...stateRef.current, messageInputValue: "" });
+                        updateState({
+                            ...stateRef.current,
+                            messageInputValue: '',
+                        })
                     })
                     .onFailed((error) => {
                         console.log(error)
-                        console.log("failed")
-                    });
+                        console.log('failed')
+                    })
             }
         } else {
-            return null;
+            return null
         }
     }
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            const { currentlyJoinedChannel, messages } = state;
-            const fileMessageParams = {};
-            fileMessageParams.file = e.currentTarget.files[0];
-            currentlyJoinedChannel.sendFileMessage(fileMessageParams)
+            const { currentlyJoinedChannel, messages } = state
+            const fileMessageParams = {}
+            fileMessageParams.file = e.currentTarget.files[0]
+            currentlyJoinedChannel
+                .sendFileMessage(fileMessageParams)
                 .onSucceeded((message) => {
-                    updateState({ ...stateRef.current, messageInputValue: "", file: null });
+                    updateState({
+                        ...stateRef.current,
+                        messageInputValue: '',
+                        file: null,
+                    })
                 })
                 .onFailed((error) => {
                     console.log(error)
-                    console.log("failed")
-                });
+                    console.log('failed')
+                })
         }
     }
 
     const handleDeleteMessage = async (messageToDelete) => {
-        const { currentlyJoinedChannel } = state;
-        await deleteMessage(currentlyJoinedChannel, messageToDelete); // Delete
+        const { currentlyJoinedChannel } = state
+        await deleteMessage(currentlyJoinedChannel, messageToDelete) // Delete
     }
 
     const updateMessage = async (message) => {
-        updateState({ ...state, messageToUpdate: message, messageInputValue: message.message });
+        updateState({
+            ...state,
+            messageToUpdate: message,
+            messageInputValue: message.message,
+        })
     }
 
     const handleLoadMemberSelectionList = async () => {
-        updateState({ ...state, currentlyJoinedChannel: null });
-        const [users, error] = await getAllApplicationUsers();
+        updateState({ ...state, currentlyJoinedChannel: null })
+        const [users, error] = await getAllApplicationUsers()
         if (error) {
-            return onError(error);
+            return onError(error)
         }
-        updateState({ ...state, currentlyJoinedChannel: null, applicationUsers: users, groupChannelMembers: [sb.currentUser.userId] });
+        updateState({
+            ...state,
+            currentlyJoinedChannel: null,
+            applicationUsers: users,
+            groupChannelMembers: [sb.currentUser.userId],
+        })
     }
 
     const addToChannelMembersList = (userId) => {
-        const groupChannelMembers = [...state.groupChannelMembers, userId];
-        updateState({ ...state, groupChannelMembers: groupChannelMembers });
+        const groupChannelMembers = [...state.groupChannelMembers, userId]
+        updateState({ ...state, groupChannelMembers: groupChannelMembers })
     }
 
     const setupUser = async () => {
-        const { userNameInputValue, userIdInputValue } = state;
+        const { userNameInputValue, userIdInputValue } = state
         const sendbirdChat = await SendbirdChat.init({
-            appId: SENDBIRD_INFO.appId,
+            appId,
             localCacheEnabled: true,
-            modules: [new GroupChannelModule()]
-        });
+            modules: [new GroupChannelModule()],
+        })
 
-        await sendbirdChat.connect(userIdInputValue);
-        await sendbirdChat.setChannelInvitationPreference(true);
+        await sendbirdChat.connect(userIdInputValue)
+        await sendbirdChat.setChannelInvitationPreference(true)
 
-        const userUpdateParams = {};
-        userUpdateParams.nickname = userNameInputValue;
-        userUpdateParams.userId = userIdInputValue;
-        await sendbirdChat.updateCurrentUserInfo(userUpdateParams);
+        const userUpdateParams = {}
+        userUpdateParams.nickname = userNameInputValue
+        userUpdateParams.userId = userIdInputValue
+        await sendbirdChat.updateCurrentUserInfo(userUpdateParams)
 
-        sb = sendbirdChat;
-        updateState({ ...state, loading: true });
-        const [channels, error] = await loadChannels(channelHandlers);
+        sb = sendbirdChat
+        updateState({ ...state, loading: true })
+        const [channels, error] = await loadChannels(channelHandlers)
         if (error) {
-            return onError(error);
+            return onError(error)
         }
 
-        updateState({ ...state, channels: channels, loading: false, settingUpUser: false });
+        updateState({
+            ...state,
+            channels: channels,
+            loading: false,
+            settingUpUser: false,
+        })
     }
 
     if (state.loading) {
@@ -318,11 +371,15 @@ const GroupChannelFreezeUnfreeze = (props) => {
     }
 
     if (state.error) {
-        return <div className="error">{state.error} check console for more information.</div>
+        return (
+            <div className="error">
+                {state.error} check console for more information.
+            </div>
+        )
     }
 
-    console.log('- - - - State object very useful for debugging - - - -');
-    console.log(state);
+    console.log('- - - - State object very useful for debugging - - - -')
+    console.log(state)
 
     return (
         <>
@@ -332,13 +389,15 @@ const GroupChannelFreezeUnfreeze = (props) => {
                 userIdInputValue={state.userIdInputValue}
                 settingUpUser={state.settingUpUser}
                 onUserIdInputChange={onUserIdInputChange}
-                onUserNameInputChange={onUserNameInputChange} />
+                onUserNameInputChange={onUserNameInputChange}
+            />
             <ChannelList
                 channels={state.channels}
                 handleJoinChannel={handleJoinChannel}
                 handleCreateChannel={handleLoadMemberSelectionList}
                 handleDeleteChannel={handleDeleteChannel}
-                handleLoadMemberSelectionList={handleLoadMemberSelectionList} />
+                handleLoadMemberSelectionList={handleLoadMemberSelectionList}
+            />
             <MembersSelect
                 applicationUsers={state.applicationUsers}
                 groupChannelMembers={state.groupChannelMembers}
@@ -360,165 +419,258 @@ const GroupChannelFreezeUnfreeze = (props) => {
                     handleDeleteMessage={handleDeleteMessage}
                     updateMessage={updateMessage}
                 />
-                {state.currentlyJoinedChannel?.isFrozen || <MessageInput
-                    value={state.messageInputValue}
-                    onChange={onMessageInputChange}
-                    sendMessage={sendMessage}
-                    fileSelected={state.file}
-                    onFileInputChange={onFileInputChange}
-                />}
+                {state.currentlyJoinedChannel?.isFrozen || (
+                    <MessageInput
+                        value={state.messageInputValue}
+                        onChange={onMessageInputChange}
+                        sendMessage={sendMessage}
+                        fileSelected={state.file}
+                        onFileInputChange={onFileInputChange}
+                    />
+                )}
             </Channel>
             <MembersList
                 channel={state.currentlyJoinedChannel}
                 handleMemberInvite={handleMemberInvite}
             />
         </>
-    );
-};
+    )
+}
 
 // Chat UI Components
 const ChannelList = ({
     channels,
     handleJoinChannel,
     handleDeleteChannel,
-    handleLoadMemberSelectionList
+    handleLoadMemberSelectionList,
 }) => {
     return (
-        <div className='channel-list'>
+        <div className="channel-list">
             <div className="channel-type">
                 <h1>Group Channels</h1>
-                <button className="channel-create-button" onClick={() => handleLoadMemberSelectionList()}>Create Channel</button>
+                <button
+                    className="channel-create-button"
+                    onClick={() => handleLoadMemberSelectionList()}
+                >
+                    Create Channel
+                </button>
             </div>
-            {channels.map(channel => {
+            {channels.map((channel) => {
                 return (
-                    <div key={channel.url} className="channel-list-item" >
+                    <div key={channel.url} className="channel-list-item">
                         <div
                             className="channel-list-item-name"
-                            onClick={() => { handleJoinChannel(channel.url) }}
+                            onClick={() => {
+                                handleJoinChannel(channel.url)
+                            }}
                         >
                             <ChannelName members={channel.members} />
-                            <div className="last-message">{channel.lastMessage?.message}</div>
+                            <div className="last-message">
+                                {channel.lastMessage?.message}
+                            </div>
                         </div>
                         <div>
-                            {channel.isFrozen && <img className="frozen-icon" src='/icon_freeze.png' />}
+                            {channel.isFrozen && (
+                                <img
+                                    className="frozen-icon"
+                                    src="/icon_freeze.png"
+                                />
+                            )}
                         </div>
                         <div>
-                            <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                <img className="channel-icon" src='/icon_delete.png' />
+                            <button
+                                className="control-button"
+                                onClick={() => handleDeleteChannel(channel.url)}
+                            >
+                                <img
+                                    className="channel-icon"
+                                    src="/icon_delete.png"
+                                />
                             </button>
                         </div>
                     </div>
-                );
+                )
             })}
         </div>
-    );
+    )
 }
 
 const ChannelName = ({ members }) => {
-    const membersToDisplay = members.slice(0, 2);
-    const membersNotToDisplay = members.slice(2);
+    const membersToDisplay = members.slice(0, 2)
+    const membersNotToDisplay = members.slice(2)
 
-    return <>
-        {membersToDisplay.map((member) => {
-            return <span key={member.userId}>{member.nickname} </span>
-        })}
-        {membersNotToDisplay.length > 0 && `+ ${membersNotToDisplay.length}`}
-    </>
+    return (
+        <>
+            {membersToDisplay.map((member) => {
+                return <span key={member.userId}>{member.nickname} </span>
+            })}
+            {membersNotToDisplay.length > 0 &&
+                `+ ${membersNotToDisplay.length}`}
+        </>
+    )
 }
 
-const Channel = ({ userIdInputValue, currentlyJoinedChannel, children, handleLeaveChannel, handleFreezeChannel, channelRef }) => {
+const Channel = ({
+    userIdInputValue,
+    currentlyJoinedChannel,
+    children,
+    handleLeaveChannel,
+    handleFreezeChannel,
+    channelRef,
+}) => {
     if (currentlyJoinedChannel) {
-        return <div className="channel" ref={channelRef}>
-            <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
-            <div className="channel-controls">
-                <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
-                {currentlyJoinedChannel?.creator.userId == userIdInputValue &&
-                    <div className="freeze-channel">
-                        Freeze channel
-                        <input type="checkbox" onChange={handleFreezeChannel} checked={currentlyJoinedChannel?.isFrozen} />
-                    </div>
-                }
+        return (
+            <div className="channel" ref={channelRef}>
+                <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
+                <div className="channel-controls">
+                    <button
+                        className="leave-channel"
+                        onClick={handleLeaveChannel}
+                    >
+                        Leave Channel
+                    </button>
+                    {currentlyJoinedChannel?.creator.userId ==
+                        userIdInputValue && (
+                        <div className="freeze-channel">
+                            Freeze channel
+                            <input
+                                type="checkbox"
+                                onChange={handleFreezeChannel}
+                                checked={currentlyJoinedChannel?.isFrozen}
+                            />
+                        </div>
+                    )}
+                </div>
+                <div>{children}</div>
             </div>
-            <div>{children}</div>
-        </div>;
+        )
     }
-    return <div className="channel"></div>;
+    return <div className="channel"></div>
 }
 
 const ChannelHeader = ({ children }) => {
-    return <div className="channel-header">{children}</div>;
+    return <div className="channel-header">{children}</div>
 }
 
 const MembersList = ({ channel, handleMemberInvite }) => {
     if (channel) {
-        return <div className="members-list">
-            <button onClick={handleMemberInvite}>Invite</button>
-            {channel.members.map((member) =>
-                <div className="member-item" key={member.userId}>{member.nickname}</div>
-            )}
-        </div>;
+        return (
+            <div className="members-list">
+                <button onClick={handleMemberInvite}>Invite</button>
+                {channel.members.map((member) => (
+                    <div className="member-item" key={member.userId}>
+                        {member.nickname}
+                    </div>
+                ))}
+            </div>
+        )
     } else {
-        return null;
+        return null
     }
 }
 
 const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
-    return <div className="message-list">
-        {messages.map(message => {
-            if (!message.sender) return null;
-            const messageSentByYou = message.sender.userId === sb.currentUser.userId;
-            return (
-                <div key={message.messageId} className={`message-item ${messageSentByYou ? 'message-from-you' : ''}`}>
-                    <Message
-                        message={message}
-                        handleDeleteMessage={handleDeleteMessage}
-                        updateMessage={updateMessage}
-                        messageSentByYou={messageSentByYou} />
-                    <ProfileImage user={message.sender} />
-                </div>
-            );
-        })}
-    </div>
+    return (
+        <div className="message-list">
+            {messages.map((message) => {
+                if (!message.sender) return null
+                const messageSentByYou =
+                    message.sender.userId === sb.currentUser.userId
+                return (
+                    <div
+                        key={message.messageId}
+                        className={`message-item ${
+                            messageSentByYou ? 'message-from-you' : ''
+                        }`}
+                    >
+                        <Message
+                            message={message}
+                            handleDeleteMessage={handleDeleteMessage}
+                            updateMessage={updateMessage}
+                            messageSentByYou={messageSentByYou}
+                        />
+                        <ProfileImage user={message.sender} />
+                    </div>
+                )
+            })}
+        </div>
+    )
 }
 
-const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou }) => {
+const Message = ({
+    message,
+    updateMessage,
+    handleDeleteMessage,
+    messageSentByYou,
+}) => {
     if (message.url) {
         return (
-            <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+            <div
+                className={`message  ${
+                    messageSentByYou ? 'message-from-you' : ''
+                }`}
+            >
                 <div className="message-user-info">
-                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div className="message-sender-name">
+                        {message.sender.nickname}{' '}
+                    </div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
                 <img src={message.url} />
             </div>
-        );
+        )
     }
-    const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
+    const messageSentByCurrentUser =
+        message.sender.userId === sb.currentUser.userId
 
     return (
-        <div className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}>
+        <div
+            className={`message  ${messageSentByYou ? 'message-from-you' : ''}`}
+        >
             <div className="message-info">
                 <div className="message-user-info">
-                    <div className="message-sender-name">{message.sender.nickname}{' '}</div>
+                    <div className="message-sender-name">
+                        {message.sender.nickname}{' '}
+                    </div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                {messageSentByCurrentUser &&
+                {messageSentByCurrentUser && (
                     <div>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                        <button
+                            className="control-button"
+                            onClick={() => updateMessage(message)}
+                        >
+                            <img
+                                className="message-icon"
+                                src="/icon_edit.png"
+                            />
+                        </button>
+                        <button
+                            className="control-button"
+                            onClick={() => handleDeleteMessage(message)}
+                        >
+                            <img
+                                className="message-icon"
+                                src="/icon_delete.png"
+                            />
+                        </button>
                     </div>
-                }
+                )}
             </div>
             <div>{message.message}</div>
         </div>
-    );
+    )
 }
 
 const ProfileImage = ({ user }) => {
     if (user.plainProfileUrl) {
         return <img className="profile-image" src={user.plainProfileUrl} />
     } else {
-        return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
+        return (
+            <div className="profile-image-fallback">
+                {user.nickname.charAt(0)}
+            </div>
+        )
     }
 }
 
@@ -529,22 +681,26 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                 placeholder="write a message"
                 value={value}
                 onChange={onChange}
-                onKeyDown={(event => handleEnterPress(event, sendMessage))}
+                onKeyDown={(event) => handleEnterPress(event, sendMessage)}
             />
             <div className="message-input-buttons">
-                <button className="send-message-button" onClick={sendMessage}>Send Message</button>
-                <label className="file-upload-label" htmlFor="upload" >Select File</label>
+                <button className="send-message-button" onClick={sendMessage}>
+                    Send Message
+                </button>
+                <label className="file-upload-label" htmlFor="upload">
+                    Select File
+                </label>
                 <input
                     id="upload"
                     className="file-upload-button"
-                    type='file'
+                    type="file"
                     hidden={true}
                     onChange={onFileInputChange}
-                    onClick={() => { }}
+                    onClick={() => {}}
                 />
             </div>
         </div>
-    );
+    )
 }
 
 const MembersSelect = ({
@@ -553,32 +709,49 @@ const MembersSelect = ({
     currentlyJoinedChannel,
     addToChannelMembersList,
     handleCreateChannel,
-    handleUpdateChannelMembersList
+    handleUpdateChannelMembersList,
 }) => {
     if (applicationUsers.length > 0) {
-        return <div className="overlay">
-            <div className="overlay-content">
-                <button onClick={() => {
-                    if (currentlyJoinedChannel) {
-                        handleUpdateChannelMembersList();
-                    } else {
-                        handleCreateChannel();
-                    }
-                }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
-                {applicationUsers.map((user) => {
-                    const userSelected = groupChannelMembers.some((member) => member === user.userId);
-                    return <div
-                        key={user.userId}
-                        className={`member-item ${userSelected ? 'member-selected' : ''}`}
-                        onClick={() => addToChannelMembersList(user.userId)}>
-                        <ProfileImage user={user} />
-                        <div className="member-item-name">{user.nickname}</div>
-                    </div>
-                })}
+        return (
+            <div className="overlay">
+                <div className="overlay-content">
+                    <button
+                        onClick={() => {
+                            if (currentlyJoinedChannel) {
+                                handleUpdateChannelMembersList()
+                            } else {
+                                handleCreateChannel()
+                            }
+                        }}
+                    >
+                        {currentlyJoinedChannel ? 'Submit' : 'Create'}
+                    </button>
+                    {applicationUsers.map((user) => {
+                        const userSelected = groupChannelMembers.some(
+                            (member) => member === user.userId
+                        )
+                        return (
+                            <div
+                                key={user.userId}
+                                className={`member-item ${
+                                    userSelected ? 'member-selected' : ''
+                                }`}
+                                onClick={() =>
+                                    addToChannelMembersList(user.userId)
+                                }
+                            >
+                                <ProfileImage user={user} />
+                                <div className="member-item-name">
+                                    {user.nickname}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
             </div>
-        </div>;
+        )
     }
-    return null;
+    return null
 }
 
 const CreateUserForm = ({
@@ -587,110 +760,120 @@ const CreateUserForm = ({
     userNameInputValue,
     userIdInputValue,
     onUserNameInputChange,
-    onUserIdInputChange
+    onUserIdInputChange,
 }) => {
     if (settingUpUser) {
-        return <div className="overlay">
-            <div className="overlay-content" onKeyDown={(event) => handleEnterPress(event, setupUser)}>
-                <div>User ID</div>
-                <input
-                    onChange={onUserIdInputChange}
-                    className="form-input"
-                    type="text" value={userIdInputValue} />
+        return (
+            <div className="overlay">
+                <div
+                    className="overlay-content"
+                    onKeyDown={(event) => handleEnterPress(event, setupUser)}
+                >
+                    <div>User ID</div>
+                    <input
+                        onChange={onUserIdInputChange}
+                        className="form-input"
+                        type="text"
+                        value={userIdInputValue}
+                    />
 
-                <div>User Nickname</div>
-                <input
-                    onChange={onUserNameInputChange}
-                    className="form-input"
-                    type="text" value={userNameInputValue} />
+                    <div>User Nickname</div>
+                    <input
+                        onChange={onUserNameInputChange}
+                        className="form-input"
+                        type="text"
+                        value={userNameInputValue}
+                    />
 
-                <button
-                    className="user-submit-button"
-                    onClick={setupUser}
-                >Connect</button>
+                    <button className="user-submit-button" onClick={setupUser}>
+                        Connect
+                    </button>
+                </div>
             </div>
-        </div>
+        )
     } else {
-        return null;
+        return null
     }
 }
 
 const FreezeNotification = () => (
-    <div className='freeze-notification'>Channel Frozen</div>
+    <div className="freeze-notification">Channel Frozen</div>
 )
 
 // Helpful functions that call Sendbird
 const loadChannels = async (channelHandlers) => {
-    const groupChannelFilter = new GroupChannelFilter();
-    groupChannelFilter.includeEmpty = true;
+    const groupChannelFilter = new GroupChannelFilter()
+    groupChannelFilter.includeEmpty = true
 
     const collection = sb.groupChannel.createGroupChannelCollection({
         filter: groupChannelFilter,
         order: GroupChannelListOrder.LATEST_LAST_MESSAGE,
-    });
+    })
 
-    collection.setGroupChannelCollectionHandler(channelHandlers);
+    collection.setGroupChannelCollectionHandler(channelHandlers)
 
-    const channels = await collection.loadMore();
-    return [channels, null];
+    const channels = await collection.loadMore()
+    return [channels, null]
 }
 
 const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
-    const messageFilter = new MessageFilter();
+    const messageFilter = new MessageFilter()
 
     const collection = channel.createMessageCollection({
         filter: messageFilter,
         startingPoint: Date.now(),
-        limit: 100
-    });
+        limit: 100,
+    })
 
-    collection.setMessageCollectionHandler(messageHandlers);
+    collection.setMessageCollectionHandler(messageHandlers)
     collection
         .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
         .onCacheResult(onCacheResult)
-        .onApiResult(onApiResult);
-    return collection;
+        .onApiResult(onApiResult)
+    return collection
 }
 
 const inviteUsersToChannel = async (channel, userIds) => {
-    await channel.inviteWithUserIds(userIds);
+    await channel.inviteWithUserIds(userIds)
 }
 
 const createChannel = async (channelName, userIdsToInvite) => {
     try {
-        const groupChannelParams = {};
-        groupChannelParams.invitedUserIds = userIdsToInvite;
-        groupChannelParams.name = channelName;
-        groupChannelParams.operatorUserIds = userIdsToInvite;
-        const groupChannel = await sb.groupChannel.createChannel(groupChannelParams);
-        return [groupChannel, null];
+        const groupChannelParams = {}
+        groupChannelParams.invitedUserIds = userIdsToInvite
+        groupChannelParams.name = channelName
+        groupChannelParams.operatorUserIds = userIdsToInvite
+        const groupChannel = await sb.groupChannel.createChannel(
+            groupChannelParams
+        )
+        return [groupChannel, null]
     } catch (error) {
-        return [null, error];
+        return [null, error]
     }
 }
 
 const deleteChannel = async (channelUrl) => {
     try {
-        const channel = await sb.groupChannel.getChannel(channelUrl);
-        await channel.delete();
-        return [channel, null];
+        const channel = await sb.groupChannel.getChannel(channelUrl)
+        await channel.delete()
+        return [channel, null]
     } catch (error) {
-        return [null, error];
+        return [null, error]
     }
 }
 
 const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
-    await currentlyJoinedChannel.deleteMessage(messageToDelete);
+    await currentlyJoinedChannel.deleteMessage(messageToDelete)
 }
 
 const getAllApplicationUsers = async () => {
     try {
-        const userQuery = sb.createApplicationUserListQuery({ limit: 100 });
-        const users = await userQuery.next();
-        return [users, null];
+        const userQuery = sb.createApplicationUserListQuery({ limit: 100 })
+        const users = await userQuery.next()
+        return [users, null]
     } catch (error) {
-        return [null, error];
+        return [null, error]
     }
 }
 
-export default GroupChannelFreezeUnfreeze;
+export default GroupChannelFreezeUnfreeze

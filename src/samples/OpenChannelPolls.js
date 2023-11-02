@@ -1,4 +1,6 @@
-import { useState, useRef, useContext } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
+import { ConnectionHandler } from '@sendbird/chat'
+
 import { v4 as uuid } from 'uuid'
 
 import SendbirdChat from '@sendbird/chat'
@@ -7,18 +9,16 @@ import {
     OpenChannelHandler,
 } from '@sendbird/chat/openChannel'
 
-import { timestampToTime } from '../utils/messageUtils'
+import { timestampToTime, handleEnterPress } from '../utils/messageUtils'
 import { GlobalContext } from '../GlobalProvider'
 
 let sb
 
-const OpenChannelMuteUnmuteUsers = (props) => {
+const OpenChannelPollsSample = (props) => {
     const { appId } = useContext(GlobalContext)
     const [state, updateState] = useState({
         currentlyJoinedChannel: null,
         currentlyUpdatingChannel: null,
-        currentlyJoinedChannelOperators: [],
-        applicationUsers: [],
         messages: [],
         channels: [],
         showChannelCreate: false,
@@ -31,12 +31,28 @@ const OpenChannelMuteUnmuteUsers = (props) => {
         messageToUpdate: null,
         loading: false,
         error: false,
-        isShowMembersList: false,
     })
 
     //need to access state in message reeived callback
     const stateRef = useRef()
     stateRef.current = state
+
+    const channelRef = useRef()
+
+    const scrollToBottom = (item, smooth) => {
+        item?.scrollTo({
+            top: item.scrollHeight,
+            behavior: smooth,
+        })
+    }
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current)
+    }, [state.currentlyJoinedChannel])
+
+    useEffect(() => {
+        scrollToBottom(channelRef.current, 'smooth')
+    }, [state.messages])
 
     const onError = (error) => {
         updateState({ ...state, error: error.message })
@@ -44,16 +60,31 @@ const OpenChannelMuteUnmuteUsers = (props) => {
     }
 
     const handleJoinChannel = async (channelUrl) => {
+        if (state.currentlyJoinedChannel?.url === channelUrl) {
+            return null
+        }
         const { channels } = state
         updateState({ ...state, loading: true })
         const channelToJoin = channels.find(
             (channel) => channel.url === channelUrl
         )
-        const [channel, messages, error] = await joinChannel(channelToJoin)
-        const [operators, operatorsError] = await getChannelOperators(channel)
+        await channelToJoin.enter()
+        const [messages, error] = await loadMessages(channelToJoin)
+
         if (error) {
             return onError(error)
         }
+
+        // setup connection event handlers
+        const connectionHandler = new ConnectionHandler()
+
+        connectionHandler.onReconnectSucceeded = async () => {
+            const [messages, error] = await loadMessages(channelToJoin)
+
+            updateState({ ...stateRef.current, messages: messages })
+        }
+
+        sb.addConnectionHandler(uuid(), connectionHandler)
 
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler()
@@ -82,10 +113,9 @@ const OpenChannelMuteUnmuteUsers = (props) => {
         sb.openChannel.addOpenChannelHandler(uuid(), channelHandler)
         updateState({
             ...state,
-            currentlyJoinedChannel: channel,
+            currentlyJoinedChannel: channelToJoin,
             messages: messages,
             loading: false,
-            currentlyJoinedChannelOperators: operators,
         })
     }
 
@@ -260,18 +290,25 @@ const OpenChannelMuteUnmuteUsers = (props) => {
             modules: [new OpenChannelModule()],
         })
 
-        await sendbirdChat.connect(userIdInputValue)
+        try {
+            await sendbirdChat.connect(userIdInputValue)
+        } catch (e) {
+            console.log('error', e)
+        }
+
         await sendbirdChat.setChannelInvitationPreference(true)
 
         const userUpdateParams = {}
         userUpdateParams.nickname = userNameInputValue
         userUpdateParams.userId = userIdInputValue
-        await sendbirdChat.updateCurrentUserInfo(userUpdateParams)
+        await sendbirdChat
+            .updateCurrentUserInfo(userUpdateParams)
+            .then((data) => console.log(data))
 
         sb = sendbirdChat
+
         updateState({ ...state, loading: true })
         const [channels, error] = await loadChannels()
-        const [users, usersError] = await getAllApplicationUsers()
         if (error) {
             return onError(error)
         }
@@ -280,65 +317,7 @@ const OpenChannelMuteUnmuteUsers = (props) => {
             channels: channels,
             loading: false,
             settingUpUser: false,
-            applicationUsers: users,
         })
-    }
-
-    const toggleMembersList = () => {
-        updateState({ ...state, isShowMembersList: !state.isShowMembersList })
-    }
-
-    const handleOperator = async (callbackName, user) => {
-        const {
-            currentlyJoinedChannel,
-            applicationUsers,
-            currentlyJoinedChannelOperators,
-        } = state
-
-        try {
-            await currentlyJoinedChannel[callbackName]([user.userId])
-            const [operators, operatorsError] = await getChannelOperators(
-                currentlyJoinedChannel
-            )
-            updateState({
-                ...state,
-                applicationUsers: applicationUsers,
-                currentlyJoinedChannelOperators: operators,
-            })
-        } catch (error) {
-            console.log('Error')
-            console.log(error)
-        }
-    }
-
-    const registerUnregisterAnOperator = (user, isOperator) => {
-        if (isOperator) {
-            handleOperator('removeOperators', user)
-            alert('Operator was unregister')
-        } else {
-            handleOperator('addOperators', user)
-            alert('Operator was register')
-        }
-    }
-
-    const muteUnmuteUser = (user, isOperator) => {
-        const { currentlyJoinedChannel } = state
-        if (isOperator) {
-            if (user.isMuted) {
-                unmuteUser(currentlyJoinedChannel, user)
-            } else {
-                muteUser(currentlyJoinedChannel, user, 'description')
-            }
-        }
-
-        const updatedUsers = state.applicationUsers.map((item) => {
-            if (item.userId === user.userId) {
-                return { ...item, isMuted: !item.isMuted }
-            }
-            return item
-        })
-
-        updateState({ ...state, applicationUsers: updatedUsers })
     }
 
     if (state.loading) {
@@ -387,10 +366,8 @@ const OpenChannelMuteUnmuteUsers = (props) => {
             />
             <Channel
                 currentlyJoinedChannel={state.currentlyJoinedChannel}
-                operators={state.currentlyJoinedChannelOperators}
-                userIdInputValue={state.userIdInputValue}
                 handleLeaveChannel={handleLeaveChannel}
-                toggleMembersList={toggleMembersList}
+                channelRef={channelRef}
             >
                 <MessagesList
                     messages={state.messages}
@@ -405,15 +382,6 @@ const OpenChannelMuteUnmuteUsers = (props) => {
                     onFileInputChange={onFileInputChange}
                 />
             </Channel>
-            <MembersList
-                toggleMembersList={toggleMembersList}
-                isShowMembersList={state.isShowMembersList}
-                users={state.applicationUsers}
-                userIdInputValue={state.userIdInputValue}
-                operators={state.currentlyJoinedChannelOperators}
-                registerUnregisterAnOperator={registerUnregisterAnOperator}
-                muteUnmuteUser={muteUnmuteUser}
-            />
         </>
     )
 }
@@ -488,16 +456,11 @@ const Channel = ({
     currentlyJoinedChannel,
     handleLeaveChannel,
     children,
-    toggleMembersList,
-    operators,
-    userIdInputValue,
+    channelRef,
 }) => {
     if (currentlyJoinedChannel) {
-        const isOperator = operators.find(
-            (operator) => userIdInputValue === operator.userId
-        )
         return (
-            <div className="channel">
+            <div className="channel" ref={channelRef}>
                 <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
                 <div>
                     <button
@@ -506,14 +469,6 @@ const Channel = ({
                     >
                         Exit Channel
                     </button>
-                    {isOperator && (
-                        <button
-                            className="leave-channel register-as-operator-btn"
-                            onClick={toggleMembersList}
-                        >
-                            Open users list
-                        </button>
-                    )}
                 </div>
                 <div>{children}</div>
             </div>
@@ -541,15 +496,14 @@ const MessagesList = ({ messages, handleDeleteMessage, updateMessage }) => {
 }
 
 const Message = ({ message, updateMessage, handleDeleteMessage }) => {
+    if (!message.sender) return null
     if (message.url) {
         return (
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
-
                 <div className="oc-message-sender-name">
                     {message.sender.nickname}{' '}
                 </div>
-
                 <img src={message.url} />
             </div>
         )
@@ -597,8 +551,8 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                 placeholder="write a message"
                 value={value}
                 onChange={onChange}
+                onKeyDown={(event) => handleEnterPress(event, sendMessage)}
             />
-
             <div className="message-input-buttons">
                 <button className="send-message-button" onClick={sendMessage}>
                     Send Message
@@ -606,7 +560,6 @@ const MessageInput = ({ value, onChange, sendMessage, onFileInputChange }) => {
                 <label className="file-upload-label" htmlFor="upload">
                     Select File
                 </label>
-
                 <input
                     id="upload"
                     className="file-upload-button"
@@ -636,14 +589,12 @@ const ChannelDetails = ({
                         className="form-input"
                         onChange={onChannelNamenIputChange}
                     />
-
                     <button
                         className="form-button"
                         onClick={() => toggleChannelDetails(null)}
                     >
                         Close
                     </button>
-
                     <button onClick={() => handleUpdateChannel()}>
                         Update channel name
                     </button>
@@ -671,6 +622,9 @@ const ChannelCreate = ({
                     <input
                         className="form-input"
                         onChange={onChannelNamenIputChange}
+                        onKeyDown={(event) =>
+                            handleEnterPress(event, handleCreateChannel)
+                        }
                     />
                     <div>
                         <button
@@ -704,7 +658,10 @@ const CreateUserForm = ({
     if (settingUpUser) {
         return (
             <div className="overlay">
-                <div className="overlay-content">
+                <div
+                    className="overlay-content"
+                    onKeyDown={(event) => handleEnterPress(event, setupUser)}
+                >
                     <div>User ID</div>
 
                     <input
@@ -738,74 +695,6 @@ const CreateUserForm = ({
     }
 }
 
-const MembersList = ({
-    toggleMembersList,
-    isShowMembersList,
-    users,
-    registerUnregisterAnOperator,
-    userIdInputValue,
-    operators,
-    muteUnmuteUser,
-}) => {
-    if (isShowMembersList && users) {
-        return (
-            <div className="members-list">
-                <button onClick={toggleMembersList}>Close</button>
-                {users.map((user) => {
-                    const isOperator = operators.find(
-                        (operator) => user.userId === operator.userId
-                    )
-                    const userIsNotSender = user.userId !== userIdInputValue
-                    return (
-                        <div key={user.userId}>
-                            <div
-                                key={user.userId}
-                                className="member-item-wrapper"
-                            >
-                                <div className="member-item">
-                                    {user.nickname}
-                                    {isOperator && (
-                                        <img
-                                            className="message-icon"
-                                            src="/operator_icon.png"
-                                        />
-                                    )}
-                                </div>
-                                {userIsNotSender && (
-                                    <button
-                                        onClick={() =>
-                                            registerUnregisterAnOperator(
-                                                user,
-                                                isOperator
-                                            )
-                                        }
-                                    >
-                                        {isOperator
-                                            ? 'Unregister as operator'
-                                            : 'Register as operator'}
-                                    </button>
-                                )}
-                                {userIsNotSender && (
-                                    <button
-                                        className="mute-button"
-                                        onClick={() =>
-                                            muteUnmuteUser(user, isOperator)
-                                        }
-                                    >
-                                        {user.isMuted ? 'Unmute' : 'Mute'}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    )
-                })}
-            </div>
-        )
-    } else {
-        return null
-    }
-}
-
 // Helpful functions that call Sendbird
 const loadChannels = async () => {
     try {
@@ -819,9 +708,8 @@ const loadChannels = async () => {
     }
 }
 
-const joinChannel = async (channel) => {
+const loadMessages = async (channel) => {
     try {
-        await channel.enter()
         //list all messages
         const messageListParams = {}
         messageListParams.nextResultSize = 20
@@ -829,9 +717,9 @@ const joinChannel = async (channel) => {
             0,
             messageListParams
         )
-        return [channel, messages, null]
+        return [messages, null]
     } catch (error) {
-        return [null, null, error]
+        return [null, error]
     }
 }
 
@@ -869,9 +757,7 @@ const updateChannel = async (
         )
         const openChannelParams = {}
         openChannelParams.name = channelNameInputValue
-
         openChannelParams.operatorUserIds = [sb.currentUser.userId]
-
         const updatedChannel = await channel.updateChannel(openChannelParams)
         return [updatedChannel, null]
     } catch (error) {
@@ -883,32 +769,4 @@ const deleteMessage = async (currentlyJoinedChannel, messageToDelete) => {
     await currentlyJoinedChannel.deleteMessage(messageToDelete)
 }
 
-const getAllApplicationUsers = async () => {
-    try {
-        const userQuery = sb.createApplicationUserListQuery({ limit: 100 })
-        const users = await userQuery.next()
-        return [users, null]
-    } catch (error) {
-        return [null, error]
-    }
-}
-
-const getChannelOperators = async (channel) => {
-    try {
-        const query = channel.createOperatorListQuery()
-        const operators = await query.next()
-        return [operators, null]
-    } catch (error) {
-        return [null, error]
-    }
-}
-
-const muteUser = async (channel, userId, description) => {
-    await channel.muteUser(userId, 600000, description)
-}
-
-const unmuteUser = async (channel, userId) => {
-    await channel.unmuteUser(userId)
-}
-
-export default OpenChannelMuteUnmuteUsers
+export default OpenChannelPollsSample

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -8,12 +8,12 @@ import {
     MessageCollectionInitPolicy
 } from '@sendbird/chat/groupChannel';
 
-import { SENDBIRD_INFO } from '../constants/constants';
 import { timestampToTime, handleEnterPress } from '../utils/messageUtils';
+import { GlobalContext } from '../GlobalProvider';
 let sb;
 
 const BasicGroupChannelSample = (props) => {
-
+    const { appId } = useContext(GlobalContext);
     const [state, updateState] = useState({
         applicationUsers: [],
         groupChannelMembers: [],
@@ -292,7 +292,7 @@ const BasicGroupChannelSample = (props) => {
     const setupUser = async () => {
         const { userNameInputValue, userIdInputValue } = state;
         const sendbirdChat = await SendbirdChat.init({
-            appId: SENDBIRD_INFO.appId,
+            appId,
             localCacheEnabled: true,
             modules: [new GroupChannelModule()]
         });

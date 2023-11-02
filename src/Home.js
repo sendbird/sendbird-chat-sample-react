@@ -1,18 +1,46 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { GlobalContext } from './GlobalProvider';
+
+
+
+
+const showToast = () => {
+    // Get the snackbar DIV
+    var x = document.getElementById("snackbar");
+
+    // Add the "show" class to DIV
+    x.className = "show";
+  
+    // After 3 seconds, remove the show class from DIV
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2000);
+}
 
 const Home = () => {
+  const {appId, setAppId} = useContext(GlobalContext);
+
+  const handleApply = () => {
+    const _appId = document.getElementById("appIdInputText").value;
+    setAppId(_appId);
+    showToast()
+  }
+
   return (
     <div className="home">
       <div>
-        <h1>Basic Code Samples</h1>
+        <h3>App setting</h3>
+        <input id="appIdInputText" type="text" placeholder='input application id...' style={{fontSize: 16, minWidth: 500, height:46, marginLeft: 10}} defaultValue={appId}/> 
+        <button onClick={() => handleApply()}>Apply</button>
+      </div>
+      <div>
+        <h3>Basic Code Samples</h3>
         <ul>
           <li><Link to="/open-channel">Basic Open Channel</Link></li>
           <li><Link to="/group-channel">Basic Group Channel</Link></li>
         </ul>
       </div>
       <div>
-        <h1>Open Channel Code Samples</h1>
+        <h3>Open Channel Code Samples</h3>
         <ul>
           <li><Link to="/open-channel-send-an-admin-message">Open Channel Send an Admin message</Link></li>
           <li><Link to="/open-channel-message-threading">Open Channel Message Threading</Link></li>
@@ -35,6 +63,7 @@ const Home = () => {
           <li><Link to="/open-channel-bun-unban-users">Open Channel Ban and Unban users</Link></li>
           <li><Link to="/open-channel-update-delete-message-by-operator">Open Channel Update and delete message by operator</Link></li>
           <li><Link to="/open-channel-members-list-order">Open Channel Members list order</Link></li>
+          {/* <li><Link to="/open-channel-polls">[Temp] Open Channel Polls</Link></li> */}
         </ul>
       </div>
       <div>
@@ -72,6 +101,7 @@ const Home = () => {
           <li><Link to="/group-channel-pinned-messages">Group Channel Pinned Messages</Link></li>
         </ul>
       </div>
+      
     </div>
   );
 }
