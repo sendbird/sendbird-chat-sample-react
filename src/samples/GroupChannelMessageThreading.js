@@ -737,7 +737,7 @@ const loadChannels = async (channelHandlers) => {
     return [channels, null];
 }
 
-const loadMessages = async (channel, messageHandlers, onCacheResult, onApiResult) => {
+const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
     const messageFilter = new MessageFilter();
 
     const collection = channel.createMessageCollection({
