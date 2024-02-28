@@ -1,7 +1,8 @@
-# SendBird Chat SDK React Sample
+# Sendbird Chat SDK React Sample
+> Note: This sample is a Chat SDK sample, not the UIKit React sample.
+> [Visit here if you are looking for the **UIKit React sample**.](https://github.com/sendbird/sendbird-uikit-react/tree/main/samples)
 
 ![React sample](/react-sample.gif?raw=true "react sample")
-
 
 ## Overview
 A simple react app that demonstrates how to use the Sendbird [Chat SDK](https://sendbird.com/docs/chat).
