@@ -1,6 +1,5 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,

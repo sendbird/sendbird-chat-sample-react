@@ -165,7 +165,7 @@ const GroupChannelPinnedMessages = (props) => {
     }
 
     const handleCreateChannel = async (channelName = "testChannel",) => {
-        const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers);
+        const [error] = await createChannel(channelName, state.groupChannelMembers);
         if (error) {
             return onError(error);
         }
@@ -178,7 +178,7 @@ const GroupChannelPinnedMessages = (props) => {
     }
 
     const handleDeleteChannel = async (channelUrl) => {
-        const [channel, error] = await deleteChannel(channelUrl);
+        const [error] = await deleteChannel(channelUrl);
         if (error) {
             return onError(error);
         }
@@ -213,7 +213,7 @@ const GroupChannelPinnedMessages = (props) => {
             const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
-            const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
+            const messageIndex = messages.findIndex((item => item.messageId === messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
@@ -247,7 +247,7 @@ const GroupChannelPinnedMessages = (props) => {
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            const { currentlyJoinedChannel, messages, isPinMessage } = state;
+            const { currentlyJoinedChannel, isPinMessage } = state;
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             fileMessageParams.isPinnedMessage = isPinMessage
@@ -478,7 +478,7 @@ const ChannelList = ({
                         </div>
                         <div>
                             <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                <img className="channel-icon" src='/icon_delete.png' />
+                                <img className="channel-icon" src='/icon_delete.png' alt=''/>
                             </button>
                         </div>
                     </div>
@@ -569,16 +569,16 @@ const Message = ({ message, pinnedMessageIds, updateMessage, handleDeleteMessage
                     <div>
                       {isPinnedMessage ?
                           <button className="control-button" onClick={() => handleUnpinMessage(message)}>
-                            <img className="message-icon" src='/icon_unpin.png' />
+                            <img className="message-icon" src='/icon_unpin.png' alt=''/>
                           </button> :
                           <button className="control-button" onClick={() => handlePinMessage(message)}>
-                            <img className="message-icon" src='/icon_pin.png' />
+                            <img className="message-icon" src='/icon_pin.png' alt=''/>
                           </button>}
                     </div>}
                 </div>
               </div>
 
-              <img className="message-img" src={message.url} />
+              <img className="message-img" src={message.url} alt=''/>
             </div >);
     }
 
@@ -593,14 +593,14 @@ const Message = ({ message, pinnedMessageIds, updateMessage, handleDeleteMessage
                     <div>
                         {isPinnedMessage ?
                         <button className="control-button" onClick={() => handleUnpinMessage(message)}>
-                          <img className="message-icon" src='/icon_unpin.png' />
+                          <img className="message-icon" src='/icon_unpin.png' alt=''/>
                         </button> :
                         <button className="control-button" onClick={() => handlePinMessage(message)}>
-                          <img className="message-icon" src='/icon_pin.png' />
+                          <img className="message-icon" src='/icon_pin.png'alt=''/>
                         </button>}
 
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' alt=''/></button>
+                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' alt=''/></button>
                     </div>}
             </div>
             <div>{message.message}</div>
@@ -623,12 +623,12 @@ const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou }) => {
                   {messageSentByCurrentUser &&
                     <div>
                       <button className="control-button" onClick={() => handleUnpinMessage(message)}>
-                        <img className="message-icon" src='/icon_unpin.png' />
+                        <img className="message-icon" src='/icon_unpin.png' alt=''/>
                       </button>
                     </div>}
                 </div>
               </div>
-              <img className="message-img" src={message.url} />
+              <img className="message-img" src={message.url} alt=''/>
             </div >);
     }
 
@@ -641,7 +641,7 @@ const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou }) => {
                 </div>
                 {messageSentByCurrentUser &&
                     <div>
-                        <button className="control-button" onClick={() => handleUnpinMessage(message)}><img className="message-icon" src='/icon_unpin.png' /></button>
+                        <button className="control-button" onClick={() => handleUnpinMessage(message)}><img className="message-icon" src='/icon_unpin.png' alt=''/></button>
                     </div>}
             </div>
             <div>{message.message}</div>
@@ -651,7 +651,7 @@ const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou }) => {
 
 const ProfileImage = ({ user }) => {
     if (user.plainProfileUrl) {
-        return <img className="profile-image" src={user.plainProfileUrl} />
+        return <img className="profile-image" src={user.plainProfileUrl} alt=''/>
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
     }
