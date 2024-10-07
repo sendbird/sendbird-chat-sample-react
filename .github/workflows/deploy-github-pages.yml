@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # 또는 원하는 브랜치 이름
+      - fixed-deploy-github-pages
 
 jobs:
   build-and-deploy:
