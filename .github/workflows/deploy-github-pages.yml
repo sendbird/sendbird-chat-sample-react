@@ -31,8 +31,8 @@ jobs:
           CI: false # Eslint error ignore
 
       - name: Deply to Github Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          branch: gh-pages  # 배포할 브랜치
-          folder: build  # 배포할 폴더 (React 빌드 결과물이 있는 폴더)
-
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build  # 배포할 폴더 (React 빌드 결과물이 있는 폴더)
+          
