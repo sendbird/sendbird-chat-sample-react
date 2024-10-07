@@ -18,10 +18,10 @@ jobs:
           node-version: '18.x'  # 또는 프로젝트에 맞는 Node.js 버전
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install
 
       - name: Build
-        run: npm run build
+        run: yarn build
         env:
           CI: false  # ESLint 에러 무시
 
