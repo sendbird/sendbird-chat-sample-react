@@ -1,0 +1,49 @@
+name: Deploy React App to GitHub Pages
+
+on:
+  push:
+    branches:
+      - added-open-channel-pinned-message  # 또는 원하는 브랜치 이름
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.x'  # 또는 프로젝트에 맞는 Node.js 버전
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build
+        run: yarn build
+        env:
+          CI: false  # ESLint 에러 무시
+
+      - name: List build directory
+        run: ls -R build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          force_orphan: true
+
+      - name: Check deployment
+        run: |
+          echo "Deployment to gh-pages branch completed."
+          echo "GitHub Pages should now be building from the gh-pages branch."
+          echo "Please allow a few minutes for the changes to propagate."
+
+      - name: Provide next steps
+        run: |
+          echo "If your site is not visible after a few minutes, please check:"
+          echo "1. The 'Actions' tab for any errors in the workflow run"
+          echo "2. The 'gh-pages' branch in your repository to ensure content was pushed"
+          echo "3. Your repository settings under 'Pages' to confirm the source is set to gh-pages branch"
