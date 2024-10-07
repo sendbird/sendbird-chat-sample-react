@@ -24,7 +24,6 @@ jobs:
         run: yarn build
         env:
           CI: false  # ESLint 에러 무시
-          #PUBLIC_URL: https://sendbird.github.io/sendbird-chat-sample-react
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
