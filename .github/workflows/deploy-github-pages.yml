@@ -30,6 +30,12 @@ jobs:
         env:
           CI: false # Eslint error ignore
 
+      - name: List build directory
+        run: ls -R build
+          
+      - name: Print working directory
+        run: pwd
+
       - name: Deply to Github Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
