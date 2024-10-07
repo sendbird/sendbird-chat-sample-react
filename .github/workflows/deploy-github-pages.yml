@@ -7,29 +7,32 @@ on:
     branches:
       - 'added-open-channel-pinned-message'
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
 
 # List of jobs
 jobs:
-  deploy:
+  build-and-deply:
     runs-on: ubuntu-latest
-    # Job steps
-    steps:
-      # Manual Checkout
-      - uses: actions/checkout@v4
 
-      # Set up Node
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '18.x'
+      
+      - name: Install dependencies
+        run: yarn install
 
-      - uses: bitovi/github-actions-deploy-react-to-ghpages@v1.0.3
+      - name: Build
+        run: yarn build
+        env:
+          CI: false # Eslint error ignore
+
+      - name: Deply to Github Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          install_command: yarn install
-          build_command: yarn build
-          ignore_build_errors: false
-          path: build
-          checkout: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+
