@@ -5,7 +5,6 @@ on:
   # Event for the workflow to run on
   push:
     branches:
-      - 'main'
       - 'added-open-channel-pinned-message'
 
 permissions:
@@ -27,7 +26,7 @@ jobs:
         with:
           node-version: '18.x'
 
-      - uses:  bitovi/github-actions-react-to-ghpages@v1.2.0
+      - uses:  bitovi/github-actions-react-to-ghpages@v1.0.0
         with:
           install_command: yarn install
           build_command: yarn build
