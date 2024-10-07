@@ -1,5 +1,5 @@
 # Workflow name
-name: Build and Publish Storybook to GitHub Pages
+name: Build and Publish to GitHub Pages
 
 on:
   # Event for the workflow to run on
@@ -35,12 +35,4 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          #github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build   
-      #👇 Add build and deploy to GitHub Pages as a step in the workflow
-      # - uses: bitovi/github-actions-build-to-github-pages@v1
-      #  with:
-      #    install_command: yarn install # default: npm ci
-      #    build_command: yarn build 
-      #    path: build
-      #    checkout: false # default: true
