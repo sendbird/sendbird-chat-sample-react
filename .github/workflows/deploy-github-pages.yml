@@ -27,14 +27,9 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Build
-        run: CI=false yarn build
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - uses:  bitovi/github-actions-build-to-github-pages@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          install_command: yarn install
+          build_command: CI=false yarn build
+          path: build
+          checkout: false
