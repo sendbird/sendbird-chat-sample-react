@@ -3,7 +3,7 @@ name: Deploy React App to GitHub Pages
 on:
   push:
     branches:
-      - main  # 또는 원하는 브랜치 이름
+      - added-open-channel-pinned-message  # 또는 원하는 브랜치 이름
 
 jobs:
   build-and-deploy:
