@@ -47,7 +47,6 @@ import GroupChannelReactChannelTypes from './samples/GroupChannelTypes';
 import GroupChannelUpdateDeleteMessageByOperator from './samples/GroupChannelUpdateDeleteMessageByOperator';
 import GroupChannelArchive from './samples/GroupChannelArchive'
 import GroupChannelMuteUnmuteUsers from './samples/GroupChannelMuteUnmuteUsers';
-import GroupChannelBanUnbanUsers from './samples/GroupChannelBanUnbanUsers';
 import GroupChannelRetrieveNumberOfMembersHaventReceivedMessage from './samples/GroupChannelRetrieveNumberOfMembersHaventReceivedMessage';
 import GroupChannelOperatorsList from './samples/GroupChannelOperatorsList';
 import GroupChannelMembersListOrder from './samples/GroupChannelMembersListOrder';

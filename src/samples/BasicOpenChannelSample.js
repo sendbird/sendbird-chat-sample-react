@@ -77,7 +77,7 @@ const BasicOpenChannelSample = (props) => {
         const connectionHandler = new ConnectionHandler();
 
         connectionHandler.onReconnectSucceeded = async () => {
-            const [messages, error] = await loadMessages(channelToJoin);
+            const [messages] = await loadMessages(channelToJoin);
 
             updateState({ ...stateRef.current, messages: messages });
         }
@@ -88,7 +88,7 @@ const BasicOpenChannelSample = (props) => {
         //listen for incoming messages
         const channelHandler = new OpenChannelHandler();
         channelHandler.onMessageUpdated = (channel, message) => {
-            const messageIndex = stateRef.current.messages.findIndex((item => item.messageId == message.messageId));
+            const messageIndex = stateRef.current.messages.findIndex((item => item.messageId === message.messageId));
             const updatedMessages = [...stateRef.current.messages];
             updatedMessages[messageIndex] = message;
             updateState({ ...stateRef.current, messages: updatedMessages });
@@ -127,7 +127,7 @@ const BasicOpenChannelSample = (props) => {
     }
 
     const handleDeleteChannel = async (channelUrl) => {
-        const [channel, error] = await deleteChannel(channelUrl);
+        const [error] = await deleteChannel(channelUrl);
         if (error) {
             return onError(error);
         }
@@ -188,7 +188,7 @@ const BasicOpenChannelSample = (props) => {
             const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
-            const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
+            const messageIndex = messages.findIndex((item => item.messageId === messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
@@ -337,10 +337,10 @@ const ChannelList = ({ channels, handleJoinChannel, toggleShowCreateChannel, han
                         {userIsOperator &&
                             <div>
                                 <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                    <img className="channel-icon" src='/icon_edit.png' />
+                                    <img className="channel-icon" src='/icon_edit.png' alt=''/>
                                 </button>
                                 <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                    <img className="channel-icon" src='/icon_delete.png' />
+                                    <img className="channel-icon" src='/icon_delete.png' alt=''/>
                                 </button>
                             </div>
                         }
@@ -387,7 +387,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
             <div className="oc-message">
                 <div>{timestampToTime(message.createdAt)}</div>
                 <div className="oc-message-sender-name">{message.sender.nickname}{' '}</div>
-                <img src={message.url} />
+                <img src={message.url} alt=''/>
             </div>
         );
     }
@@ -402,10 +402,10 @@ const Message = ({ message, updateMessage, handleDeleteMessage }) => {
 
             {messageSentByCurrentUser && <>
                 <button className="control-button" onClick={() => updateMessage(message)}>
-                    <img className="oc-message-icon" src='/icon_edit.png' />
+                    <img className="oc-message-icon" src='/icon_edit.png' alt=''/>
                 </button>
                 <button className="control-button" onClick={() => handleDeleteMessage(message)}>
-                    <img className="oc-message-icon" src='/icon_delete.png' />
+                    <img className="oc-message-icon" src='/icon_delete.png' alt=''/>
                 </button>
             </>}
         </div>
