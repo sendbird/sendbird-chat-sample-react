@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "https://sendbird.github.io/sendbird-chat-sample-react/static/css/main.c62a37ad.css",
-    "main.js": "https://sendbird.github.io/sendbird-chat-sample-react/static/js/main.89de3f29.js",
-    "static/js/120.d338924a.chunk.js": "https://sendbird.github.io/sendbird-chat-sample-react/static/js/120.d338924a.chunk.js",
-    "static/js/767.9b0ea057.chunk.js": "https://sendbird.github.io/sendbird-chat-sample-react/static/js/767.9b0ea057.chunk.js",
-    "static/js/895.79958c29.chunk.js": "https://sendbird.github.io/sendbird-chat-sample-react/static/js/895.79958c29.chunk.js",
-    "index.html": "https://sendbird.github.io/sendbird-chat-sample-react/index.html",
-    "main.c62a37ad.css.map": "https://sendbird.github.io/sendbird-chat-sample-react/static/css/main.c62a37ad.css.map",
-    "main.89de3f29.js.map": "https://sendbird.github.io/sendbird-chat-sample-react/static/js/main.89de3f29.js.map",
-    "120.d338924a.chunk.js.map": "https://sendbird.github.io/sendbird-chat-sample-react/static/js/120.d338924a.chunk.js.map",
-    "895.79958c29.chunk.js.map": "https://sendbird.github.io/sendbird-chat-sample-react/static/js/895.79958c29.chunk.js.map"
+    "main.css": "/static/css/main.c62a37ad.css",
+    "main.js": "/static/js/main.53d53b45.js",
+    "static/js/120.d338924a.chunk.js": "/static/js/120.d338924a.chunk.js",
+    "static/js/767.9b0ea057.chunk.js": "/static/js/767.9b0ea057.chunk.js",
+    "static/js/895.79958c29.chunk.js": "/static/js/895.79958c29.chunk.js",
+    "index.html": "/index.html",
+    "main.c62a37ad.css.map": "/static/css/main.c62a37ad.css.map",
+    "main.53d53b45.js.map": "/static/js/main.53d53b45.js.map",
+    "120.d338924a.chunk.js.map": "/static/js/120.d338924a.chunk.js.map",
+    "895.79958c29.chunk.js.map": "/static/js/895.79958c29.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c62a37ad.css",
-    "static/js/main.89de3f29.js"
+    "static/js/main.53d53b45.js"
   ]
 }
