@@ -273,6 +273,7 @@ const BasicGroupChannelSample = (props) => {
         });
 
         await sendbirdChat.connect(userIdInputValue);
+        //await sendbirdChat.connect('froyo_agent_user', '3dd76f7be16294a2aefcbe40b3d771a100c3c2f0');
         await sendbirdChat.setChannelInvitationPreference(true);
 
         const userUpdateParams = {};
