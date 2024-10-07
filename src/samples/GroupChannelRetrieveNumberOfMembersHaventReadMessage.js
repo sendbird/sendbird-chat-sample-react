@@ -1,6 +1,5 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -165,7 +164,7 @@ const GroupChannelRetrieveNumberOfMembersHaventReadMessage = (props) => {
     }
 
     const handleCreateChannel = async (channelName = "testChannel",) => {
-        const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers);
+        const [error] = await createChannel(channelName, state.groupChannelMembers);
         if (error) {
             return onError(error);
         }
@@ -178,7 +177,7 @@ const GroupChannelRetrieveNumberOfMembersHaventReadMessage = (props) => {
     }
 
     const handleDeleteChannel = async (channelUrl) => {
-        const [channel, error] = await deleteChannel(channelUrl);
+        const [error] = await deleteChannel(channelUrl);
         if (error) {
             return onError(error);
         }
@@ -215,7 +214,7 @@ const GroupChannelRetrieveNumberOfMembersHaventReadMessage = (props) => {
             const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue;
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
-            const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
+            const messageIndex = messages.findIndex((item => item.messageId === messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
@@ -235,7 +234,7 @@ const GroupChannelRetrieveNumberOfMembersHaventReadMessage = (props) => {
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            const { currentlyJoinedChannel, messages } = state;
+            const { currentlyJoinedChannel } = state;
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
@@ -398,7 +397,7 @@ const ChannelList = ({
                         </div>
                         <div>
                             <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                <img className="channel-icon" src='/icon_delete.png' />
+                                <img className="channel-icon" src='/icon_delete.png' alt=''/>
                             </button>
                         </div>
                     </div>
@@ -485,9 +484,9 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                         <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                         <div>{timestampToTime(message.createdAt)}</div>
                     </div>
-                    {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of unread members" onClick={() => getNumberOfUnreadMembers(message)}><img className="message-icon" src='/unread_icon.png' /></button></div>}
+                    {messageSentByCurrentUser && <div><button className="control-button number-of-undelivered-message-btn" data-title="Get number of unread members" onClick={() => getNumberOfUnreadMembers(message)}><img className="message-icon" src='/unread_icon.png' alt=''/></button></div>}
                 </div>
-                <img src={message.url} />
+                <img src={message.url} alt=''/>
                 {showNumberOfUnreadMembers && <div className="number-of-undelivered-members">Number of members unread a message: {numberOfUnreadMembers}<span className="number-of-undelivered-members-btn" onClick={closeNumberOfUnreadMembers}>&#10006;</span></div>}
             </div>
         );
@@ -502,9 +501,9 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </div>
                 {messageSentByCurrentUser &&
                     <div>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
-                        <button className="control-button number-of-undelivered-message-btn" data-title="Get number of unread members" onClick={() => getNumberOfUnreadMembers(message)}><img className="message-icon" src='/unread_icon.png' /></button>
+                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' alt=''/></button>
+                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' alt=''/></button>
+                        <button className="control-button number-of-undelivered-message-btn" data-title="Get number of unread members" onClick={() => getNumberOfUnreadMembers(message)}><img className="message-icon" src='/unread_icon.png' alt=''/></button>
                     </div>
                 }
             </div>
@@ -516,7 +515,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
 
 const ProfileImage = ({ user }) => {
     if (user.plainProfileUrl) {
-        return <img className="profile-image" src={user.plainProfileUrl} />
+        return <img className="profile-image" src={user.plainProfileUrl} alt=''/>
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
     }
