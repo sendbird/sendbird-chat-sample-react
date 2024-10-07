@@ -47,3 +47,12 @@ jobs:
           echo "1. The 'Actions' tab for any errors in the workflow run"
           echo "2. The 'gh-pages' branch in your repository to ensure content was pushed"
           echo "3. Your repository settings under 'Pages' to confirm the source is set to gh-pages branch"
+
+      - name: Check build output
+        run: |
+          echo "Build directory contents:"
+          ls -R build
+          echo "Checking for key files:"
+          [ -f build/index.html ] && echo "index.html exists" || echo "index.html is missing"
+          [ -f build/manifest.json ] && echo "manifest.json exists" || echo "manifest.json is missing"
+          [ -d build/static ] && echo "static directory exists" || echo "static directory is missing"

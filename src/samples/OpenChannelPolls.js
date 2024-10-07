@@ -83,7 +83,7 @@ const OpenChannelPolls = (props) => {
       updateState({ ...state, loading: true });
       const channelToJoin = channels.find((channel) => channel.url === channelUrl);
       const [channel, messages, error] = await joinChannel(channelToJoin);
-      const [operators, operatorsError] = await getChannelOperators(channel);
+      const [operators] = await getChannelOperators(channel);
       if (error) {
           //return onError(error);
           console.error(error);
@@ -179,7 +179,7 @@ const OpenChannelPolls = (props) => {
     }
 
     const handleDeleteChannel = async (channelUrl) => {
-      const [channel, error] = await deleteChannel(channelUrl);
+      const [error] = await deleteChannel(channelUrl);
       if (error) {
           return onError(error);
       }
@@ -260,7 +260,7 @@ const OpenChannelPolls = (props) => {
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            const { currentlyJoinedChannel, messages } = state;
+            const { currentlyJoinedChannel } = state;
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
@@ -348,7 +348,7 @@ const OpenChannelPolls = (props) => {
         sb = sendbirdChat;
         updateState({ ...state, loading: true });
         const [channels, error] = await loadChannels();
-        const [users, usersError] = await getAllApplicationUsers();
+        const [users] = await getAllApplicationUsers();
         if (error) {
             return onError(error);
         }
@@ -361,11 +361,11 @@ const OpenChannelPolls = (props) => {
     }
 
     const handleOperator = async (callbackName, user) => {
-      const { currentlyJoinedChannel, applicationUsers, currentlyJoinedChannelOperators } = state;
+      const { currentlyJoinedChannel, applicationUsers } = state;
 
       try {
           await currentlyJoinedChannel[callbackName]([user.userId]);
-          const [operators, operatorsError] = await getChannelOperators(currentlyJoinedChannel);
+          const [operators] = await getChannelOperators(currentlyJoinedChannel);
           updateState({ ...state, applicationUsers: applicationUsers, currentlyJoinedChannelOperators: operators })
       } catch (error) {
           console.log("Error");
@@ -389,14 +389,6 @@ const OpenChannelPolls = (props) => {
 
     const setMaxCountPinnedMessageError = (errorState) => {
         updateState({ ...state, isMaxCountPinnedMessagesError: errorState });
-    }
-
-    const toggleIsPinMessage = () => {
-        if (state.pinnedMessageIds.length >= state.maxCountPinnedMessages) {
-            updateState({ ...state, isMaxCountPinnedMessagesError: true })
-        } else {
-            updateState({ ...state, isPinMessage: !state.isPinMessage });
-        }
     }
 
     const postPoll = async () => {
@@ -729,11 +721,11 @@ const ChannelList = ({
                         {userIsOperator &&
                             <div>
                                 <button className="control-button" onClick={() => toggleChannelDetails(channel)}>
-                                    <img className="channel-icon" src='/icon_edit.png' />
+                                    <img className="channel-icon" src='/icon_edit.png' alt=''/>
 
                                 </button>
                                 <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                    <img className="channel-icon" src='/icon_delete.png' />
+                                    <img className="channel-icon" src='/icon_delete.png' alt=''/>
 
                                 </button>
                             </div>}
@@ -852,13 +844,13 @@ const Message = ({
               {
                 isPinnedMessage ?
                   <button className="control-button" onClick={() => handleUnpinMessage(message)}>
-                    <img className="message-icon" src='/icon_unpin.png' />
+                    <img className="message-icon" src='/icon_unpin.png' alt=''/>
                   </button> :
                   <button className="control-button" onClick={() => handlePinMessage(message)}>
-                    <img className="message-icon" src='/icon_pin.png' />
+                    <img className="message-icon" src='/icon_pin.png' alt=''/>
                   </button>}
-                  <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                  <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                  <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' alt=''/></button>
+                  <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' alt=''/></button>
                 </div>
               }
           </div>
@@ -882,8 +874,8 @@ const Message = ({
                   <label htmlFor="option">{option.text}</label>
                   {(messageSentByCurrentUser && status === "open") &&
                     <>
-                      <button className="control-button" onClick={() => isShowPollModals(option, "open", "isUpdateOptionModal", "optionToUpdate")}><img className="option-icon" src='/icon_edit.png' /></button>
-                      <button className="control-button" onClick={() => handleDeleteOption(option)}><img className="option-icon" src='/icon_delete.png' /></button>
+                      <button className="control-button" onClick={() => isShowPollModals(option, "open", "isUpdateOptionModal", "optionToUpdate")}><img className="option-icon" src='/icon_edit.png' alt=''/></button>
+                      <button className="control-button" onClick={() => handleDeleteOption(option)}><img className="option-icon" src='/icon_delete.png' alt=''/></button>
                     </>
                   }
                 </div>
@@ -909,7 +901,7 @@ const Message = ({
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                <img src={message.url} />
+                <img src={message.url} alt=''/>
             </div >);
     }
 
@@ -924,14 +916,14 @@ const Message = ({
                     <div>
                         {isPinnedMessage ?
                           <button className="control-button" onClick={() => handleUnpinMessage(message)}>
-                            <img className="message-icon" src='/icon_unpin.png' />
+                            <img className="message-icon" src='/icon_unpin.png' alt=''/>
                           </button> :
                           <button className="control-button" onClick={() => handlePinMessage(message)}>
-                            <img className="message-icon" src='/icon_pin.png' />
+                            <img className="message-icon" src='/icon_pin.png' alt=''/>
                           </button>
                         }
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' alt=''/></button>
+                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' alt=''/></button>
                     </div>}
             </div>
             <div>{message.message}</div>
@@ -941,7 +933,7 @@ const Message = ({
 
 const ProfileImage = ({ user }) => {
     if (user.plainProfileUrl) {
-        return <img className="profile-image" src={user.plainProfileUrl} />
+        return <img className="profile-image" src={user.plainProfileUrl} alt=''/>
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
     }
@@ -1030,7 +1022,7 @@ const MembersList = ({ toggleMembersList, isShowMembersList, users, registerUnre
                   <div key={user.userId} className="member-item-wrapper">
                     <div className="member-item">
                       {user.nickname}
-                      {isOperator && <img className="message-icon" src='/operator_icon.png' />}
+                      {isOperator && <img className="message-icon" src='/operator_icon.png' alt=''/>}
                     </div>
                     {userIsNotSender && <button onClick={() => registerUnregisterAnOperator(user, isOperator)}>
                       {isOperator ? "Unregister as operator" : "Register as operator"}
@@ -1179,41 +1171,6 @@ const AddNewOptionModal = ({
   return null;
 }
 
-const MembersSelect = ({
-    applicationUsers,
-    groupChannelMembers,
-    currentlyJoinedChannel,
-    addToChannelMembersList,
-    handleCreateChannel,
-    handleUpdateChannelMembersList
-
-}) => {
-    if (applicationUsers.length > 0) {
-        return <div className="overlay">
-            <div className="overlay-content">
-                <button onClick={() => {
-                    if (currentlyJoinedChannel) {
-                        handleUpdateChannelMembersList();
-                    } else {
-                        handleCreateChannel();
-                    }
-                }}>{currentlyJoinedChannel ? 'Submit' : 'Create'}</button>
-                {applicationUsers.map((user) => {
-                    const userSelected = groupChannelMembers.some((member) => member === user.userId);
-                    return <div
-                        key={user.userId}
-                        className={`member-item ${userSelected ? 'member-selected' : ''}`}
-                        onClick={() => addToChannelMembersList(user.userId)}>
-                        <ProfileImage user={user} />
-                        <div className="member-item-name">{user.nickname}</div>
-                    </div>
-                })}
-            </div>
-        </div>;
-    }
-    return null;
-}
-
 const CreateUserForm = ({
     setupUser,
     settingUpUser,
@@ -1265,12 +1222,12 @@ const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou, addOrRem
                 {messageSentByCurrentUser &&
                   <div>
                     <button className="control-button" onClick={() => handleUnpinMessage(message)}>
-                      <img className="message-icon" src='/icon_unpin.png' />
+                      <img className="message-icon" src='/icon_unpin.png' alt=''/>
                     </button>
                   </div>}
               </div>
             </div>
-            <img className="message-img" src={message.url} />
+            <img className="message-img" src={message.url} alt=''/>
           </div >);
   }
 
@@ -1296,7 +1253,7 @@ const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou, addOrRem
               </div>
               {messageSentByCurrentUser &&
                   <div>
-                      <button className="control-button" onClick={() => handleUnpinMessage(message)}><img className="message-icon" src='/icon_unpin.png' /></button>
+                      <button className="control-button" onClick={() => handleUnpinMessage(message)}><img className="message-icon" src='/icon_unpin.png' alt=''/></button>
                   </div>}
           </div>
           <div className='poll-info'>
@@ -1319,8 +1276,8 @@ const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou, addOrRem
                   <label htmlFor="option">{option.text}</label>
                   {(messageSentByYou && status === "open") &&
                     <>
-                      <button className="control-button" onClick={() => isShowPollModals(option, "open", "isUpdateOptionModal", "optionToUpdate")}><img className="option-icon" src='/icon_edit.png' /></button>
-                      <button className="control-button" onClick={() => handleDeleteOption(option)}><img className="option-icon" src='/icon_delete.png' /></button>
+                      <button className="control-button" onClick={() => isShowPollModals(option, "open", "isUpdateOptionModal", "optionToUpdate")}><img className="option-icon" src='/icon_edit.png' alt=''/></button>
+                      <button className="control-button" onClick={() => handleDeleteOption(option)}><img className="option-icon" src='/icon_delete.png' alt=''/></button>
                     </>
                   }
                 </div>
@@ -1348,7 +1305,7 @@ const PinnedMessage = ({ message, handleUnpinMessage, messageSentByYou, addOrRem
               </div>
               {messageSentByCurrentUser &&
                   <div>
-                      <button className="control-button" onClick={() => handleUnpinMessage(message)}><img className="message-icon" src='/icon_unpin.png' /></button>
+                      <button className="control-button" onClick={() => handleUnpinMessage(message)}><img className="message-icon" src='/icon_unpin.png' alt=''/></button>
                   </div>}
           </div>
           <div>{message.message}</div>
