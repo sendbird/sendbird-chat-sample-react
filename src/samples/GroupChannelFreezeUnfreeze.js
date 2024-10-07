@@ -1,6 +1,5 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { v4 as uuid } from 'uuid';
 import SendbirdChat from '@sendbird/chat';
 import {
     GroupChannelModule,
@@ -163,7 +162,7 @@ const GroupChannelFreezeUnfreeze = (props) => {
 
     const handleFreezeChannel = async () => {
         const { currentlyJoinedChannel } = state;
-        if (state.userIdInputValue == currentlyJoinedChannel?.creator.userId) {
+        if (state.userIdInputValue === currentlyJoinedChannel?.creator.userId) {
             if (!currentlyJoinedChannel?.isFrozen) {
                 await currentlyJoinedChannel.freeze();
             } else {
@@ -177,7 +176,7 @@ const GroupChannelFreezeUnfreeze = (props) => {
     }
 
     const handleCreateChannel = async (channelName = "testChannel",) => {
-        const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers);
+        const [error] = await createChannel(channelName, state.groupChannelMembers);
         if (error) {
             return onError(error);
         }
@@ -190,7 +189,7 @@ const GroupChannelFreezeUnfreeze = (props) => {
     }
 
     const handleDeleteChannel = async (channelUrl) => {
-        const [channel, error] = await deleteChannel(channelUrl);
+        const [error] = await deleteChannel(channelUrl);
         if (error) {
             return onError(error);
         }
@@ -228,7 +227,7 @@ const GroupChannelFreezeUnfreeze = (props) => {
                 const userMessageUpdateParams = {};
                 userMessageUpdateParams.message = state.messageInputValue;
                 const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
-                const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
+                const messageIndex = messages.findIndex((item => item.messageId === messageToUpdate.messageId));
                 messages[messageIndex] = updatedMessage;
                 updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
             } else {
@@ -250,7 +249,7 @@ const GroupChannelFreezeUnfreeze = (props) => {
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            const { currentlyJoinedChannel, messages } = state;
+            const { currentlyJoinedChannel } = state;
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
@@ -400,11 +399,11 @@ const ChannelList = ({
                             <div className="last-message">{channel.lastMessage?.message}</div>
                         </div>
                         <div>
-                            {channel.isFrozen && <img className="frozen-icon" src='/icon_freeze.png' />}
+                            {channel.isFrozen && <img className="frozen-icon" src='/icon_freeze.png' alt=''/>}
                         </div>
                         <div>
                             <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                <img className="channel-icon" src='/icon_delete.png' />
+                                <img className="channel-icon" src='/icon_delete.png' alt=''/>
                             </button>
                         </div>
                     </div>
@@ -432,7 +431,7 @@ const Channel = ({ userIdInputValue, currentlyJoinedChannel, children, handleLea
             <ChannelHeader>{currentlyJoinedChannel.name}</ChannelHeader>
             <div className="channel-controls">
                 <button className="leave-channel" onClick={handleLeaveChannel}>Leave Channel</button>
-                {currentlyJoinedChannel?.creator.userId == userIdInputValue &&
+                {currentlyJoinedChannel?.creator.userId === userIdInputValue &&
                     <div className="freeze-channel">
                         Freeze channel
                         <input type="checkbox" onChange={handleFreezeChannel} checked={currentlyJoinedChannel?.isFrozen} />
@@ -489,7 +488,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                <img src={message.url} />
+                <img src={message.url} alt=''/>
             </div>
         );
     }
@@ -504,8 +503,8 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </div>
                 {messageSentByCurrentUser &&
                     <div>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' alt=''/></button>
+                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' alt=''/></button>
                     </div>
                 }
             </div>
@@ -516,7 +515,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
 
 const ProfileImage = ({ user }) => {
     if (user.plainProfileUrl) {
-        return <img className="profile-image" src={user.plainProfileUrl} />
+        return <img className="profile-image" src={user.plainProfileUrl} alt=''/>
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
     }

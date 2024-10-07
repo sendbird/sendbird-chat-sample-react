@@ -183,7 +183,7 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const handleCreateChannel = async (channelName = "testChannel",) => {
-        const [groupChannel, error] = await createChannel(channelName, state.groupChannelMembers);
+        const [error] = await createChannel(channelName, state.groupChannelMembers);
         if (error) {
             return onError(error);
         }
@@ -196,7 +196,7 @@ const BasicGroupChannelSample = (props) => {
     }
 
     const handleDeleteChannel = async (channelUrl) => {
-        const [channel, error] = await deleteChannel(channelUrl);
+        const [error] = await deleteChannel(channelUrl);
         if (error) {
             return onError(error);
         }
@@ -231,7 +231,7 @@ const BasicGroupChannelSample = (props) => {
             const userMessageUpdateParams = {};
             userMessageUpdateParams.message = state.messageInputValue
             const updatedMessage = await currentlyJoinedChannel.updateUserMessage(messageToUpdate.messageId, userMessageUpdateParams)
-            const messageIndex = messages.findIndex((item => item.messageId == messageToUpdate.messageId));
+            const messageIndex = messages.findIndex((item => item.messageId === messageToUpdate.messageId));
             messages[messageIndex] = updatedMessage;
             updateState({ ...state, messages: messages, messageInputValue: "", messageToUpdate: null });
         } else {
@@ -252,7 +252,7 @@ const BasicGroupChannelSample = (props) => {
 
     const onFileInputChange = async (e) => {
         if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-            const { currentlyJoinedChannel, messages } = state;
+            const { currentlyJoinedChannel } = state;
             const fileMessageParams = {};
             fileMessageParams.file = e.currentTarget.files[0];
             currentlyJoinedChannel.sendFileMessage(fileMessageParams)
@@ -402,7 +402,7 @@ const ChannelList = ({
                         </div>
                         <div>
                             <button className="control-button" onClick={() => handleDeleteChannel(channel.url)}>
-                                <img className="channel-icon" src='/icon_delete.png' />
+                                <img className="channel-icon" src='/icon_delete.png' alt=''/>
                             </button>
                         </div>
                     </div>
@@ -481,7 +481,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                     <div className="message-sender-name">{message.sender.nickname}{' '}</div>
                     <div>{timestampToTime(message.createdAt)}</div>
                 </div>
-                <img src={message.url} />
+                <img src={message.url} alt=''/>
             </div >);
     }
     const messageSentByCurrentUser = message.sender.userId === sb.currentUser.userId;
@@ -495,14 +495,14 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
                 </div>
                 {messageSentByCurrentUser &&
                     <div>
-                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' /></button>
-                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' /></button>
+                        <button className="control-button" onClick={() => updateMessage(message)}><img className="message-icon" src='/icon_edit.png' alt=''/></button>
+                        <button className="control-button" onClick={() => handleDeleteMessage(message)}><img className="message-icon" src='/icon_delete.png' alt=''/></button>
                     </div>}
             </div>
             <div>{message.message}</div>
             {messageSentByYou && (
                 <div>
-                    <img className={`message-icon double_tick-icon ${isMessagesRead && "double_tick-icon-read"}`} src={isMessagesRead ? '/double_tick_as_read.png' : '/double_tick.png'} />
+                    <img className={`message-icon double_tick-icon ${isMessagesRead && "double_tick-icon-read"}`} src={isMessagesRead ? '/double_tick_as_read.png' : '/double_tick.png'} alt=''/>
                 </div>
             )}
         </div>
@@ -511,7 +511,7 @@ const Message = ({ message, updateMessage, handleDeleteMessage, messageSentByYou
 
 const ProfileImage = ({ user }) => {
     if (user.plainProfileUrl) {
-        return <img className="profile-image" src={user.plainProfileUrl} />
+        return <img className="profile-image" src={user.plainProfileUrl} alt=''/>
     } else {
         return <div className="profile-image-fallback">{user.nickname.charAt(0)}</div>;
     }
