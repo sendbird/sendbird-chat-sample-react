@@ -27,6 +27,8 @@ import OpenChannelMuteUnmuteUsers from './samples/OpenChannelMuteUnmuteUsers';
 import OpenChannelBanUnbanUsers from './samples/OpenChannelBanUnbanUsers';
 import OpenChannelUpdateDeleteMessageByOperator from './samples/OpenChannelUpdateDeleteMessageByOperator';
 import OpenChannelMembersListOrder from './samples/OpenChannelMembersListOrder';
+import OpenChannelPinnedMessage from './samples/OpenChannelPinnedMessages';
+import OpenChannelPolls from './samples/OpenChannelPolls';
 
 // Group channel samples
 import GroupChannelTypingIndicatorSample from './samples/GroupChannelTypingIndicatorSample';
@@ -118,6 +120,8 @@ const App = () => {
         <Route path='/group-channel-polls' element={<GroupChannelPolls />} />
         <Route path='/group-channel-scheduled-messages' element={<GroupChannelScheduledMessages />} />
         <Route path='/group-channel-pinned-messages' element={<GroupChannelPinnedMessages />} />
+        <Route path='/open-channel-pinned-messages' element={<OpenChannelPinnedMessage />} />
+        <Route path='/open-channel-polls' element={<OpenChannelPolls />} />
       </Routes>
     </div>
   );

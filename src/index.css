@@ -807,6 +807,12 @@ code {
   width: 40%;
 }
 
+.poll-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+}
 .open-poll-btn {
   padding: 5px;
   background: transparent;
