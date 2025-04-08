@@ -32,7 +32,7 @@ const Home = () => {
           <li><Link to="/open-channel-user-do-not-disturb-or-snooze">Open Channel User do not disturb or snooze</Link></li>
           <li><Link to="/open-channel-register-unregister-operator">Open Channel Register and Unregister operator</Link></li>
           <li><Link to="/open-channel-mute-unmute-users">Open Channel Mute and Unmute users</Link></li>
-          <li><Link to="/open-channel-bun-unban-users">Open Channel Ban and Unban users</Link></li>
+          <li><Link to="/open-channel-ban-unban-users">Open Channel Ban and Unban users</Link></li>
           <li><Link to="/open-channel-update-delete-message-by-operator">Open Channel Update and delete message by operator</Link></li>
           <li><Link to="/open-channel-members-list-order">Open Channel Members list order</Link></li>
         </ul>
@@ -57,7 +57,7 @@ const Home = () => {
           <li><Link to="/group-channel-update-delete-message-by-operator">Group Channel Update and delete message by operator</Link></li>
           <li><Link to="/group-channel-archive">Group Channel Archive</Link></li>
           <li><Link to="/group-channel-mute-unmute-users">Group Channel Mute Unmute users</Link></li>
-          <li><Link to="/group-channel-bun-unban-users">Group Channel Ban and Unban users</Link></li>
+          <li><Link to="/group-channel-ban-unban-users">Group Channel Ban and Unban users</Link></li>
           <li><Link to="/group-channel-retrieve-number-of-members-havent-received-message">Group Channel Retrieve number of members haven't received message</Link></li>
           <li><Link to="/group-channel-operators-list">Group Channel Operators List</Link></li>
           <li><Link to="/group-channel-members-list-order">Group Channel Members list order</Link></li>

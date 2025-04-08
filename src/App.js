@@ -106,7 +106,7 @@ const App = () => {
         <Route path='/open-channel-user-do-not-disturb-or-snooze' element={<OpenChannelUserDoNotDisturbOrSnooze />} />
         <Route path='/open-channel-register-unregister-operator' element={<OpenChannelRegisterUnregisterOperator />} />
         <Route path='/open-channel-mute-unmute-users' element={<OpenChannelMuteUnmuteUsers />} />
-        <Route path='/open-channel-bun-unban-users' element={<OpenChannelBanUnbanUsers />} />
+        <Route path='/open-channel-ban-unban-users' element={<OpenChannelBanUnbanUsers />} />
         <Route path='/open-channel-update-delete-message-by-operator' element={<OpenChannelUpdateDeleteMessageByOperator />} />
         <Route path='/open-channel-members-list-order' element={<OpenChannelMembersListOrder />} />
         <Route path='/group-channel-retrieve-banned-or-muted-users' element={<GroupChannelRetrieveAListOfBannedOrMutedUsers />} />
@@ -118,6 +118,7 @@ const App = () => {
         <Route path='/group-channel-polls' element={<GroupChannelPolls />} />
         <Route path='/group-channel-scheduled-messages' element={<GroupChannelScheduledMessages />} />
         <Route path='/group-channel-pinned-messages' element={<GroupChannelPinnedMessages />} />
+        <Route path='/group-channel-ban-unban-users' element={<GroupChannelBanUnbanUsers />} />
       </Routes>
     </div>
   );
